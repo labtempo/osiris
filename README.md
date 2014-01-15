@@ -1,4 +1,6 @@
-osiris
+OSIRIS Framework
 ======
 
-Osiris, Framework to Monitoring Systems
+Sens<b><u>o</u></b>r-based Monitoring Systems Framework
+
+
