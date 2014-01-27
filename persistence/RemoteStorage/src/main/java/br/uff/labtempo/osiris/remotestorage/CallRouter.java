@@ -9,7 +9,6 @@ import br.uff.labtempo.osiris.remotestorage.amqp.OnCallListener;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,6 +30,7 @@ public class CallRouter implements OnCallListener {
         this.storage = storage;
     }
 
+    @Override
     public String onCall(String message) {
         System.out.println(">>incoming: " + message);
 
@@ -99,8 +99,7 @@ public class CallRouter implements OnCallListener {
     private Method getMethod(Object obj, String target) throws NoSuchMethodException {
         for (Method m : obj.getClass().getMethods()) {
             if (target.equals(m.getName())) {
-                Class[] paramsType = m.getParameterTypes();
-                return obj.getClass().getMethod(target, paramsType);
+                return m;
             }
         }
         return null;
