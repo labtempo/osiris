@@ -1,6 +1,5 @@
 package br.uff.labtempo.osiris.remoteconsole;
 
-import br.uff.labtempo.osiris.remoteconsole.storageapi.Storage;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,10 +11,10 @@ public class App {
 
     public static void main(String[] args) {
         try {
-            Storage storage = new Storage();
-            Console console = new Console(storage);
+            Client client = new Client();
+            Console console = new Console(client.getStorageInstance());
             console.start();
-            storage.close();
+            client.close();
         } catch (Exception ex) {
             Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
         }

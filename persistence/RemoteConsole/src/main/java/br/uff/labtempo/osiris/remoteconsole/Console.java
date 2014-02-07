@@ -5,10 +5,11 @@
  */
 package br.uff.labtempo.osiris.remoteconsole;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import br.uff.labtempo.osiris.remoteconsole.storageapi.Storage;
 
 /**
  *
@@ -42,7 +43,7 @@ public class Console {
             }
         }
         scan.close();
-        
+
     }
 
     private void printPrompt() {
@@ -59,7 +60,7 @@ public class Console {
 
     }
 
-    private void printArray(String[] items, String detail) {
+    private void printArray(List<String> items, String detail) {
         for (String item : items) {
             if (detail.length() > 0) {
                 String format = "\t %-40s %s\n";
@@ -70,12 +71,14 @@ public class Console {
         }
     }
 
-    private void printArray(String[] items) {
+    private void printArray(List<String> items) {
         printArray(items, "");
     }
 
     private void printItem(String item) {
-        printArray(new String[]{item});
+        List<String> list = new ArrayList<String>();
+        list.add(item);
+        printArray(list);
     }
 
     private boolean executeCommand(String command) {
@@ -87,9 +90,9 @@ public class Console {
             switch (parseCommand(parts[0])) {
                 case LS:
                     if (repository != null) {
-                        printArray(storage.listRepositoryKeys(repository), "entry");
+                        printArray(storage.listRepositoryKeys(repository),"entry");
                     } else {
-                        printArray(storage.listRepositories(), "<REP>");
+                        printArray(storage.listRepositories(),"<REP>");
                     }
                     break;
                 case CD:
@@ -161,6 +164,7 @@ public class Console {
 
             }
         } catch (Exception e) {
+            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, e);
         }
         return true;
     }
@@ -170,6 +174,7 @@ public class Console {
     }
 
     private enum Command {
+
         EXIT, LS, CD, CAT, MKDIR, ECHO, RM
     }
 

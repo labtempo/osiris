@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.uff.labtempo.osiris.remotestorage;
+package br.uff.labtempo.osiris.remoteconsole;
 
 import java.util.List;
 
@@ -15,15 +15,15 @@ public interface Storage {
 
     public void createRepository(String repository) ;
 
-    public String[] listRepositories();
-    
+    public List<String> listRepositories();
+    //need fix the nulled retun
     public boolean hasRepository(String repository);
 
     public String getRepository(String repository);
 
     public boolean removeRepository(String repository);
 
-    public String[] listRepositoryKeys(String repository);
+    public List<String> listRepositoryKeys(String repository);
 
     public void addEntry(String repository, String key, String value);
 

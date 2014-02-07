@@ -8,7 +8,7 @@ public class App
 {
     public static void main( String[] args )
     {
-        Storage storage =  new  Storage();
+        MemoryStorage storage =  new  MemoryStorage();
         Server server = new Server(storage);
         server.start();
     }

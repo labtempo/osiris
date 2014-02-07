@@ -5,7 +5,7 @@
  */
 package br.uff.labtempo.osiris.remotestorage;
 
-import br.uff.labtempo.osiris.remotestorage.amqp.RPCServer;
+import br.uff.labtempo.osiris.remotestorage.amqp.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,18 +15,16 @@ import java.util.logging.Logger;
  */
 public class Server {
 
-    CallRouter router;
-    RPCServer connection;
+    
+    RPCServer server;
 
-    public Server(Storage storage) {
-        this.router = new CallRouter(storage);
+    public Server(MemoryStorage storage) {
+        this.server = new JSONRpcServer<Storage>(storage,Storage.class, "localhost");
     }
 
     public void start() {
-        setShutdownHook();
-        this.connection = new RPCServer();
-        this.connection.setOnCallListener(router); 
-        this.connection.start();
+        setShutdownHook();        
+        server.start();        
     }
 
     private void setShutdownHook() {
@@ -41,7 +39,7 @@ public class Server {
     private void close() {
         System.out.println("Server is shutting down now...");
         try {
-            connection.close();
+            server.close();
         } catch (Exception ex) {
             Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
         }
