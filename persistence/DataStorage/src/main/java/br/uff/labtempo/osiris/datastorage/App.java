@@ -1,4 +1,4 @@
-package br.uff.labtempo.osiris.remotestorage;
+package br.uff.labtempo.osiris.datastorage;
 
 import br.uff.labtempo.osiris.util.connection.server.RemoteListener;
 

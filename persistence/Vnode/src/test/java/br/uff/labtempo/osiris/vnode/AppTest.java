@@ -1,4 +1,4 @@
-package br.uff.labtempo.osiris.remotestorage;
+package br.uff.labtempo.osiris.vnode;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
