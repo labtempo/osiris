@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
-<properties>
-    <comment>FILE AMQP PROPERTIES:</comment>
-    <entry key="amqp.exchange">rpc.call</entry>
-    <entry key="amqp.exchange.type">direct</entry>
-    <entry key="amqp.routing.key">rpc.</entry>
-</properties>

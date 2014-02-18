@@ -5,8 +5,10 @@
  */
 package br.uff.labtempo.osiris.remoteconsole;
 
+import br.uff.labtempo.osiris.util.interfaces.Storage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -109,6 +111,14 @@ public class Console {
                 case CAT:
                     if (repository != null && parts.length > 1 && parts[1] != null) {
                         printItem(storage.getEntryContent(repository, parts[1]));
+                    }else{
+                        try {
+                            Map map = storage.getRepositoryKeysAndEntry(parts[1]);
+                            printItem(map.toString());
+                        } catch (ClassCastException e) {
+                        }
+                        
+                        
                     }
                     break;
                 case ECHO:

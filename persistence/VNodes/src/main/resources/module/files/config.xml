@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <comment>FILE SANDBOX PROPERTIES:</comment>
+    <entry key="module.resource.data.host">localhost</entry>
+    <entry key="module.resource.data.name">storage</entry>
+    <entry key="module.resource.network.host">localhost</entry>
+    <entry key="module.resource.network.name">sensornet</entry>
+    <entry key="module.name">sandbox</entry>
+    <entry key="module.data.schema.name">module_sandbox0</entry>
+    <entry key="module.data.item.prefix">sanx0_</entry>
+    <entry key="module.data.default.item">default</entry>
+</properties>

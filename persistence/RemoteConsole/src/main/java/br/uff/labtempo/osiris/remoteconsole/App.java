@@ -1,6 +1,7 @@
 package br.uff.labtempo.osiris.remoteconsole;
 
-import br.uff.labtempo.osiris.util.connection.client.RemoteCall;
+import br.uff.labtempo.osiris.util.components.conn.rpc.RemoteCall;
+import br.uff.labtempo.osiris.util.interfaces.Storage;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
