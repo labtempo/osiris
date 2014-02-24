@@ -25,7 +25,7 @@ public class Venus extends Module implements OnMessageListener{
     }
 
     @Override
-    protected void beforeBoot() throws ComponentInitializationException {
+    protected void onCreate() throws ComponentInitializationException {
         try {
             Subscriber sub = new Subscriber(new String[]{"marte","saturno"},"localhost",this);
             addRequire(sub);
@@ -33,7 +33,6 @@ public class Venus extends Module implements OnMessageListener{
         } catch (Exception e) {
             throw new ComponentInitializationException(e);
         }
-        super.beforeBoot(); 
     }
 
     public void onReceiveMessage(String message, String subject) {

@@ -5,6 +5,7 @@
  */
 package br.uff.labtempo.osiris.util.components.conn;
 
+import br.uff.labtempo.osiris.util.components.Component;
 import br.uff.labtempo.osiris.util.components.ComponentInitializationException;
 import br.uff.labtempo.osiris.util.components.Service;
 import com.rabbitmq.client.Channel;
@@ -22,7 +23,7 @@ import java.util.logging.Logger;
  *
  * @author Felipe
  */
-public class JSONRpcClient extends Service{
+public class JSONRpcClient extends Component {
 
     private String AMQPHostAddress;
     private String AMQPResourceName;
@@ -38,7 +39,6 @@ public class JSONRpcClient extends Service{
     private Object proxyInstance;
 
     public JSONRpcClient(String AMQPResourceName, String AMQPHostAddress, Class<?> proxyClass) {
-        super("JSON RPC Client: " + AMQPResourceName);
         this.AMQPHostAddress = AMQPHostAddress;
         this.AMQPResourceName = AMQPResourceName;
         this.proxyClass = proxyClass;
@@ -49,7 +49,7 @@ public class JSONRpcClient extends Service{
     }
 
     @Override
-    protected void beforeBoot() throws ComponentInitializationException {
+    protected void onCreate() throws ComponentInitializationException {
         try {
             Properties prop = Config.getProperties();
             AMQPRoutingKey = prop.getProperty("amqp.rpc.routing.key") + AMQPResourceName;
@@ -60,7 +60,7 @@ public class JSONRpcClient extends Service{
     }
 
     @Override
-    protected void boostrap() throws ComponentInitializationException {
+    protected void onStart() throws ComponentInitializationException {
         try {
             ConnectionFactory factory = new ConnectionFactory();
             factory.setHost(AMQPHostAddress);
@@ -74,18 +74,24 @@ public class JSONRpcClient extends Service{
     }
 
     @Override
-    protected void shutdown() {
+    protected void onStop() {
         try {
             if (RabbitmqRpcClient != null) {
                 RabbitmqRpcClient.close();
             }
+        } catch (Exception ex) {
+        }
+        try {
             if (AMQPChannel != null) {
                 AMQPChannel.close();
             }
+        } catch (Exception ex) {
+        }
+        try {
             if (AMQPConnection != null) {
                 AMQPConnection.close();
             }
-        } catch (IOException ex) {
+        } catch (Exception ex) {
         }
     }
 }

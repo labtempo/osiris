@@ -65,4 +65,8 @@ public class VBox {
         storage.addEntry(schema, defItem, "{}");
     }
 
+    public void newMeasure(String message) {
+        System.out.println(message);
+    }
+
 }

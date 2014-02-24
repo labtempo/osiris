@@ -32,7 +32,7 @@ public class Publisher extends Component {
     }
 
     @Override
-    protected void beforeBoot() throws ComponentInitializationException {
+    protected void onCreate() throws ComponentInitializationException {
         try {
             Properties prop = Config.getProperties();
             AMQPExchange = prop.getProperty("amqp.event.exchange");
@@ -44,7 +44,7 @@ public class Publisher extends Component {
     }
 
     @Override
-    protected void boostrap() throws ComponentInitializationException {
+    protected void onStart() throws ComponentInitializationException {
         try {
             ConnectionFactory factory = new ConnectionFactory();
             factory.setHost(AMQPHostAddress);
@@ -57,16 +57,26 @@ public class Publisher extends Component {
     }
 
     @Override
-    protected void shutdown() {
+    protected void onStop() {
         try {
             if (AMQPChannel != null) {
                 AMQPChannel.close();
             }
+        } catch (Exception ex) {
+        }
+        try {
             if (AMQPConnection != null) {
                 AMQPConnection.close();
             }
         } catch (Exception ex) {
         }
+    }
+
+    public boolean isActive() {
+        if (AMQPChannel.isOpen() && AMQPConnection.isOpen()) {
+            return true;
+        }
+        return false;
     }
 
     public boolean publish(String message) {

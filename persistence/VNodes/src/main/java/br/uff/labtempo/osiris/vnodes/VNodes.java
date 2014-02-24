@@ -10,6 +10,8 @@ import br.uff.labtempo.osiris.vnodes.vbox.VBox;
 import br.uff.labtempo.osiris.util.components.ComponentInitializationException;
 import br.uff.labtempo.osiris.util.components.Module;
 import br.uff.labtempo.osiris.util.components.conn.JSONRpcClient;
+import br.uff.labtempo.osiris.util.components.conn.OnMessageListener;
+import br.uff.labtempo.osiris.util.components.conn.Subscriber;
 import br.uff.labtempo.osiris.util.interfaces.Storage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +23,7 @@ import java.util.logging.Logger;
  *
  * @author Felipe
  */
-public class VNodes extends Module {
+public class VNodes extends Module implements OnMessageListener{
 
     
     public VNodes(){
@@ -29,23 +31,25 @@ public class VNodes extends Module {
     }
 
     @Override
-    protected void beforeBoot() throws ComponentInitializationException {
+    protected void onCreate() throws ComponentInitializationException {
         try {
             loadSystemProperties();
             String host = System.getProperty("module.resource.data.host");
             String resource = System.getProperty("module.resource.data.name");
             JSONRpcClient service = new JSONRpcClient(resource, host, Storage.class);
             RPCConnection.getInstance().addStorageService(service);
+            String[] subjects = {"sensornet"};
+            Subscriber subscriber = new Subscriber(subjects, "localhost", this);
             addRequire(service);
+            addRequire(subscriber);
             
         } catch (Exception e) {
             throw new ComponentInitializationException(e);
         }
-        super.beforeBoot(); 
     }
 
     @Override
-    protected void boostrap() throws ComponentInitializationException {
+    protected void onStart() throws ComponentInitializationException {
         try {
             VBox.getInstance().loadDataFromStorage();
         } catch (Exception ex) {
@@ -64,6 +68,11 @@ public class VNodes extends Module {
         input.close();
         prop.putAll(System.getProperties());
         System.setProperties(prop);
+    }
+
+    @Override
+    public void onReceiveMessage(String message, String subject) {
+        VBox.getInstance().newMeasure(message);
     }
 
 }

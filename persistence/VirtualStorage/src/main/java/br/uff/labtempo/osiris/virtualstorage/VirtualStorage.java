@@ -22,15 +22,12 @@ public class VirtualStorage extends Module{
     }
 
     @Override
-    protected void beforeBoot() throws ComponentInitializationException {        
+    protected void onCreate() throws ComponentInitializationException {        
         try {
             addRequire(new JSONRpcServer("storage", "localhost",new MemoryStorage(), Storage.class));
         } catch (Exception e) {
             throw new ComponentInitializationException(e);
-        }        
-        super.beforeBoot();
+        }
     }
-    
-    
     
 }

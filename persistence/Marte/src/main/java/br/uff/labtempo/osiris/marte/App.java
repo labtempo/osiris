@@ -1,5 +1,7 @@
 package br.uff.labtempo.osiris.marte;
 
+import org.omg.SendingContext.RunTime;
+
 /**
  * Hello world!
  *

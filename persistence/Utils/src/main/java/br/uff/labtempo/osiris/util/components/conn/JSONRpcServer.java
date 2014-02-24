@@ -44,7 +44,7 @@ public class JSONRpcServer extends Service {
     }
 
     @Override
-    protected void beforeBoot() throws ComponentInitializationException {
+    protected void onCreate() throws ComponentInitializationException {
         try {
             Properties prop = Config.getProperties();
             AMQPExchange = prop.getProperty("amqp.rpc.exchange");
@@ -57,7 +57,7 @@ public class JSONRpcServer extends Service {
     }
 
     @Override
-    protected void boostrap() throws ComponentInitializationException {
+    protected void onStart() throws ComponentInitializationException {
         try {
             ConnectionFactory factory = new ConnectionFactory();
             factory.setHost(AMQPHostAddress);
@@ -73,7 +73,7 @@ public class JSONRpcServer extends Service {
     }
 
     @Override
-    protected void loop() throws ComponentInitializationException {
+    protected void onLoop() throws ComponentInitializationException {
         try {
             RabbitmqRpcServer.mainloop();
         } catch (IOException ex) {
@@ -82,18 +82,24 @@ public class JSONRpcServer extends Service {
     }
 
     @Override
-    protected void shutdown() {
+    protected void onStop() {
         try {
             if (RabbitmqRpcServer != null) {
-                RabbitmqRpcServer.terminateMainloop();                
+                RabbitmqRpcServer.terminateMainloop();
             }
+        } catch (Exception ex) {
+        }
+        try {
             if (AMQPChannel != null) {
                 AMQPChannel.close();
             }
+        } catch (Exception ex) {
+        }
+        try {
             if (AMQPConnection != null) {
                 AMQPConnection.close();
             }
-        } catch (IOException ex) {
+        } catch (Exception ex) {
         }
     }
 }

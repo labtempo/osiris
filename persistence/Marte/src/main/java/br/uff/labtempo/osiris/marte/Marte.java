@@ -19,11 +19,13 @@ public class Marte extends Module {
     Publisher publisher;
 
     public Marte() {
-        super("Marte");
+        super("Marte");         
     }
 
+    
+    
     @Override
-    protected void beforeBoot() throws ComponentInitializationException {
+    protected void onCreate() throws ComponentInitializationException {
         try {
             publisher = new Publisher("marte", "localhost");
             addRequire(publisher);
@@ -31,11 +33,10 @@ public class Marte extends Module {
         } catch (Exception e) {
             throw new ComponentInitializationException(e);
         }
-        super.beforeBoot();
     }
 
     @Override
-    protected void afterBoot() throws ComponentInitializationException {
+    protected void onStart() throws ComponentInitializationException {
 
         Scanner scan = new Scanner(System.in);
 
@@ -50,9 +51,6 @@ public class Marte extends Module {
                 System.out.println("sent: " + command);
             }
         }
-        scan.close();
-        super.afterBoot();
-        
+        scan.close();    
     }
-
 }

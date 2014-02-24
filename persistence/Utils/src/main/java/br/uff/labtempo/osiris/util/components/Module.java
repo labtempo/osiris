@@ -5,9 +5,16 @@
  */
 package br.uff.labtempo.osiris.util.components;
 
-import static java.lang.Thread.sleep;
+import br.uff.labtempo.osiris.util.logging.Log;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,107 +24,151 @@ import java.util.logging.Logger;
  */
 public abstract class Module extends Component {
 
-    private List<Component> requires;
-    private List<Component> provides;
-    private List<Thread> services;
+    private Map<Class<?>, Component> requires;
+    private Map<Class<?>, Component> provides;
+    private List<Future> services;
     private String name;
-    private boolean close;
+    private boolean closing;
 
     public Module(String name) {
         this.name = name;
-        requires = new ArrayList<Component>();
-        provides = new ArrayList<Component>();
-        services = new ArrayList<Thread>();
+        requires = new HashMap<Class<?>, Component>();
+        provides = new HashMap<Class<?>, Component>();
+        services = new ArrayList<Future>();
     }
 
     /* basic */
     public void addRequire(Component content) {
-        requires.add(content);
+        requires.put(Component.class, content);
     }
 
     public void addProvide(Component content) {
-        provides.add(content);
+        provides.put(Component.class, content);
     }
 
     public void addRequire(Service content) {
-        requires.add((Component) content);
-        services.add(content.getThread());
+        requires.put(Service.class, content);
     }
 
     public void addProvide(Service content) {
-        provides.add((Component) content);
-        services.add(content.getThread());
+        provides.put(Service.class, content);
     }
 
     @Override
-    protected void beforeBoot() throws ComponentInitializationException {
-        System.out.println("Control + C para terminar o " + name);
-        final Thread thread = Thread.currentThread();
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                if (close = !close) {
-                    close();
-                    try {
-                        thread.join();
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(Module.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
+    public void start() throws ComponentInitializationException {
+        Log.D("Component is initializing...");
+        try {
+            onCreate();
+            onRequiredStart();
+            onStart();
+            onProvidedStart();
+        } catch (Exception e) {
+            Log.D("Initialization aborted!");
+            closing = true;
+            finish();
+            Logger.getLogger(Module.class.getName()).log(Level.SEVERE, null, e);            
+            throw new ComponentInitializationException(e);            
+        }
+    }
+
+    @Override
+    public void finish() {
+        Log.D("Finishing process started");
+        onPause();        
+        onProvidedFinish();
+        onStop();        
+        onRequiredFinish();
+        onDestroy();
+        Log.D("Finishing process is complete");
+    }
+
+    protected void onRequiredStart() throws ComponentInitializationException {
+        shutdownHook();
+        ExecutorService executor = Executors.newCachedThreadPool();
+        for (Entry<Class<?>, Component> entry : requires.entrySet()) {
+
+            Component component = entry.getValue();
+            component.start();
+
+            if (entry.getKey().equals(Service.class)) {
+                services.add(executor.submit((Service) component));
             }
-        });
-
-        for (Component component : requires) {
-            component.start();
         }
     }
 
-    @Override
-    protected void afterBoot() throws ComponentInitializationException {
-        for (Component component : provides) {
+    protected void onProvidedStart() throws ComponentInitializationException {
+        ExecutorService executor = Executors.newCachedThreadPool();
+        for (Entry<Class<?>, Component> entry : provides.entrySet()) {
+            Component component = entry.getValue();
             component.start();
+
+            if (entry.getKey().equals(Service.class)) {
+                services.add(executor.submit((Service) component));
+            }
         }
 
-        for (Thread thread : services) {
+        for (Future f : services) {
             try {
-                thread.join();
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                //e.printStackTrace();
+                f.get();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Module.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ExecutionException ex) {
+                Logger.getLogger(Module.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        System.out.println(name + " desligado!");
-        
-        if ((close = !close)) {
-            close();
-        }
 
-    }
-
-    @Override
-    protected void beforeShutdown() {
-        for (Component widget : requires) {
-            widget.close();
+        if (!closing) {
+            closing = true;
+            System.exit(0);
         }
     }
 
-    @Override
-    protected void afterShutdown() {
-        for (Component widget : provides) {
-            widget.close();
+    protected void onRequiredFinish() {
+        for (Entry<Class<?>, Component> entry : requires.entrySet()) {
+            Component component = entry.getValue();
+            component.finish();
+        }
+    }
+
+    protected void onProvidedFinish() {
+        for (Entry<Class<?>, Component> entry : provides.entrySet()) {
+            Component component = entry.getValue();
+            component.finish();
         }
     }
 
     private void autoclose() {
+        Log.D("Autoclose activated!");
         (new Thread() {
             public void run() {
-                System.out.println("autoclose on!");
                 try {
-                    sleep(6000);
-                    System.exit(-1);
+                    Thread.sleep(6000);
+                    System.exit(0);
                 } catch (InterruptedException ex) {
                     Logger.getLogger(Module.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }).start();
     }
+
+    private void shutdownHook() {
+        System.out.println("Control + C to terminate " + name);
+        final Thread thread = Thread.currentThread();
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                Log.D("ShutdownHook is running...");
+                thread.setName("Shutdown hook");
+                try {
+                    if (!closing) {
+                        closing = true;
+                        thread.join();
+                    }
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Module.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                Log.D("ShutdownHook end");
+            }
+        });
+    }
+
 }

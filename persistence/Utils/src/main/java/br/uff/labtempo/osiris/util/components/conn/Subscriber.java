@@ -52,7 +52,7 @@ public class Subscriber extends Service {
     }
 
     @Override
-    protected void beforeBoot() throws ComponentInitializationException {
+    protected void onCreate() throws ComponentInitializationException {
         try {
             Properties prop = Config.getProperties();
             AMQPExchange = prop.getProperty("amqp.event.exchange");
@@ -68,69 +68,69 @@ public class Subscriber extends Service {
     }
 
     @Override
-    protected void boostrap() throws ComponentInitializationException {
+    protected void onStart() throws ComponentInitializationException {
         try {
             ConnectionFactory factory = new ConnectionFactory();
             factory.setHost(AMQPHostAddress);
             AMQPConnection = factory.newConnection();
             AMQPChannel = AMQPConnection.createChannel();
-            
+
             AMQPChannel.exchangeDeclare(AMQPExchange, AMQPExchangeType);
             AMQPQueue = AMQPChannel.queueDeclare().getQueue();
 
             for (String bindingKey : AMQPBindingKeys) {
                 AMQPChannel.queueBind(AMQPQueue, AMQPExchange, bindingKey);
             }
-            
+            RabbitmqConsumer = new QueueingConsumer(AMQPChannel);
+            AMQPChannel.basicConsume(AMQPQueue, true, RabbitmqConsumer);
         } catch (Exception ex) {
             throw new ComponentInitializationException(ex);
         }
     }
 
     @Override
-    protected void loop() throws ComponentInitializationException {
+    protected void onLoop() throws ComponentInitializationException {
+        int i = 0;
         try {
-            RabbitmqConsumer = new QueueingConsumer(AMQPChannel);
-            try {
-                AMQPChannel.basicConsume(AMQPQueue, true, RabbitmqConsumer);
-            } catch (IOException ex) {
-                Logger.getLogger(Subscriber.class.getName()).log(Level.SEVERE, null, ex);
-            }
             while (active) {
                 QueueingConsumer.Delivery delivery;
                 try {
                     delivery = RabbitmqConsumer.nextDelivery();
                     listener.onReceiveMessage(new String(delivery.getBody()), getSubject(delivery.getEnvelope().getRoutingKey()));
-                } catch (ShutdownSignalException ex) {
-                    Logger.getLogger(Subscriber.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (ConsumerCancelledException ex) {
-                    Logger.getLogger(Subscriber.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (ShutdownSignalException | ConsumerCancelledException ex) {
+                    break;
                 }
             }
         } catch (InterruptedException ex) {
             throw new ComponentInitializationException(ex);
         }
+        System.out.println("saindo do loop");
     }
 
     @Override
-    protected void shutdown() {
+    protected void onStop() {
+
+        active = false;
+
         try {
-            active = false;
             if (AMQPChannel != null) {
                 AMQPChannel.close();
             }
+        } catch (Exception ex) {
+        }
+        try {
             if (AMQPConnection != null) {
                 AMQPConnection.close();
             }
-        } catch (IOException ex) {
+        } catch (Exception ex) {
         }
     }
-    
-    private String getSubject(String routingKey){
-        if(AMQPBindingKeys.contains(routingKey)){
+
+    private String getSubject(String routingKey) {
+        if (AMQPBindingKeys.contains(routingKey)) {
             int i = AMQPBindingKeys.indexOf(routingKey);
             return AMQPSubjects[i];
-        }        
+        }
         return null;
     }
 

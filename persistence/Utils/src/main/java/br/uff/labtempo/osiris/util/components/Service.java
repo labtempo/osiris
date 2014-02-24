@@ -5,6 +5,7 @@
  */
 package br.uff.labtempo.osiris.util.components;
 
+import br.uff.labtempo.osiris.util.logging.Log;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,64 +15,17 @@ import java.util.logging.Logger;
  */
 public abstract class Service extends Component implements Runnable {
 
-    private Thread thread;
-    private boolean close;
-    private Service obj;
+    private String name;
 
     public Service(String name) {
-        thread = new Thread(this, "Service - " + name);
-        thread.setDaemon(true);
-    }
-
-    public Thread getThread() {
-        return thread;
+        this.name = name;
     }
 
     @Override
     public void run() throws ComponentInitializationException {
-        loop();
+        Thread.currentThread().setName("Service - " + name);
+        onLoop();
     }
 
-    @Override
-    public void start() throws ComponentInitializationException {
-        try {
-            beforeBoot();
-            boostrap();
-            afterBoot();
-            thread.start();
-        } catch (Exception e) {
-            close();
-            throw new ComponentInitializationException(e);
-        }
-    }
-
-    @Override
-    public void close() {
-        beforeShutdown();
-        shutdown();
-        afterShutdown();
-    }
-
-    protected void loop() throws ComponentInitializationException {
-        obj = this;
-        synchronized (this) {
-            while (!close) {
-                try {
-                    wait();
-                } catch (InterruptedException ex) {
-
-                }
-            }
-        }
-    }
-
-    @Override
-    protected void shutdown() throws ComponentInitializationException {
-        if (obj != null) {
-            close = true;
-            synchronized (obj) {
-                obj.notifyAll();
-            }
-        }
-    }
+    protected abstract void onLoop() throws ComponentInitializationException;
 }
