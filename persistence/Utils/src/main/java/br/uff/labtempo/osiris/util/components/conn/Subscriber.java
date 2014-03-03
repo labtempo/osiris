@@ -28,38 +28,39 @@ import java.util.logging.Logger;
  */
 public class Subscriber extends Service {
 
-    private String AMQPHostAddress;
-    private String[] AMQPSubjects;
+    private String AmqpHostAddress;
+    private String[] AmqpSubjects;
 
-    private String AMQPExchange;
-    private String AMQPExchangeType;
-    private List<String> AMQPBindingKeys;
-    private String AMQPQueue;
+    private String AmqpExchange;
+    private String AmqpExchangeType;
+    private List<String> AmqpBindingKeys;
+    private String AmqpQueue;
 
-    private Connection AMQPConnection;
-    private Channel AMQPChannel;
+    private Connection AmqpConnection;
+    private Channel AmqpChannel;
     private QueueingConsumer RabbitmqConsumer;
 
+    private String routingKeyPattern;
     private OnMessageListener listener;
     private boolean active = true;
 
     public Subscriber(String[] AMQPSubjects, String AMQPHostAddress, OnMessageListener listener) {
         super("Subscriber");
-        this.AMQPHostAddress = AMQPHostAddress;
-        this.AMQPSubjects = AMQPSubjects;
+        this.AmqpHostAddress = AMQPHostAddress;
+        this.AmqpSubjects = AMQPSubjects;
         this.listener = listener;
-        AMQPBindingKeys = new ArrayList<String>();
+        AmqpBindingKeys = new ArrayList<String>();
     }
 
     @Override
     protected void onCreate() throws ComponentInitializationException {
         try {
             Properties prop = Config.getProperties();
-            AMQPExchange = prop.getProperty("amqp.event.exchange");
-            AMQPExchangeType = prop.getProperty("amqp.event.exchange.type");
-
-            for (String subject : AMQPSubjects) {
-                AMQPBindingKeys.add(prop.getProperty("amqp.event.routing.key") + subject);
+            AmqpExchange = prop.getProperty("amqp.event.exchange");
+            AmqpExchangeType = prop.getProperty("amqp.event.exchange.type");
+            routingKeyPattern = prop.getProperty("amqp.event.routing.key");
+            for (String subject : AmqpSubjects) {
+                AmqpBindingKeys.add(routingKeyPattern + subject);
             }
 
         } catch (Exception ex) {
@@ -71,18 +72,18 @@ public class Subscriber extends Service {
     protected void onStart() throws ComponentInitializationException {
         try {
             ConnectionFactory factory = new ConnectionFactory();
-            factory.setHost(AMQPHostAddress);
-            AMQPConnection = factory.newConnection();
-            AMQPChannel = AMQPConnection.createChannel();
+            factory.setHost(AmqpHostAddress);
+            AmqpConnection = factory.newConnection();
+            AmqpChannel = AmqpConnection.createChannel();
 
-            AMQPChannel.exchangeDeclare(AMQPExchange, AMQPExchangeType);
-            AMQPQueue = AMQPChannel.queueDeclare().getQueue();
+            AmqpChannel.exchangeDeclare(AmqpExchange, AmqpExchangeType);
+            AmqpQueue = AmqpChannel.queueDeclare().getQueue();
 
-            for (String bindingKey : AMQPBindingKeys) {
-                AMQPChannel.queueBind(AMQPQueue, AMQPExchange, bindingKey);
+            for (String bindingKey : AmqpBindingKeys) {
+                AmqpChannel.queueBind(AmqpQueue, AmqpExchange, bindingKey);
             }
-            RabbitmqConsumer = new QueueingConsumer(AMQPChannel);
-            AMQPChannel.basicConsume(AMQPQueue, true, RabbitmqConsumer);
+            RabbitmqConsumer = new QueueingConsumer(AmqpChannel);
+            AmqpChannel.basicConsume(AmqpQueue, true, RabbitmqConsumer);
         } catch (Exception ex) {
             throw new ComponentInitializationException(ex);
         }
@@ -113,25 +114,26 @@ public class Subscriber extends Service {
         active = false;
 
         try {
-            if (AMQPChannel != null) {
-                AMQPChannel.close();
+            if (AmqpChannel != null) {
+                AmqpChannel.close();
             }
         } catch (Exception ex) {
         }
         try {
-            if (AMQPConnection != null) {
-                AMQPConnection.close();
+            if (AmqpConnection != null) {
+                AmqpConnection.close();
             }
         } catch (Exception ex) {
         }
     }
 
     private String getSubject(String routingKey) {
-        if (AMQPBindingKeys.contains(routingKey)) {
-            int i = AMQPBindingKeys.indexOf(routingKey);
-            return AMQPSubjects[i];
+        if (AmqpBindingKeys.contains(routingKey)) {
+            int i = AmqpBindingKeys.indexOf(routingKey);
+            return AmqpSubjects[i];
+        }else{
+            return routingKey.replace(routingKeyPattern, "");            
         }
-        return null;
     }
 
 }

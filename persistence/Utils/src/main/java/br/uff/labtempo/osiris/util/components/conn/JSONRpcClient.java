@@ -25,22 +25,22 @@ import java.util.logging.Logger;
  */
 public class JSONRpcClient extends Component {
 
-    private String AMQPHostAddress;
-    private String AMQPResourceName;
+    private String AmqpHostAddress;
+    private String AmqpResourceName;
 
-    private String AMQPRoutingKey;
-    private String AMQPQueue;
+    private String AmqpRoutingKey;
+    private String AmqpQueue;
 
-    private Connection AMQPConnection;
-    private Channel AMQPChannel;
+    private Connection AmqpConnection;
+    private Channel AmqpChannel;
     private JsonRpcClient RabbitmqRpcClient;
 
     private Class proxyClass;
     private Object proxyInstance;
 
     public JSONRpcClient(String AMQPResourceName, String AMQPHostAddress, Class<?> proxyClass) {
-        this.AMQPHostAddress = AMQPHostAddress;
-        this.AMQPResourceName = AMQPResourceName;
+        this.AmqpHostAddress = AMQPHostAddress;
+        this.AmqpResourceName = AMQPResourceName;
         this.proxyClass = proxyClass;
     }
 
@@ -52,8 +52,8 @@ public class JSONRpcClient extends Component {
     protected void onCreate() throws ComponentInitializationException {
         try {
             Properties prop = Config.getProperties();
-            AMQPRoutingKey = prop.getProperty("amqp.rpc.routing.key") + AMQPResourceName;
-            AMQPQueue = prop.getProperty("amqp.rpc.exchange");
+            AmqpRoutingKey = prop.getProperty("amqp.rpc.routing.key") + AmqpResourceName;
+            AmqpQueue = prop.getProperty("amqp.rpc.exchange");
         } catch (Exception ex) {
             throw new ComponentInitializationException(ex);
         }
@@ -63,10 +63,10 @@ public class JSONRpcClient extends Component {
     protected void onStart() throws ComponentInitializationException {
         try {
             ConnectionFactory factory = new ConnectionFactory();
-            factory.setHost(AMQPHostAddress);
-            AMQPConnection = factory.newConnection();
-            AMQPChannel = AMQPConnection.createChannel();
-            RabbitmqRpcClient = new JsonRpcClient(AMQPChannel, AMQPQueue, AMQPRoutingKey, 60);
+            factory.setHost(AmqpHostAddress);
+            AmqpConnection = factory.newConnection();
+            AmqpChannel = AmqpConnection.createChannel();
+            RabbitmqRpcClient = new JsonRpcClient(AmqpChannel, AmqpQueue, AmqpRoutingKey, 60);
             proxyInstance = RabbitmqRpcClient.createProxy(proxyClass);
         } catch (Exception ex) {
             throw new ComponentInitializationException(ex);
@@ -82,14 +82,14 @@ public class JSONRpcClient extends Component {
         } catch (Exception ex) {
         }
         try {
-            if (AMQPChannel != null) {
-                AMQPChannel.close();
+            if (AmqpChannel != null) {
+                AmqpChannel.close();
             }
         } catch (Exception ex) {
         }
         try {
-            if (AMQPConnection != null) {
-                AMQPConnection.close();
+            if (AmqpConnection != null) {
+                AmqpConnection.close();
             }
         } catch (Exception ex) {
         }

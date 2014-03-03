@@ -19,11 +19,11 @@ class DataPacket {
     public String toString() {
         StringBuilder packet = new StringBuilder();
 
-        packet.append("{id:");
+        packet.append("id:");
         packet.append(sensorID);
-        packet.append(",time:");
+        packet.append(";time:");
         packet.append(timestamp);
-        packet.append(",measures:{");
+        packet.append(";measures:{");
         packet.append(measures);
         packet.append("}}");
         return packet.toString();

@@ -24,34 +24,34 @@ import java.util.logging.Logger;
  */
 public abstract class Module extends Component {
 
-    private Map<Class<?>, Component> requires;
-    private Map<Class<?>, Component> provides;
+    private Map<Component, Class<?>> requires;
+    private Map<Component, Class<?>> provides;
     private List<Future> services;
     private String name;
     private boolean closing;
 
     public Module(String name) {
         this.name = name;
-        requires = new HashMap<Class<?>, Component>();
-        provides = new HashMap<Class<?>, Component>();
+        requires = new HashMap<Component, Class<?>>();
+        provides = new HashMap<Component, Class<?>>();
         services = new ArrayList<Future>();
     }
 
     /* basic */
     public void addRequire(Component content) {
-        requires.put(Component.class, content);
+        requires.put(content, Component.class);
     }
 
     public void addProvide(Component content) {
-        provides.put(Component.class, content);
+        provides.put(content, Component.class);
     }
 
     public void addRequire(Service content) {
-        requires.put(Service.class, content);
+        requires.put(content, Service.class);
     }
 
     public void addProvide(Service content) {
-        provides.put(Service.class, content);
+        provides.put(content, Service.class);
     }
 
     @Override
@@ -85,12 +85,12 @@ public abstract class Module extends Component {
     protected void onRequiredStart() throws ComponentInitializationException {
         shutdownHook();
         ExecutorService executor = Executors.newCachedThreadPool();
-        for (Entry<Class<?>, Component> entry : requires.entrySet()) {
+        for (Entry<Component, Class<?>> entry : requires.entrySet()) {
 
-            Component component = entry.getValue();
+            Component component = entry.getKey();
             component.start();
 
-            if (entry.getKey().equals(Service.class)) {
+            if (entry.getValue().equals(Service.class)) {
                 services.add(executor.submit((Service) component));
             }
         }
@@ -98,15 +98,15 @@ public abstract class Module extends Component {
 
     protected void onProvidedStart() throws ComponentInitializationException {
         ExecutorService executor = Executors.newCachedThreadPool();
-        for (Entry<Class<?>, Component> entry : provides.entrySet()) {
-            Component component = entry.getValue();
+        for (Entry<Component, Class<?>> entry : provides.entrySet()) {
+            Component component = entry.getKey();
             component.start();
 
-            if (entry.getKey().equals(Service.class)) {
+            if (entry.getValue().equals(Service.class)) {
                 services.add(executor.submit((Service) component));
             }
-        }
-
+        }      
+        
         for (Future f : services) {
             try {
                 f.get();
@@ -124,15 +124,15 @@ public abstract class Module extends Component {
     }
 
     protected void onRequiredFinish() {
-        for (Entry<Class<?>, Component> entry : requires.entrySet()) {
-            Component component = entry.getValue();
+        for (Entry<Component, Class<?>> entry : requires.entrySet()) {
+            Component component = entry.getKey();
             component.finish();
         }
     }
 
     protected void onProvidedFinish() {
-        for (Entry<Class<?>, Component> entry : provides.entrySet()) {
-            Component component = entry.getValue();
+        for (Entry<Component, Class<?>> entry : provides.entrySet()) {
+            Component component = entry.getKey();
             component.finish();
         }
     }

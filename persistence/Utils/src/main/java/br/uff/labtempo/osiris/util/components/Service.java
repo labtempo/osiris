@@ -26,6 +26,9 @@ public abstract class Service extends Component implements Runnable {
         Thread.currentThread().setName("Service - " + name);
         onLoop();
     }
-
+    
+    @Override
+    protected abstract void onCreate() throws ComponentInitializationException;
+    
     protected abstract void onLoop() throws ComponentInitializationException;
 }

@@ -26,6 +26,10 @@ public class VNode {
     public void setName(String name) {
         this.name = name;
     }
+    
+    public String getName() {
+        return name;
+    }
 
     /**
      * @return the ID

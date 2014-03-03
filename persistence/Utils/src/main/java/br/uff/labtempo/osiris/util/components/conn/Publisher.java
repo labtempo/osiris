@@ -18,26 +18,26 @@ import java.util.Properties;
  */
 public class Publisher extends Component {
 
-    private String AMQPHostAddress;
-    private String AMQPExchange;
-    private String AMQPExchangeType;
-    private String AMQPResourceName;
-    private String AMQPRoutingKey;
-    private Connection AMQPConnection;
-    private Channel AMQPChannel;
+    private String AmqpHostAddress;
+    private String AmqpExchange;
+    private String AmqpExchangeType;
+    private String AmqpResourceName;
+    private String AmqpRoutingKey;
+    private Connection AmqpConnection;
+    private Channel AmqpChannel;
 
     public Publisher(String AMQPResourceName, String AMQPHostAddress) {
-        this.AMQPHostAddress = AMQPHostAddress;
-        this.AMQPResourceName = AMQPResourceName;
+        this.AmqpHostAddress = AMQPHostAddress;
+        this.AmqpResourceName = AMQPResourceName;
     }
 
     @Override
     protected void onCreate() throws ComponentInitializationException {
         try {
             Properties prop = Config.getProperties();
-            AMQPExchange = prop.getProperty("amqp.event.exchange");
-            AMQPExchangeType = prop.getProperty("amqp.event.exchange.type");
-            AMQPRoutingKey = prop.getProperty("amqp.event.routing.key") + AMQPResourceName;
+            AmqpExchange = prop.getProperty("amqp.event.exchange");
+            AmqpExchangeType = prop.getProperty("amqp.event.exchange.type");
+            AmqpRoutingKey = prop.getProperty("amqp.event.routing.key") + AmqpResourceName;
         } catch (Exception ex) {
             throw new ComponentInitializationException(ex);
         }
@@ -47,10 +47,10 @@ public class Publisher extends Component {
     protected void onStart() throws ComponentInitializationException {
         try {
             ConnectionFactory factory = new ConnectionFactory();
-            factory.setHost(AMQPHostAddress);
-            AMQPConnection = factory.newConnection();
-            AMQPChannel = AMQPConnection.createChannel();
-            AMQPChannel.exchangeDeclare(AMQPExchange, AMQPExchangeType);
+            factory.setHost(AmqpHostAddress);
+            AmqpConnection = factory.newConnection();
+            AmqpChannel = AmqpConnection.createChannel();
+            AmqpChannel.exchangeDeclare(AmqpExchange, AmqpExchangeType);
         } catch (Exception ex) {
             throw new ComponentInitializationException(ex);
         }
@@ -59,21 +59,21 @@ public class Publisher extends Component {
     @Override
     protected void onStop() {
         try {
-            if (AMQPChannel != null) {
-                AMQPChannel.close();
+            if (AmqpChannel != null) {
+                AmqpChannel.close();
             }
         } catch (Exception ex) {
         }
         try {
-            if (AMQPConnection != null) {
-                AMQPConnection.close();
+            if (AmqpConnection != null) {
+                AmqpConnection.close();
             }
         } catch (Exception ex) {
         }
     }
 
     public boolean isActive() {
-        if (AMQPChannel.isOpen() && AMQPConnection.isOpen()) {
+        if (AmqpChannel.isOpen() && AmqpConnection.isOpen()) {
             return true;
         }
         return false;
@@ -81,7 +81,16 @@ public class Publisher extends Component {
 
     public boolean publish(String message) {
         try {
-            AMQPChannel.basicPublish(AMQPExchange, AMQPRoutingKey, null, message.getBytes());
+            AmqpChannel.basicPublish(AmqpExchange, AmqpRoutingKey, null, message.getBytes());
+        } catch (Exception ex) {
+            return false;
+        }
+        return true;
+    }
+    
+    public boolean publish(String message, String resourceId) {
+        try {
+            AmqpChannel.basicPublish(AmqpExchange, AmqpRoutingKey+"."+resourceId, null, message.getBytes());
         } catch (Exception ex) {
             return false;
         }

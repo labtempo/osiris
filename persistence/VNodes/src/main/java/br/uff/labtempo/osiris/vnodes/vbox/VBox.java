@@ -5,8 +5,12 @@
  */
 package br.uff.labtempo.osiris.vnodes.vbox;
 
+import br.uff.labtempo.osiris.util.interfaces.Network;
 import br.uff.labtempo.osiris.vnodes.conn.RPCConnection;
 import br.uff.labtempo.osiris.util.interfaces.Storage;
+import br.uff.labtempo.osiris.util.interfaces.VSensor;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +18,7 @@ import java.util.Map;
  *
  * @author Felipe
  */
-public class VBox {
+public class VBox implements VSensor {
 
     private static VBox instance;
 
@@ -23,6 +27,8 @@ public class VBox {
     private Map<String, Integer> mapDataSource;
 
     private VBox() {
+        this.nodes = new ArrayList<>();
+        this.mapDataSource =  new HashMap<>();
     }
 
     public static VBox getInstance() {
@@ -54,19 +60,49 @@ public class VBox {
     public void createNewStorageDataSchema() throws Exception {
         Storage storage = RPCConnection.getInstance().getStorage();
         String schema = System.getProperty("module.data.schema.name");
-        String defItem =  System.getProperty("module.data.default.item");
+        String defItem = System.getProperty("module.data.default.item");
 
-        boolean isCreated = storage.createRepository(schema);        
+        boolean isCreated = storage.createRepository(schema);
 
         if (!isCreated) {
             throw new Exception("schema could not be created");
         }
-        
+
         storage.addEntry(schema, defItem, "{}");
     }
 
     public void newMeasure(String message) {
         System.out.println(message);
+    }
+    
+    private void addToStorage(VNode vnode){
+        Storage storage =  RPCConnection.getInstance().getStorage();
+        
+        //storage.
+        
+    }
+    
+    @Override
+    public List<String> getSensors() {
+        List<String> sensors = new ArrayList<>();
+        for (VNode sensor : nodes) {
+            sensors.add(sensor.getName());
+        }
+        return sensors;
+    }
+
+    @Override
+    public boolean bind(String resource, String vnodename) {
+        Network net = RPCConnection.getInstance().getNetwork();
+
+        if (net.getNode(resource) && !mapDataSource.containsKey(resource)) {
+            VNode vnode = new VNode();
+            vnode.setName(vnodename);
+            vnode.setDataSource(vnodename);
+            mapDataSource.put(resource, nodes.size()+1);
+            return nodes.add(vnode);
+        }
+        return false;
     }
 
 }
