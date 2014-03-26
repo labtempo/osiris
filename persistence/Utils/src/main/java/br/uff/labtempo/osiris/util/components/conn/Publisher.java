@@ -79,7 +79,7 @@ public class Publisher extends Component {
         return false;
     }
 
-    public boolean publish(String message) {
+    public synchronized boolean publish(String message) {
         try {
             AmqpChannel.basicPublish(AmqpExchange, AmqpRoutingKey, null, message.getBytes());
         } catch (Exception ex) {
@@ -88,7 +88,7 @@ public class Publisher extends Component {
         return true;
     }
     
-    public boolean publish(String message, String resourceId) {
+    public synchronized boolean publish(String message, String resourceId) {
         try {
             AmqpChannel.basicPublish(AmqpExchange, AmqpRoutingKey+"."+resourceId, null, message.getBytes());
         } catch (Exception ex) {

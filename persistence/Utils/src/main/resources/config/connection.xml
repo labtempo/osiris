@@ -9,4 +9,5 @@
     <entry key="amqp.event.exchange">event.cast</entry>
     <entry key="amqp.event.exchange.type">topic</entry>
     <entry key="amqp.event.routing.key">event.</entry>
+    <entry key="amqp.collector.event.routing.key">event.network</entry>
 </properties>

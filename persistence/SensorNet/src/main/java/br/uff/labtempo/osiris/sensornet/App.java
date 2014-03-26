@@ -8,7 +8,7 @@ public class App
 {
     public static void main( String[] args )
     {
-        SensorNet sernsorNet = new SensorNet();        
+        Application sernsorNet = new Application();        
         sernsorNet.start();
         
     }
