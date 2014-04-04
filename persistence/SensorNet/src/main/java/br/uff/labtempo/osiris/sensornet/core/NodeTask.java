@@ -13,7 +13,7 @@ import java.util.logging.Logger;
  *
  * @author Felipe
  */
-public class NodeTask implements Runnable {
+class NodeTask implements Runnable {
 
     private Node node;
     private OnTaskListener listener;
@@ -30,7 +30,7 @@ public class NodeTask implements Runnable {
                 long time;
                 synchronized (node) {
                     time = node.getRealisticDelayToUpdate();
-                    Log.D(node.getId() + " time defined: " + time);
+                    Log.D(node.getId() + " next check at " + time + " milliseconds");
                 }
                 
                 Thread.sleep(time);

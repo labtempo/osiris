@@ -29,7 +29,7 @@ public class Collector extends Module {
             publisher = new Publisher(RESOURCE_REFERENCE, "localhost");
             addRequire(publisher);
             addProvide(new Sensor(231, 6000, publisher, ID));
-//            addProvide(new Sensor(232, 6000, publisher, ID,231));
+            //addProvide(new Sensor(232, 6000, publisher, ID,231));
 //            addProvide(new Sensor(233, 6000, publisher, ID,231));
 //            addProvide(new Sensor(234, 6000, publisher, ID,233));
 //            addProvide(new Sensor(235, 6000, publisher, ID,233));

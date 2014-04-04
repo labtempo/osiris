@@ -7,29 +7,39 @@ package br.uff.labtempo.osiris.sensornet.core;
 
 import br.uff.labtempo.osiris.util.data.DataPacket;
 import br.uff.labtempo.osiris.util.logging.Log;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
  *
  * @author Felipe
  */
-public class NodeManager implements OnTaskListener{
+class NodeManager implements OnTaskListener {
 
     private final Map<String, NodeTask> running;
     private final Map<String, Node> sleeping;
+    private final Map<String, Integer> networks;
     private final ScheduledThreadPoolExecutor executorService;
+    private OnNodeManagerListener listener;
 
-    public NodeManager() {
-        running = new Hashtable<>();
-        sleeping = new Hashtable<>();
-        executorService = new ScheduledThreadPoolExecutor(100);
+    public NodeManager(OnNodeManagerListener listener) {
+        this.running = new HashMap<>();
+        this.sleeping = new HashMap<>();
+        this.networks = new HashMap<>();
+        this.executorService = new ScheduledThreadPoolExecutor(100);
+        this.listener = listener;
     }
 
     public void onEventIncoming(DataPacket packet) {
+        Log.D(" ** " + packet.getId() + " distributing ** ");
+
         if (isRunning(packet)) {
             return;
         }
@@ -37,8 +47,11 @@ public class NodeManager implements OnTaskListener{
         if (isSleeping(packet)) {
             return;
         }
-
-        createNode(packet);
+        
+        
+        Node node = new Node(packet);
+        listener.onNodeChange(node, EventType.NEWNODEFOUND);
+        createTask(node);        
     }
 
     private synchronized boolean isRunning(DataPacket packet) {
@@ -46,6 +59,7 @@ public class NodeManager implements OnTaskListener{
             NodeTask task = running.get(packet.getFullResourcePath());
             Node node = task.getNode();
             node.update(packet);
+
             return true;
         }
         return false;
@@ -56,31 +70,48 @@ public class NodeManager implements OnTaskListener{
             Node node = sleeping.get(packet.getFullResourcePath());
             sleeping.remove(packet.getFullResourcePath());
             node.restart(packet);
-            createTask(node);            
+            createTask(node);
             return true;
         }
         return false;
     }
 
-    private void createNode(DataPacket packet) {
-        Node node = new Node(packet);
-        createTask(node);
-    }
-    
-    private synchronized void createTask(Node node){
+    private synchronized void createTask(Node node) {
         NodeTask task = new NodeTask(node, this);
-        running.put(node.getFullResourcePath(),task);
+        running.put(node.getFullResourcePath(), task);
         executorService.execute(task);
         node.setStatus(Node.Status.RUNNING);
-        Log.D(node.getId()+ " node is running...");
+
+        if (!networks.containsKey(node.getSource())) {
+            networks.put(node.getSource(), 1);
+            listener.onNodeChange(node, EventType.NEWNETWORKFOUND);
+        } else {
+            networks.put(node.getSource(), networks.get(node.getSource()) + 1);
+        }
+        
+        listener.onNodeChange(node, EventType.NODEUP);
+        
+        Log.D(node.getId() + " nodeTask is created!");
     }
 
     @Override
-    public synchronized void onTaskClose(Node node) {        
+    public synchronized void onTaskClose(Node node) {
         running.remove(node.getFullResourcePath());
-        sleeping.put(node.getFullResourcePath(),node);
+        sleeping.put(node.getFullResourcePath(), node);
         node.setStatus(Node.Status.SLEEPING);
-        Log.D(node.getId()+" node is sleeping...");        
+        listener.onNodeChange(node, EventType.NODEDOWN);
+
+        if (networks.containsKey(node.getSource())) {
+            if (networks.get(node.getSource()) <= 1) {
+                networks.remove(node.getSource());
+                listener.onNodeChange(node, EventType.NETWORKLOST);
+
+            } else {
+                networks.put(node.getSource(), networks.get(node.getSource()) - 1);
+            }
+        }
+
+        Log.D(node.getId() + " nodeTask is finished!");
     }
 
 }

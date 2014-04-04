@@ -13,7 +13,7 @@ import java.io.Serializable;
  *
  * @author Felipe
  */
-public class Node implements Serializable {
+class Node implements Serializable {
 
     private String id;
     private String source;
@@ -113,7 +113,7 @@ public class Node implements Serializable {
             this.data = packet.getData();
             this.oldSystemTimeOfUpdate = systemTimeOfUpdate;
             this.systemTimeOfUpdate = getSystemMillis();
-            Log.D(id + " updating...");
+            Log.D(id + " updated!");
         }
     }
 
@@ -121,8 +121,7 @@ public class Node implements Serializable {
         this.timestampOfUpdate = packet.getTimestamp() - packet.getInterval();
         this.systemTimeOfUpdate = getSystemMillis() - packet.getInterval();
         update(packet);
-        this.intervalToUpdate += this.intervalToUpdate/4;
-        Log.D(id + " restarting...");
+        Log.D(id + " restarted!");
     }
 
     public void setStatus(Status status) {
@@ -159,5 +158,5 @@ public class Node implements Serializable {
     public enum Status {
 
         RUNNING, SLEEPING
-    }
+    }    
 }
