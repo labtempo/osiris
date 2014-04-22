@@ -8,7 +8,7 @@ public class App
 {
     public static void main( String[] args )
     {
-        Console console = new Console();
+        Application console = new Application();
         console.start();
     }
 }

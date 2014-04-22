@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package br.uff.labtempo.osiris.model;
 
 import java.io.Serializable;
@@ -21,29 +20,32 @@ import javax.persistence.TemporalType;
  */
 @Entity
 public class Sample implements Serializable {
+
     @Id
     @GeneratedValue
     private long id;
-    
-    @ManyToOne
-    private VirtualSensor sensor;
-    
-    
+
     @ManyToOne
     private Mote mote;
-    
-    private String sample;    
-    
+
+    @ManyToOne
+    private VirtualSensor sensor;
+
+    private String sample;
+
     @Temporal(TemporalType.TIMESTAMP)
-    private Date timestamp;    
+    private Date timestamp;
 
     public Sample() {
     }
 
-    public Sample(VirtualSensor vsensor, Mote mote, String sample, Date timestamp) {
-        this.sensor = vsensor;
+    public Sample(Mote mote, String sample, Date timestamp) {
         this.mote = mote;
         this.sample = sample;
-        this.timestamp = timestamp;        
+        this.timestamp = timestamp;
+    }
+
+    public String getSample() {
+        return this.sample;
     }
 }

@@ -3,12 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package br.uff.labtempo.osiris.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -21,62 +22,61 @@ import javax.persistence.TemporalType;
  *
  * @author Felipe
  */
-
 @Entity
 public class Mote implements Serializable {
-    
-    @Id    
+
+    @Id
     private String id;
-    
+
     @Column(nullable = true)
     private String parent;
-    
-    
+
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastModified;
-    
+
     private String lastSample;
-    
+
     @OneToOne(mappedBy = "mote")
     private VirtualSensor sensor;
     
     @OneToMany(mappedBy = "mote")
-    private List<Sample> samples;
-    
-    public Mote(){}
-    
-    public Mote(String id, String sample){
+    private List<Sample> samples = new ArrayList<>();
+
+    public Mote() {
+    }
+
+    public Mote(String id, String sample) {
         this.id = id;
         this.lastModified = new Date();
         this.lastSample = sample;
     }
-    
-    public String getId(){
+
+    public String getId() {
         return this.id;
     }
-    
-    public String getLastSample(){
+
+    public String getLastSample() {
         return this.lastSample;
     }
-    
-    public Date getLastModified(){
+
+    public Date getLastModified() {
         return this.lastModified;
     }
 
     public void setLastSample(String data) {
-       this.lastSample = data;
+        this.lastSample = data;
     }
 
     public void setLastModified(long timestamp) {
-       this.lastModified = new Date(timestamp);
+        this.lastModified = new Date(timestamp);
     }
 
-   public boolean hasSensor() {
-       return this.sensor != null;
-   }
+    public boolean hasSensor() {
+        return this.sensor != null;
+    }
 
     public VirtualSensor getSensor() {
         return this.sensor;
     }
-            
+
 }

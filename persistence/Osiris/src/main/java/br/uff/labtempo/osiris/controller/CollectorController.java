@@ -38,8 +38,11 @@ public class CollectorController extends Component {
 
             if (mote.hasSensor()) {
                 VirtualSensor vsensor = mote.getSensor();
-                Sample sample = new Sample(vsensor, mote, packet.getData(), new Date(packet.getTimestamp()));
-                data.save(sample);
+                Sample sample = new Sample(mote, packet.getData(), new Date(packet.getTimestamp()));
+                
+                vsensor.getSamples().add(sample);
+                
+                data.save(vsensor);
             }
 
         } else {

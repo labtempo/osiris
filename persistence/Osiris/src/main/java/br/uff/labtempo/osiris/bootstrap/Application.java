@@ -12,10 +12,12 @@ import br.uff.labtempo.osiris.data.DataManager;
 import br.uff.labtempo.osiris.controller.exceptions.NewMoteException;
 import br.uff.labtempo.osiris.util.components.ComponentInitializationException;
 import br.uff.labtempo.osiris.util.components.Module;
+import br.uff.labtempo.osiris.util.components.conn.JSONRpcServer;
 import br.uff.labtempo.osiris.util.components.conn.OnMessageListener;
 import br.uff.labtempo.osiris.util.components.conn.Publisher;
 import br.uff.labtempo.osiris.util.components.conn.Subscriber;
 import br.uff.labtempo.osiris.util.data.DataPacket;
+import br.uff.labtempo.osiris.util.interfaces.Client;
 import br.uff.labtempo.osiris.util.logging.Log;
 
 /**
@@ -52,7 +54,7 @@ public class Application extends Module implements OnMessageListener{
             addProvide(collector);
             addProvide(client);
             addProvide(subscriber);
-            //addProvide(new JSONRpcServer("sensornet", "localhost", this, Network.class));
+            addProvide(new JSONRpcServer("osiris", "localhost", client, Client.class));
 
         } catch (Exception e) {
             throw new ComponentInitializationException(e);

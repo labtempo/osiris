@@ -66,7 +66,7 @@ public class JSONRpcClient extends Component {
             factory.setHost(AmqpHostAddress);
             AmqpConnection = factory.newConnection();
             AmqpChannel = AmqpConnection.createChannel();
-            RabbitmqRpcClient = new JsonRpcClient(AmqpChannel, AmqpQueue, AmqpRoutingKey, 60);
+            RabbitmqRpcClient = new JsonRpcClient(AmqpChannel, AmqpQueue, AmqpRoutingKey, 6000);
             proxyInstance = RabbitmqRpcClient.createProxy(proxyClass);
         } catch (Exception ex) {
             throw new ComponentInitializationException(ex);

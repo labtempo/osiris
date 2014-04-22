@@ -15,9 +15,9 @@ import br.uff.labtempo.osiris.util.data.DataPacket;
  *
  * @author Felipe
  */
-public class Console extends Module implements OnMessageListener {
+public class Application extends Module implements OnMessageListener {
 
-    public Console() {
+    public Application() {
         super("SensorNetConsole");
     }
 

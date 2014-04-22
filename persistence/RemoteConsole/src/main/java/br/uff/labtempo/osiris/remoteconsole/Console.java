@@ -5,10 +5,15 @@
  */
 package br.uff.labtempo.osiris.remoteconsole;
 
+import br.uff.labtempo.osiris.util.components.ComponentInitializationException;
+import br.uff.labtempo.osiris.util.components.Service;
+import br.uff.labtempo.osiris.util.interfaces.Client;
 import br.uff.labtempo.osiris.util.interfaces.Storage;
+import br.uff.labtempo.osiris.util.logging.Log;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,44 +22,21 @@ import java.util.logging.Logger;
  *
  * @author Felipe
  */
-public class Console {
+public class Console extends Service {
 
-    private final String PROMPT_NAME = "Storage";
-    private final String PROMPT_DELIMITER = "/";
+    private final String PROMPT_NAME = "Osiris";
     private final String PROMPT_CLOSURE = ">";
-    private Storage storage;
-    private String repository;
+    private Client osiris;
+    private Scanner scan;
 
-    public Console(Storage storage) {
-        this.storage = storage;
-    }
-
-    public void start() {
-        Scanner scan = new Scanner(System.in);
-        printPrompt();
-
-        boolean loop = true;
-        while (loop && scan.hasNextLine()) {
-
-            String command = scan.nextLine();
-            synchronized (this) {
-                loop = executeCommand(command);
-                if (loop) {
-                    printPrompt();
-                }
-            }
-        }
-        scan.close();
-
+    public Console() {
+        super("Osiris Console");
+        this.osiris = osiris;
+        this.scan = new Scanner(System.in);
     }
 
     private void printPrompt() {
         StringBuilder prompt = new StringBuilder(PROMPT_NAME);
-
-        if (repository != null) {
-            prompt.append(PROMPT_DELIMITER);
-            prompt.append(repository);
-        }
 
         prompt.append(PROMPT_CLOSURE);
 
@@ -90,83 +72,43 @@ public class Console {
         try {
 
             switch (parseCommand(parts[0])) {
-                case LS:
-                    if (repository != null) {
-                        printArray(storage.listRepositoryKeys(repository),"entry");
-                    } else {
-                        printArray(storage.listRepositories(),"<REP>");
+                case CREATE:
+                    if (parts[1] != null && parts[1].length() > 0) {
+                        osiris.createVSensor(parts[1]);
                     }
                     break;
-                case CD:
-                    if (repository == null) {
-                        if (parts[1] != null && parts[1].length() > 0) {
-                            repository = storage.getRepository(parts[1]);
-                        }
-                    } else {
-                        if (parts.length == 1 || "".equals(parts[1]) || "..".equals(parts[1])) {
-                            repository = null;
-                        }
+                case FREE:
+                    Map<String, List<String>> free = osiris.getFreeItems();
+
+                    for (Entry<String, List<String>> entry : free.entrySet()) {
+                        printItem(entry.getKey());
+                        printArray(entry.getValue());
+                    }
+
+                    break;
+                case BOUND:
+                    Map<String, List<String>> bound = osiris.getBoundItems();
+
+                    for (Entry<String, List<String>> entry : bound.entrySet()) {
+                        printItem(entry.getKey());
+                        printArray(entry.getValue());
+                    }
+
+                    break;
+                case BIND:
+                    if ((parts[1] != null && parts[1].length() > 0)
+                            && (parts[2] != null && parts[2].length() > 0)) {
+                        osiris.bind(parts[1], parts[2]);
                     }
                     break;
-                case CAT:
-                    if (repository != null && parts.length > 1 && parts[1] != null) {
-                        printItem(storage.getEntryContent(repository, parts[1]));
-                    }else{
-                        try {
-                            Map map = storage.getRepositoryKeysAndEntry(parts[1]);
-                            printItem(map.toString());
-                        } catch (ClassCastException e) {
-                        }
-                        
-                        
+                case UNBIND:
+                    if (parts[1] != null && parts[1].length() > 0) {
+                        osiris.unbind(parts[1]);
                     }
                     break;
-                case ECHO:
-                    if (parts.length > 1) {
-                        if (repository != null && command.contains(">>")) {
-                            StringBuilder content = new StringBuilder();
-                            int i;
-                            for (i = 1; i < parts.length; i++) {
-                                if (parts[i].contains(">>")) {
-                                    break;
-                                }
-                                content.append(parts[i]);
-                            }
-                            String body = content.toString();
-
-                            content.setLength(0);
-
-                            for (i++; i < parts.length; i++) {
-                                content.append(parts[i]);
-                            }
-
-                            String file = content.toString();
-
-                            storage.addEntry(repository, file, body);
-
-                        } else {
-                            StringBuilder content = new StringBuilder();
-                            for (int i = 1; i < parts.length; i++) {
-                                content.append(parts[i]);
-                            }
-                            printItem(content.toString());
-                        }
-                    }
-                    break;
-                case MKDIR:
-                    if (repository == null) {
-                        if (parts[1] != null && parts[1].length() > 0) {
-                            storage.createRepository(parts[1]);
-                        }
-                    }
-                    break;
-                case RM:
-                    if (parts.length > 1 && parts[1] != null && parts[1].length() > 0) {
-                        if (repository == null) {
-                            storage.removeRepository(parts[1]);
-                        } else {
-                            storage.removeEntry(repository, parts[1]);
-                        }
+                case SAMPLES:
+                    if (parts[1] != null && parts[1].length() > 0) {
+                        printArray(osiris.getSamples(parts[1]));
                     }
                     break;
                 case EXIT:
@@ -183,9 +125,41 @@ public class Console {
         return Command.valueOf(command.toUpperCase());
     }
 
+    @Override
+    protected void onCreate() throws ComponentInitializationException {
+    }
+
+    @Override
+    protected void onLoop() throws ComponentInitializationException {
+
+        printPrompt();
+
+        boolean loop = true;
+        while (loop && scan.hasNextLine()) {
+            String command = scan.nextLine();
+            synchronized (this) {
+                loop = executeCommand(command);
+                if (loop) {
+                    printPrompt();
+                }
+            }
+        }
+
+    }
+
+    @Override
+    protected void onStop() {
+        Log.D("Closing Console");
+        this.scan.close();
+    }
+
+    void setClient(Client proxy) {
+        this.osiris = proxy;
+    }
+
     private enum Command {
 
-        EXIT, LS, CD, CAT, MKDIR, ECHO, RM
+        EXIT, CREATE, FREE, BOUND, BIND, UNBIND, SAMPLES
     }
 
 }
