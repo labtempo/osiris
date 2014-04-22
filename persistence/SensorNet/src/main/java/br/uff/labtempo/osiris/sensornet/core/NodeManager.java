@@ -7,14 +7,8 @@ package br.uff.labtempo.osiris.sensornet.core;
 
 import br.uff.labtempo.osiris.util.data.DataPacket;
 import br.uff.labtempo.osiris.util.logging.Log;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**

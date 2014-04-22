@@ -7,11 +7,6 @@ package br.uff.labtempo.osiris.sensornet.core;
 
 import br.uff.labtempo.osiris.util.data.DataPacket;
 import br.uff.labtempo.osiris.util.logging.Log;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  *

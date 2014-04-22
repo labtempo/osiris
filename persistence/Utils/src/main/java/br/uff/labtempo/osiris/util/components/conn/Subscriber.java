@@ -7,6 +7,7 @@ package br.uff.labtempo.osiris.util.components.conn;
 
 import br.uff.labtempo.osiris.util.components.ComponentInitializationException;
 import br.uff.labtempo.osiris.util.components.Service;
+import br.uff.labtempo.osiris.util.logging.Log;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -105,12 +106,12 @@ public class Subscriber extends Service {
         } catch (InterruptedException ex) {
             throw new ComponentInitializationException(ex);
         }
-        System.out.println("saindo do loop");
+        Log.D("Subscriber is finished");
     }
 
     @Override
     protected void onStop() {
-
+        Log.D("Subscriber service is stoping");
         active = false;
 
         try {

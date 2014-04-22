@@ -1,4 +1,4 @@
-package br.uff.labtempo.osiris.basicosiris;
+package br.uff.labtempo.osiris;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

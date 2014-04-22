@@ -7,6 +7,7 @@ package br.uff.labtempo.osiris.util.components.conn;
 
 import br.uff.labtempo.osiris.util.components.Component;
 import br.uff.labtempo.osiris.util.components.ComponentInitializationException;
+import br.uff.labtempo.osiris.util.logging.Log;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -58,6 +59,7 @@ public class Publisher extends Component {
 
     @Override
     protected void onStop() {
+        Log.D("Publisher is stoping");
         try {
             if (AmqpChannel != null) {
                 AmqpChannel.close();

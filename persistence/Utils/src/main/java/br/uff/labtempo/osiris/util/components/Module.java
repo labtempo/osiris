@@ -7,6 +7,8 @@ package br.uff.labtempo.osiris.util.components;
 
 import br.uff.labtempo.osiris.util.logging.Log;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,34 +26,40 @@ import java.util.logging.Logger;
  */
 public abstract class Module extends Component {
 
-    private Map<Component, Class<?>> requires;
-    private Map<Component, Class<?>> provides;
-    private List<Future> services;
+    private List<Component> requires;
+    private List<Component> provides;
+    private List<Service> requiresServices;
+    private List<Service> providesServices;
+    private List<Future> runningServices;
+
     private String name;
     private boolean closing;
 
     public Module(String name) {
         this.name = name;
-        requires = new HashMap<Component, Class<?>>();
-        provides = new HashMap<Component, Class<?>>();
-        services = new ArrayList<Future>();
+
+        requires = new ArrayList<>();
+        provides = new ArrayList<>();
+        requiresServices = new ArrayList<>();
+        providesServices = new ArrayList<>();
+        runningServices = new ArrayList<>();
     }
 
     /* basic */
     public void addRequire(Component content) {
-        requires.put(content, Component.class);
+        requires.add(content);
     }
 
     public void addProvide(Component content) {
-        provides.put(content, Component.class);
+        provides.add(content);
     }
 
     public void addRequire(Service content) {
-        requires.put(content, Service.class);
+        requiresServices.add(content);
     }
 
     public void addProvide(Service content) {
-        provides.put(content, Service.class);
+        providesServices.add(content);
     }
 
     @Override
@@ -66,17 +74,17 @@ public abstract class Module extends Component {
             Log.D("Initialization aborted!");
             closing = true;
             finish();
-            Logger.getLogger(Module.class.getName()).log(Level.SEVERE, null, e);            
-            throw new ComponentInitializationException(e);            
+            Logger.getLogger(Module.class.getName()).log(Level.SEVERE, null, e);
+            throw new ComponentInitializationException(e);
         }
     }
 
     @Override
     public void finish() {
         Log.D("Finishing process started");
-        onPause();        
+        onPause();
         onProvidedFinish();
-        onStop();        
+        onStop();
         onRequiredFinish();
         onDestroy();
         Log.D("Finishing process is complete");
@@ -84,32 +92,17 @@ public abstract class Module extends Component {
 
     protected void onRequiredStart() throws ComponentInitializationException {
         shutdownHook();
-        ExecutorService executor = Executors.newCachedThreadPool();
-        for (Entry<Component, Class<?>> entry : requires.entrySet()) {
-
-            Component component = entry.getKey();
-            component.start();
-
-            if (entry.getValue().equals(Service.class)) {
-                services.add(executor.submit((Service) component));
-            }
-        }
+        startComponents(requires);
+        runningServices.addAll(startServices(requiresServices));
     }
 
     protected void onProvidedStart() throws ComponentInitializationException {
-        ExecutorService executor = Executors.newCachedThreadPool();
-        for (Entry<Component, Class<?>> entry : provides.entrySet()) {
-            Component component = entry.getKey();
-            component.start();
+        startComponents(provides);
+        runningServices.addAll(startServices(providesServices));
 
-            if (entry.getValue().equals(Service.class)) {
-                services.add(executor.submit((Service) component));
-            }
-        }      
-        
-        for (Future f : services) {
+        for (Future future : runningServices) {
             try {
-                f.get();
+                future.get();
             } catch (InterruptedException ex) {
                 Logger.getLogger(Module.class.getName()).log(Level.SEVERE, null, ex);
             } catch (ExecutionException ex) {
@@ -124,17 +117,36 @@ public abstract class Module extends Component {
     }
 
     protected void onRequiredFinish() {
-        for (Entry<Component, Class<?>> entry : requires.entrySet()) {
-            Component component = entry.getKey();
+        finishComponents(requiresServices);
+        finishComponents(requires);
+    }
+
+    protected void onProvidedFinish() {
+        finishComponents(providesServices);
+        finishComponents(provides);
+    }
+
+    private void startComponents(List<Component> list) {
+        for (Component component : list) {
+            component.start();
+        }
+    }
+
+    private void finishComponents(List<? extends Component> list) {
+        Collections.reverse(list);
+        for (Component component : list) {
             component.finish();
         }
     }
 
-    protected void onProvidedFinish() {
-        for (Entry<Component, Class<?>> entry : provides.entrySet()) {
-            Component component = entry.getKey();
-            component.finish();
+    private List<Future> startServices(List<Service> list) {
+        ExecutorService executor = Executors.newCachedThreadPool();
+        List<Future> result = new ArrayList<>();
+        for (Service service : list) {
+            service.start();
+            result.add(executor.submit((Service) service));
         }
+        return result;
     }
 
     private void autoclose() {
@@ -161,6 +173,7 @@ public abstract class Module extends Component {
                 try {
                     if (!closing) {
                         closing = true;
+                        finish();
                         thread.join();
                     }
                 } catch (InterruptedException ex) {
