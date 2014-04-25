@@ -18,7 +18,6 @@ import br.uff.labtempo.osiris.util.components.conn.Publisher;
 import br.uff.labtempo.osiris.util.components.conn.Subscriber;
 import br.uff.labtempo.osiris.util.data.DataPacket;
 import br.uff.labtempo.osiris.util.interfaces.Client;
-import br.uff.labtempo.osiris.util.logging.Log;
 
 /**
  *

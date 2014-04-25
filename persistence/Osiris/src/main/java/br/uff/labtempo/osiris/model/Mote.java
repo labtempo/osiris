@@ -38,9 +38,6 @@ public class Mote implements Serializable {
 
     @OneToOne(mappedBy = "mote")
     private VirtualSensor sensor;
-    
-    @OneToMany(mappedBy = "mote")
-    private List<Sample> samples = new ArrayList<>();
 
     public Mote() {
     }
@@ -77,6 +74,10 @@ public class Mote implements Serializable {
 
     public VirtualSensor getSensor() {
         return this.sensor;
+    }
+
+    public void setSensor(VirtualSensor sensor) {
+        this.sensor = sensor;
     }
 
 }

@@ -14,8 +14,15 @@ import br.uff.labtempo.osiris.util.components.ComponentInitializationException;
 import br.uff.labtempo.osiris.util.interfaces.Client;
 import br.uff.labtempo.osiris.util.logging.Log;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 /**
  *
@@ -30,59 +37,114 @@ public class ClientController extends Component implements Client {
     }
 
     public void createVSensor(String name) {
-        System.out.println("<<<:::createVSensor="+name);
+        System.out.println("<<<:::createVSensor=" + name);
         VirtualSensor vsensor = new VirtualSensor(name);
         data.save(vsensor);
     }
 
     public void bind(String vsensorId, String moteId) {
-        System.out.println("<<<:::bind="+vsensorId+":"+moteId);
+        System.out.println("<<<:::bind=" + vsensorId + ":" + moteId);
         Mote mote = data.get(Mote.class, moteId);
 
-        if (mote == null) {
+        if (mote == null || mote.hasSensor()) {
             return;
         }
 
-        VirtualSensor vsensor = data.get(VirtualSensor.class, vsensorId);
+        VirtualSensor vsensor = data.get(VirtualSensor.class, Long.parseLong(vsensorId));
 
         if (vsensor == null) {
             return;
         }
 
         vsensor.setMote(mote);
+        mote.setSensor(vsensor);
 
         data.update(vsensor);
+        data.update(mote);
 
     }
 
     public void unbind(String vsensorId) {
-        System.out.println("<<<:::unbind="+vsensorId);
-        VirtualSensor vsensor = data.get(VirtualSensor.class, vsensorId);
+        System.out.println("<<<:::unbind=" + vsensorId);
+        VirtualSensor vsensor = data.get(VirtualSensor.class, Long.parseLong(vsensorId));
 
-        if (vsensor == null) {
+        if (vsensor == null || vsensor.isFree()) {
             return;
         }
 
+        Mote mote = vsensor.getMote();
+
+        mote.setSensor(null);
         vsensor.setMote(null);
 
         data.update(vsensor);
+        data.update(mote);
     }
 
     public Map<String, List<String>> getFreeItems() {
         System.out.println("<<<:::getFreeItems");
-        return null;
+
+        //get builder
+        CriteriaBuilder cb = data.getCriteriaBuilder();
+
+        //builder start(mote)
+        CriteriaQuery<String> c = cb.createQuery(String.class);
+        Root<Mote> mote = c.from(Mote.class);
+        Predicate predicate = cb.isNull(mote.<Long>get("sensor"));
+        c.where(predicate);
+        c.select(mote.<String>get("id"));
+        List<String> motes = data.<String>getQuery(c);
+
+        c.select(mote.<String>get("sensor"));
+       
+
+        //builder start(sensor)
+        CriteriaQuery<Long> c2 = cb.createQuery(Long.class);
+        Root<VirtualSensor> sensor = c2.from(VirtualSensor.class);
+        Predicate predicate2 = cb.isNull(sensor.get("mote"));
+        c2.select(sensor.<Long>get("id"));
+        c2.where(predicate2);
+        List<String> sensors = new  ArrayList<>();
+        
+         for (Long s : data.<Long>getQuery(c2)) {
+            sensors.add(String.valueOf(s));
+        }
+
+        //end
+        Map<String, List<String>> map = new HashMap<>();
+        map.put("Mote", motes);
+        map.put("Sensor", sensors);
+        return map;
     }
 
     public Map<String, List<String>> getBoundItems() {
         System.out.println("<<<:::getBoundItems");
-        return null;
+        Map<String, List<String>> map = new HashMap<>();
+
+        List<String> motes = new ArrayList<>();
+
+        for (Mote item : data.getNotNull(Mote.class, "sensor")) {
+            motes.add(item.getId());
+        }
+
+        map.put("Mote", motes);
+
+        List<String> sensors = new ArrayList<>();
+
+        for (VirtualSensor item : data.getNotNull(VirtualSensor.class, "mote")) {
+            sensors.add(String.valueOf(item.getId()));
+        }
+
+        map.put("Sensor", sensors);
+
+        return map;
     }
 
     public List<String> getSamples(String vsensorId) {
-        System.out.println("<<<:::getSamples="+vsensorId);
+        System.out.println("<<<:::getSamples=" + vsensorId);
         List<String> samples = new ArrayList<>();
 
-        VirtualSensor vsensor = data.get(VirtualSensor.class, vsensorId);
+        VirtualSensor vsensor = data.get(VirtualSensor.class, Long.parseLong(vsensorId));
 
         if (vsensor == null) {
             return samples;

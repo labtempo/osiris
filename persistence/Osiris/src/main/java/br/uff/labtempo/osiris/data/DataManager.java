@@ -8,10 +8,16 @@ package br.uff.labtempo.osiris.data;
 import br.uff.labtempo.osiris.util.components.Component;
 import br.uff.labtempo.osiris.util.components.ComponentInitializationException;
 import br.uff.labtempo.osiris.util.logging.Log;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 /**
  *
@@ -68,5 +74,43 @@ public class DataManager extends Component {
         et.begin();
         EM.remove(o);
         et.commit();
+    }
+
+    public <T> List<T> getNull(Class<T> entityType, String field) {
+        CriteriaBuilder cb = EMF.getCriteriaBuilder();
+        CriteriaQuery<T> c = cb.createQuery(entityType);
+        Root<T> item = c.from(entityType);
+        c.select(item);
+
+        Predicate predicate = cb.isNull(item.get(field));
+        c.where(predicate);
+
+        TypedQuery<T> query = EM.createQuery(c);
+        List<T> result = query.getResultList();
+        return result;
+    }
+
+    public <T> List<T> getNotNull(Class<T> entityType, String field) {
+        CriteriaBuilder cb = EMF.getCriteriaBuilder();
+
+        CriteriaQuery<T> c = cb.createQuery(entityType);
+        Root<T> item = c.from(entityType);
+        c.select(item);
+        Predicate predicate = cb.isNotNull(item.get(field));
+        c.where(predicate);
+
+        TypedQuery<T> query = EM.createQuery(c);
+        List<T> result = query.getResultList();
+        return result;
+    }
+
+    public CriteriaBuilder getCriteriaBuilder() {
+        return EMF.getCriteriaBuilder();
+    }
+    
+    public <T> List<T> getQuery(CriteriaQuery<T> query) {
+        TypedQuery<T> tquery = EM.createQuery(query);
+        List<T> result = tquery.getResultList();
+        return result;
     }
 }

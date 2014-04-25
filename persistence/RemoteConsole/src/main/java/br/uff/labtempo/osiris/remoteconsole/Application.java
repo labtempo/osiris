@@ -8,9 +8,6 @@ package br.uff.labtempo.osiris.remoteconsole;
 import br.uff.labtempo.osiris.util.components.ComponentInitializationException;
 import br.uff.labtempo.osiris.util.components.Module;
 import br.uff.labtempo.osiris.util.components.conn.JSONRpcClient;
-import br.uff.labtempo.osiris.util.components.conn.OnMessageListener;
-import br.uff.labtempo.osiris.util.components.conn.Subscriber;
-import br.uff.labtempo.osiris.util.data.DataPacket;
 import br.uff.labtempo.osiris.util.interfaces.Client;
 
 /**

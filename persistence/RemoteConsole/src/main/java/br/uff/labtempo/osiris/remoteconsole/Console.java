@@ -65,6 +65,12 @@ public class Console extends Service {
         printArray(list);
     }
 
+    private void printItem(String item, String detail) {
+        List<String> list = new ArrayList<String>();
+        list.add(item);
+        printArray(list, detail);
+    }
+
     private boolean executeCommand(String command) {
 
         String[] parts = command.split(" ");
@@ -81,7 +87,7 @@ public class Console extends Service {
                     Map<String, List<String>> free = osiris.getFreeItems();
 
                     for (Entry<String, List<String>> entry : free.entrySet()) {
-                        printItem(entry.getKey());
+                        printItem(entry.getKey(), String.valueOf(entry.getValue().size()));
                         printArray(entry.getValue());
                     }
 
@@ -90,7 +96,7 @@ public class Console extends Service {
                     Map<String, List<String>> bound = osiris.getBoundItems();
 
                     for (Entry<String, List<String>> entry : bound.entrySet()) {
-                        printItem(entry.getKey());
+                        printItem(entry.getKey(), String.valueOf(entry.getValue().size()));
                         printArray(entry.getValue());
                     }
 
@@ -116,7 +122,7 @@ public class Console extends Service {
 
             }
         } catch (Exception e) {
-            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(Console.class.getName()).log(Level.WARNING, null, e);
         }
         return true;
     }
@@ -131,18 +137,22 @@ public class Console extends Service {
 
     @Override
     protected void onLoop() throws ComponentInitializationException {
+        try {
 
-        printPrompt();
+            printPrompt();
 
-        boolean loop = true;
-        while (loop && scan.hasNextLine()) {
-            String command = scan.nextLine();
-            synchronized (this) {
-                loop = executeCommand(command);
-                if (loop) {
-                    printPrompt();
+            boolean loop = true;
+            while (loop && scan.hasNextLine()) {
+                String command = scan.nextLine();
+                synchronized (this) {
+                    loop = executeCommand(command);
+                    if (loop) {
+                        printPrompt();
+                    }
                 }
             }
+        } catch (Exception e) {
+            throw new ComponentInitializationException(e);
         }
 
     }

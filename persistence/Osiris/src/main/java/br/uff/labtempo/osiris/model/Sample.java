@@ -39,7 +39,8 @@ public class Sample implements Serializable {
     public Sample() {
     }
 
-    public Sample(Mote mote, String sample, Date timestamp) {
+    public Sample(VirtualSensor sensor, Mote mote, String sample, Date timestamp) {
+        this.sensor = sensor;
         this.mote = mote;
         this.sample = sample;
         this.timestamp = timestamp;
