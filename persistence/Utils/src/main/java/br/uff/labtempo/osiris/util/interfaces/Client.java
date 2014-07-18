@@ -14,7 +14,7 @@ import java.util.Map;
  * @author Felipe
  */
 public interface Client {
-    public void createVSensor(String name);
+    public Teste createVSensor(String name);
     public void bind(String vsensorId, String moteId);
     public void unbind(String vsensorId);
     public Map<String,List<String>> getFreeItems();

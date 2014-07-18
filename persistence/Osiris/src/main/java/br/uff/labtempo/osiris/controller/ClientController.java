@@ -12,6 +12,7 @@ import br.uff.labtempo.osiris.model.VirtualSensor;
 import br.uff.labtempo.osiris.util.components.Component;
 import br.uff.labtempo.osiris.util.components.ComponentInitializationException;
 import br.uff.labtempo.osiris.util.interfaces.Client;
+import br.uff.labtempo.osiris.util.interfaces.Teste;
 import br.uff.labtempo.osiris.util.logging.Log;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,10 +37,13 @@ public class ClientController extends Component implements Client {
         this.data = data;
     }
 
-    public void createVSensor(String name) {
+    public Teste createVSensor(String name) {
         System.out.println("<<<:::createVSensor=" + name);
         VirtualSensor vsensor = new VirtualSensor(name);
         data.save(vsensor);
+        Teste teste = new Teste();
+        teste.setName("teste");
+        return teste;
     }
 
     public void bind(String vsensorId, String moteId) {
@@ -96,7 +100,6 @@ public class ClientController extends Component implements Client {
         List<String> motes = data.<String>getQuery(c);
 
         c.select(mote.<String>get("sensor"));
-       
 
         //builder start(sensor)
         CriteriaQuery<Long> c2 = cb.createQuery(Long.class);
@@ -104,9 +107,9 @@ public class ClientController extends Component implements Client {
         Predicate predicate2 = cb.isNull(sensor.get("mote"));
         c2.select(sensor.<Long>get("id"));
         c2.where(predicate2);
-        List<String> sensors = new  ArrayList<>();
-        
-         for (Long s : data.<Long>getQuery(c2)) {
+        List<String> sensors = new ArrayList<>();
+
+        for (Long s : data.<Long>getQuery(c2)) {
             sensors.add(String.valueOf(s));
         }
 

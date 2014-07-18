@@ -9,6 +9,7 @@ import br.uff.labtempo.osiris.util.components.ComponentInitializationException;
 import br.uff.labtempo.osiris.util.components.Service;
 import br.uff.labtempo.osiris.util.interfaces.Client;
 import br.uff.labtempo.osiris.util.interfaces.Storage;
+import br.uff.labtempo.osiris.util.interfaces.Teste;
 import br.uff.labtempo.osiris.util.logging.Log;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +81,8 @@ public class Console extends Service {
             switch (parseCommand(parts[0])) {
                 case CREATE:
                     if (parts[1] != null && parts[1].length() > 0) {
-                        osiris.createVSensor(parts[1]);
+                        Object obj = osiris.createVSensor(parts[1]);
+                        //System.out.println(teste.getTeste());
                     }
                     break;
                 case FREE:

@@ -1,0 +1,34 @@
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+     http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit-1.0.xsd"
+       default-lazy-init="false">
+
+    <!--  Rabbit MQ Connection Factory -->
+    <bean id="rabbbitConnectionFactory"
+          class="org.springframework.amqp.rabbit.connection.CachingConnectionFactory">
+        <constructor-arg index="0" value="192.168.0.2"/>
+        <constructor-arg index="1" value="myrabbitserverport"/>
+        <property name="username" value="admin"/>
+        <property name="password" value="admin"/>
+    </bean>
+
+    <!-- Configure Listener to receive messages -->
+    <rabbit:listener-container
+        connection-factory="rabbbitConnectionFactory">
+        <rabbit:listener ref="consumer" queue-names="myrabitQueue" />
+    </rabbit:listener-container>
+
+    <!-- Define Template to send messages by Producer -->
+    <bean id="rabbitTemplate" class="org.springframework.amqp.rabbit.core.RabbitTemplate" >
+        <constructor-arg ref="rabbbitConnectionFactory"/>
+        <property name="exchange" value="myrabbitExchange"/>
+    </bean>
+
+    <!--  Listener Bean -->
+    <bean id="consumer"
+          class="br.uff.labtempo.consumerspring.Consumer" >
+    </bean>
+
+</beans>
