@@ -5,50 +5,81 @@
  */
 package br.uff.labtempo.omcp.client;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import br.uff.labtempo.omcp.common.Response;
+import br.uff.labtempo.omcp.common.Request;
+import br.uff.labtempo.omcp.common.exceptions.BadResponseException;
+import br.uff.labtempo.omcp.common.exceptions.ConnectionException;
+import br.uff.labtempo.omcp.common.exceptions.RequestException;
+import br.uff.labtempo.omcp.common.exceptions.UnreachableModuleException;
+import br.uff.labtempo.omcp.common.utils.RequestBuilder;
+import br.uff.labtempo.omcp.common.utils.RequestPacket;
+import br.uff.labtempo.omcp.common.utils.ResponsePacket;
 
 /**
  *
  * @author Felipe
  */
 public class OmcpConnection {
-    private RabbitBridge bridge;
 
-    public OmcpConnection(String host, String user, String password) {
-        try {
-            this.bridge = new RabbitBridge(host, user, password);
-        } catch (Exception ex) {
-            Logger.getLogger(OmcpConnection.class.getName()).log(Level.SEVERE, null, ex);
+    private RabbitClientSocket bridge;
+
+    //osiris
+    private final String DOMAIN = "osiris";
+
+    public OmcpConnection(String host, String user, String password) throws ConnectionException {
+        this.bridge = new RabbitClientSocket(host, user, password);
+        this.bridge.connect();
+    }
+
+    public OmcpConnection(String host) throws ConnectionException {
+        this.bridge = new RabbitClientSocket(host);
+        this.bridge.connect();
+    }
+
+    public void close() {
+        if (bridge != null) {
+            this.bridge.close();
         }
     }
 
-    public OmcpConnection(String host) {
-        try {
-            this.bridge = new RabbitBridge(host);
-        } catch (Exception ex) {
-            Logger.getLogger(OmcpConnection.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    public Response doGet(String url) throws UnreachableModuleException, RequestException, BadResponseException {
+        Request request = new RequestBuilder().onGet(url).build();
+        return call(request);
     }
 
-    public String doGet(String url) {
-        return null;
+    public Response doPost(String url, String content) throws UnreachableModuleException, RequestException, BadResponseException {
+        Request request = new RequestBuilder().onPost(url).content(content).build();
+        return call(request);
     }
 
-    public String doPost(String url, String content) {
-        return null;
+    public Response doPut(String url, String content) throws UnreachableModuleException, RequestException, BadResponseException {
+        Request request = new RequestBuilder().onPut(url).content(content).build();
+        return call(request);
     }
 
-    public String doPut(String url, String content) {
-        return null;
+    public Response doDelete(String url) throws UnreachableModuleException, RequestException, BadResponseException {
+        Request request = new RequestBuilder().onDelete(url).build();
+        return call(request);
     }
 
-    public String doDelete(String url) {
-        return null;
+    public void doNofity(String url) throws UnreachableModuleException, RequestException {
+        Request request = new RequestBuilder().onNotify(url).build();
+        publish(request);
     }
 
-    public void doNofity(String url) {
-
+    private Response call(Request request) {        
+        String packet = new RequestPacket().generate(request);
+        packet = bridge.call(getHostAddress(request), packet);
+        Response response = new ResponsePacket().parse(packet);
+        return response;
     }
 
+    private void publish(Request request) {
+        String packet = new RequestPacket().generate(request);
+        bridge.publish(getHostAddress(request), packet);
+    }
+
+    private String getHostAddress(Request request) {
+        return DOMAIN + "." + request.getModule();
+    }
 }

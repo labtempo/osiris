@@ -14,4 +14,6 @@ public interface ServerSocket {
     public void setListener(ServerRequestListener listener);
 
     public void run();
+    
+    public void abort();
 }

@@ -7,11 +7,16 @@ package br.uff.labtempo.omcp.server.core;
 
 import test.data.builders.TestEmptyController;
 import test.data.builders.TestRequestBuilder;
-import br.uff.labtempo.omcp.server.packets.Response;
+import br.uff.labtempo.omcp.common.Response;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import static br.uff.labtempo.omcp.common.OmcpStatusCodes.*;
+import static br.uff.labtempo.omcp.common.StatusCode.*;
+import br.uff.labtempo.omcp.common.exceptions.BadRequestException;
+import br.uff.labtempo.omcp.common.exceptions.InternalServerErrorException;
+import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
+import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
+import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
 
 
 /**
@@ -29,8 +34,9 @@ public class RouterTest {
         this.builder = new TestRequestBuilder();
     }
 
-    @Test
-    public void testNullRoutify() {
+    @Test(expected = NotImplementedException.class)
+    public void testNullRoutify() throws BadRequestException, MethodNotAllowedException, InternalServerErrorException, NotFoundException, NotImplementedException{
+        //TODO: refazer teste!
         System.out.println("testNullRoutify");
         router.addController(new TestEmptyController());
 

@@ -5,8 +5,10 @@
  */
 package test.data.builders;
 
-import br.uff.labtempo.omcp.server.packets.Request;
-import br.uff.labtempo.omcp.server.packets.RequestBuilder;
+import br.uff.labtempo.omcp.common.exceptions.BadRequestException;
+import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
+import br.uff.labtempo.omcp.common.Request;
+import br.uff.labtempo.omcp.common.utils.RequestPacket;
 
 /**
  *
@@ -17,10 +19,12 @@ public class TestRequestBuilder {
     private String resource = "/sources";
     private String version = "OMCP/0.1";
     private String dateHead = "date:";
-    private String date = "Thu, 26 Jun 2014 19:56:39 GMT";
-    private String hostHead = "host:";
+    private String date = "Thu, 24 Jul 2014 15:40:03 GMT";
+    private String hostHead = "module:";
     private String host = "sensornet";
+    private String contentHead = "content-length:";
     private String content = "message";
+    private int contentLength = 0;
     private String method = "";
 
     private String lineEmpty = "\n\n";
@@ -29,25 +33,29 @@ public class TestRequestBuilder {
 
     private String packetWithNoDate() {
         return method + s + resource + s + version + br
-                + hostHead + s + host + br
+                + hostHead + host + br
                 + lineEmpty;
     }
 
     private String packetWithNoHost() {
         return method + s + resource + s + version + br
-                + dateHead + s + date + br
+                + dateHead + date + br
                 + lineEmpty;
     }
 
     private String packetWithNoContent() {
         return method + s + resource + s + version + br
-                + dateHead + s + date + br
-                + hostHead + s + host + br
+                + dateHead + date + br
+                + hostHead + host + br
                 + lineEmpty;
     }
 
     private String packetWithContent() {
-        return packetWithNoContent() + content + br;
+        return method + s + resource + s + version + br
+                + dateHead + date + br
+                + hostHead + host + br
+                + contentHead + contentLength + br
+                + lineEmpty + content + br;
     }
 
     public TestRequestBuilder method(String method) {
@@ -55,24 +63,24 @@ public class TestRequestBuilder {
         return this;
     }
 
-    public Request buildNoHost() {
+    public Request buildNoHost() throws BadRequestException, MethodNotAllowedException {
         String message = packetWithNoHost();
-        return new RequestBuilder().message(message).build();
+        return new RequestPacket().parse(message);
     }
 
-    public Request buildNoDate() {
+    public Request buildNoDate() throws BadRequestException, MethodNotAllowedException {
         String message = packetWithNoDate();
-        return new RequestBuilder().message(message).build();
+        return new RequestPacket().parse(message);
     }
 
-    public Request buildNoContent() {
+    public Request buildNoContent() throws BadRequestException, MethodNotAllowedException {
         String message = packetWithNoContent();
-        return new RequestBuilder().message(message).build();
+        return new RequestPacket().parse(message);
     }
 
-    public Request buildContent() {
+    public Request buildContent() throws BadRequestException, MethodNotAllowedException {
         String message = packetWithContent();
-        return new RequestBuilder().message(message).build();
+        return new RequestPacket().parse(message);
     }
 
     public TestRequestBuilder date(String date) {

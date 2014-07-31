@@ -5,8 +5,12 @@
  */
 package br.uff.labtempo.omcp.server.core;
 
-import br.uff.labtempo.omcp.server.packets.Request;
-import br.uff.labtempo.omcp.server.packets.Response;
+import br.uff.labtempo.omcp.common.exceptions.InternalServerErrorException;
+import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
+import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
+import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
+import br.uff.labtempo.omcp.common.Request;
+import br.uff.labtempo.omcp.common.Response;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,8 +30,13 @@ public class Router {
         this.controllers.put(controller.getResource(), controller);
     }
 
-    public Response routify(Request request) {
+    public Response routify(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
         ControllerTemplate controller = this.controllers.get(request.getResource().toString());
+
+        if (controller == null) {
+            throw new NotFoundException("Resource not found!");
+        }
+
         switch (request.getMethod()) {
             case GET:
                 return controller.onGet();
@@ -36,11 +45,15 @@ public class Router {
             case PUT:
                 return controller.onPut(1, request.getContent());
             case DELETE:
-                return controller.onDelete(1);            
+                return controller.onDelete(1);
             case NOTIFY:
-                controller.onNotify(request.getContent());
-            default:
+                try {
+                    controller.onNotify(request.getContent());
+                } catch (Exception e) {
+                }
                 return null;
+            default:
+                throw new MethodNotAllowedException("Method " + request.getMethod() + "is not allowed.");
         }
     }
 }

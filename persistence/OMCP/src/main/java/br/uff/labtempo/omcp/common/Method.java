@@ -9,7 +9,7 @@ package br.uff.labtempo.omcp.common;
  *
  * @author Felipe
  */
-public enum OmcpMethods {
+public enum Method {
 
     GET, POST, PUT, DELETE, NOTIFY;
 }

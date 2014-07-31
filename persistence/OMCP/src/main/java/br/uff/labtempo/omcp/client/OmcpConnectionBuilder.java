@@ -5,6 +5,8 @@
  */
 package br.uff.labtempo.omcp.client;
 
+import br.uff.labtempo.omcp.common.exceptions.ConnectionException;
+
 /**
  *
  * @author Felipe
@@ -26,11 +28,10 @@ public class OmcpConnectionBuilder {
         return this;
     }
 
-    public OmcpConnection build() {
+    public OmcpConnection build()throws ConnectionException{
         if (user != null) {
             return new OmcpConnection(host, user, pass);
         }
         return new OmcpConnection(host);
     }
-
 }

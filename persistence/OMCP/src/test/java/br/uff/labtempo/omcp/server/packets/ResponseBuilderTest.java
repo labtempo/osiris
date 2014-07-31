@@ -5,17 +5,33 @@
  */
 package br.uff.labtempo.omcp.server.packets;
 
-import static br.uff.labtempo.omcp.common.OmcpStatusCodes.*;
+import br.uff.labtempo.omcp.common.utils.ResponseBuilder;
+import br.uff.labtempo.omcp.common.Response;
+import static br.uff.labtempo.omcp.common.StatusCode.*;
+import br.uff.labtempo.omcp.common.exceptions.InternalServerErrorException;
+import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import static org.junit.Assert.assertEquals;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
  *
  * @author Felipe
  */
-public class ResponseBuilderTest{
+public class ResponseBuilderTest {
+    private String host;
+    private String description;
+    private String version;
+
+    @Before
+    public void setBuilder() {
+        this.host = "omcp://test-module";
+        this.description = "test-java/0.1";
+        this.version = "OMCP/0.1";
+        ResponseBuilder.config(host, description, version);
+    }
 
     @Test
     public void testOk() {
@@ -30,16 +46,16 @@ public class ResponseBuilderTest{
     @Test
     public void testCreated() throws URISyntaxException {
         System.out.println("created");
-        URI uri = new URI("/test");
+        String uri = ("/test");
         Response response = new ResponseBuilder().created(uri).build();
         assertEquals(CREATED, response.getStatusCode());
-        assertEquals(uri, response.getLocation());
+        assertEquals(host + uri, response.getLocation());
     }
 
     @Test
     public void testNotImplemented() {
         System.out.println("testNotImplemented");
-        Response response = new ResponseBuilder().notImplemented().build();
+        Response response = new ResponseBuilder().error(new NotImplementedException("error")).build();
         assertEquals(NOT_IMPLEMENTED, response.getStatusCode());
     }
 
@@ -47,8 +63,8 @@ public class ResponseBuilderTest{
     public void testServerError() {
         System.out.println("serverError");
         String error = "Test error";
-        Response response = new ResponseBuilder().serverError(new RuntimeException(error)).build();
+        Response response = new ResponseBuilder().error(new InternalServerErrorException(error)).build();
         assertEquals(INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(error, response.getErrorMessage());
-    }    
+    }
 }

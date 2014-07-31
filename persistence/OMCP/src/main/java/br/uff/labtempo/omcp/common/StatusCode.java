@@ -9,7 +9,7 @@ package br.uff.labtempo.omcp.common;
  *
  * @author Felipe
  */
-public enum OmcpStatusCodes {
+public enum StatusCode {
 
     /*
      * Inspired from HTTP Status Code:
@@ -61,19 +61,37 @@ public enum OmcpStatusCodes {
      */
     NOT_IMPLEMENTED(501);
 
-    private int code;
+    private boolean error;
+    private final int code;
 
-    private OmcpStatusCodes(int code) {
+    private StatusCode(int code) {
         this.code = code;
+
+        if (this.code >= 400) {
+            this.error = true;
+        }
     }
 
     public int toCode() {
         return code;
     }
 
+    public boolean isError() {
+        return error;
+    }
+
     @Override
     public String toString() {
         return super.toString().replace("_", " ");
+    }
+
+    public static StatusCode getByCode(int code) {
+        for (StatusCode statusCode : values()) {
+            if (statusCode.code == code) {
+                return statusCode;
+            }
+        }
+        throw new IllegalArgumentException("No enum constant " + StatusCode.class.getName());
     }
 
 }

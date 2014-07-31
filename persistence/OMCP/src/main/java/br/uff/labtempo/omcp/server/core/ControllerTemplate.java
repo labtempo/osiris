@@ -5,8 +5,9 @@
  */
 package br.uff.labtempo.omcp.server.core;
 
-import br.uff.labtempo.omcp.server.packets.ResponseBuilder;
-import br.uff.labtempo.omcp.server.packets.Response;
+import br.uff.labtempo.omcp.common.exceptions.InternalServerErrorException;
+import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
+import br.uff.labtempo.omcp.common.Response;
 
 /**
  *
@@ -24,24 +25,24 @@ public abstract class ControllerTemplate {
         return this.resource;
     }
 
-    public Response onGet() {
-        return new ResponseBuilder().notImplemented().build();
+    public Response onGet() throws InternalServerErrorException, NotImplementedException {
+        throw new NotImplementedException("GET is not implemented");
     }
 
-    public Response onPost(String content) {
-        return new ResponseBuilder().notImplemented().build();
+    public Response onPost(String content) throws InternalServerErrorException, NotImplementedException {
+        throw new NotImplementedException("POST is not implemented");
     }
 
-    public Response onPut(long id, String content) {
-        return new ResponseBuilder().notImplemented().build();
+    public Response onPut(long id, String content) throws InternalServerErrorException, NotImplementedException {
+        throw new NotImplementedException("PUT is not implemented");
     }
 
-    public Response onDelete(long id) {
-        return new ResponseBuilder().notImplemented().build();
+    public Response onDelete(long id) throws InternalServerErrorException, NotImplementedException {
+        throw new NotImplementedException("DELETE is not implemented");
     }
 
-    public void onNotify(String content) {
-
+    public void onNotify(String content) throws InternalServerErrorException, NotImplementedException {
+        throw new NotImplementedException("NOTIFY is not implemented");
     }
 
 }
