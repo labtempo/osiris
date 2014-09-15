@@ -13,7 +13,7 @@ import java.util.Calendar;
  */
 public class Request {
 
-    private final Method method;
+    private final RequestMethod method;
     private final String version;
     private final String resource;
     private final Calendar date;
@@ -21,7 +21,7 @@ public class Request {
     private final String content;
     private final int contentLength;
 
-    public Request(Method method, String resource, String version, Calendar date, String module, String content, int contentLength) {
+    public Request(RequestMethod method, String resource, String version, Calendar date, String module, String content, int contentLength) {
         this.method = method;
         this.resource = resource;
         this.version = version;
@@ -31,7 +31,7 @@ public class Request {
         this.contentLength = contentLength;
     }
 
-    public Method getMethod() {
+    public RequestMethod getMethod() {
         return method;
     }
 

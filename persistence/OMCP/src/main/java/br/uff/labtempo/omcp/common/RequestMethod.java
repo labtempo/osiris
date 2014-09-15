@@ -9,7 +9,7 @@ package br.uff.labtempo.omcp.common;
  *
  * @author Felipe
  */
-public enum Method {
+public enum RequestMethod {
 
     GET, POST, PUT, DELETE, NOTIFY;
 }

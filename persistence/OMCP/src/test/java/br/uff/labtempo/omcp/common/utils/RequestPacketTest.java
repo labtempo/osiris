@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.uff.labtempo.omcp.server.packets;
+package br.uff.labtempo.omcp.common.utils;
 
 import br.uff.labtempo.omcp.common.Request;
-import br.uff.labtempo.omcp.common.Method;
+import br.uff.labtempo.omcp.common.RequestMethod;
 import br.uff.labtempo.omcp.common.exceptions.BadRequestException;
 import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
 import java.net.URI;
@@ -39,7 +39,7 @@ public class RequestPacketTest {
 
         Request request = builder.method("GET").host(host).resource(resource).version(version).buildNoContent();;
 
-        assertEquals(Method.GET, request.getMethod());
+        assertEquals(RequestMethod.GET, request.getMethod());
         assertEquals(host, request.getModule());
         assertEquals(resource, request.getResource());
         assertEquals(version, request.getVersion());
@@ -57,7 +57,7 @@ public class RequestPacketTest {
 
         Request request = builder.method("POST").host(host).resource(resource).version(version).content(content).buildContent();
 
-        assertEquals(Method.POST, request.getMethod());
+       assertEquals(RequestMethod.POST, request.getMethod());
         assertEquals(host, request.getModule());
         assertEquals(resource, request.getResource());
         assertEquals(version, request.getVersion());
@@ -75,7 +75,7 @@ public class RequestPacketTest {
 
         Request request = builder.method("PUT").host(host).resource(resource).version(version).content(content).buildContent();
 
-        assertEquals(Method.PUT, request.getMethod());
+assertEquals(RequestMethod.PUT, request.getMethod());
         assertEquals(host, request.getModule());
         assertEquals(resource, request.getResource());
         assertEquals(version, request.getVersion());
@@ -90,9 +90,8 @@ public class RequestPacketTest {
         String resource = "/sensors";
         String version = "OMCP/0.1";
 
-        Request request = builder.method("DELETE").host(host).resource(resource).version(version).buildNoContent();;
-
-        assertEquals(Method.DELETE, request.getMethod());
+        Request request = builder.method("DELETE").host(host).resource(resource).version(version).buildNoContent();
+        assertEquals(RequestMethod.DELETE, request.getMethod());
         assertEquals(host, request.getModule());
         assertEquals(resource, request.getResource());
         assertEquals(version, request.getVersion());
@@ -107,9 +106,9 @@ public class RequestPacketTest {
         String resource = "/sensors";
         String version = "OMCP/0.1";
 
-        Request request = builder.method("NOTIFY").host(host).resource(resource).version(version).buildNoContent();
+        Request request = builder.method("NOTIFY").host(host).resource(resource).version(version).buildContent();
 
-        assertEquals(Method.NOTIFY, request.getMethod());
+        assertEquals(RequestMethod.NOTIFY, request.getMethod());
         assertEquals(host, request.getModule());
         assertEquals(resource, request.getResource());
         assertEquals(version, request.getVersion());

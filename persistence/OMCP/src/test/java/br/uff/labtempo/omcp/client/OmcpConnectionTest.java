@@ -7,7 +7,7 @@ package br.uff.labtempo.omcp.client;
 
 import br.uff.labtempo.omcp.common.Response;
 import br.uff.labtempo.omcp.common.StatusCode;
-import br.uff.labtempo.omcp.server.OmcpServer;
+import br.uff.labtempo.omcp.server.RabbitServer.RabbitServer;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -22,7 +22,7 @@ import static org.junit.Assert.*;
 public class OmcpConnectionTest {
 
     private OmcpConnection connection;
-    private OmcpServer server;
+    privatRabbitServerer server;
     private final String pwd;
     private final String usr;
     private final String ip;
@@ -43,7 +43,7 @@ public class OmcpConnectionTest {
             System.out.println(e.getMessage());
         }
         try {
-            this.server = new OmcpServer("test", ip, usr, pwd);
+            this.server = RabbitServerrver("test", ip, usr, pwd);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

@@ -3,13 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.uff.labtempo.omcp.server;
+package br.uff.labtempo.omcp.server.RabbitServer;
 
 import br.uff.labtempo.omcp.common.exceptions.ConnectionException;
 import br.uff.labtempo.omcp.common.exceptions.UnreachableModuleException;
 import br.uff.labtempo.omcp.common.utils.RabbitComm;
-import br.uff.labtempo.omcp.server.core.ServerSocket;
-import br.uff.labtempo.omcp.server.core.ServerRequestListener;
+import br.uff.labtempo.omcp.server.RequestHandler;
 import br.uff.labtempo.omcp.server.core.ServerResponseContainer;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
@@ -30,14 +29,14 @@ public class RabbitServerSocket implements ServerSocket {
 
     private final String QUEUE_NAME;
     private final int RETRY_TIME = 30;//SECONDS
-    private ServerRequestListener listener;
+    private RabbitListener listener;
     private RabbitComm comm;
     private Channel channel;
 
     private final String ERROR = "ERROR!";
     private final String OK = "OK!";
     private final String ABORT = "ABORT: ";
-    
+
     private boolean closing;
 
     RabbitServerSocket(String queueName, String host, String user, String password) {
@@ -45,7 +44,7 @@ public class RabbitServerSocket implements ServerSocket {
         this.comm = new RabbitComm(host, user, password);
     }
 
-    public void setListener(ServerRequestListener listener) {
+    public void setListener(RabbitListener listener) {
         this.listener = listener;
     }
 
@@ -53,7 +52,7 @@ public class RabbitServerSocket implements ServerSocket {
         try {
             connect();
             declareQueue();
-            QueueingConsumer consumer = createConsumer();            
+            QueueingConsumer consumer = createConsumer();
             startListener(consumer);
         } catch (Exception e) {
             System.out.println(ABORT + e.getMessage());
@@ -62,7 +61,7 @@ public class RabbitServerSocket implements ServerSocket {
         }
     }
 
-    public void abort() {        
+    public void abort() {
         comm.close();
     }
 
@@ -213,8 +212,10 @@ public class RabbitServerSocket implements ServerSocket {
                     this.rpcConsumer(message, props);
                 } else {
                     try {
-                        //TODO: if server shutdown in here, the message will be lost!
-                        this.eventConsumer(message);
+                        //TODO: here, if server shutdowning, the message will be lost!
+                        if (this.eventConsumer(message)) {
+                            System.out.println("ERROR EVENT!");
+                        }
                         channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
                     } catch (Exception ex) {
                         channel.basicNack(delivery.getEnvelope().getDeliveryTag(), false, true);
@@ -233,8 +234,8 @@ public class RabbitServerSocket implements ServerSocket {
         }
     }
 
-    private void eventConsumer(String message) {
-        listener.incoming(message, null);
+    private boolean eventConsumer(String message) {
+        return listener.incoming(message, null);
     }
 
     private void rpcConsumer(String message, final AMQP.BasicProperties props) {

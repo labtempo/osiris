@@ -5,8 +5,8 @@
  */
 package br.uff.labtempo.omcp.common.utils;
 
-import br.uff.labtempo.omcp.common.Method;
-import static br.uff.labtempo.omcp.common.Method.*;
+import br.uff.labtempo.omcp.common.RequestMethod;
+import static br.uff.labtempo.omcp.common.RequestMethod.*;
 import br.uff.labtempo.omcp.common.Request;
 import br.uff.labtempo.omcp.common.exceptions.RequestException;
 import java.net.URI;
@@ -20,8 +20,7 @@ import java.util.Calendar;
 public class RequestBuilder {
 
     private static final String VERSION = "OMCP/0.1";
-
-    private Method method;
+    private RequestMethod method;
     private String content;
     private String resource;
     private String module;

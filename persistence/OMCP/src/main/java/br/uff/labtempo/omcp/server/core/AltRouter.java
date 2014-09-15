@@ -6,14 +6,14 @@
 
 package br.uff.labtempo.omcp.server.core;
 
-import br.uff.labtempo.omcp.common.Method;
+import br.uff.labtempo.omcp.common.RequestMethod;
 
 /**
  *
  * @author Felipe
  */
 public class AltRouter {
-    public void add(Method method, String path, Class klass, String action){
+    public void add(RequestMethod method, String path, Class klass, String action){
         path = "/resource/:id/edit";
         path = "/resource/:id/edit";
         

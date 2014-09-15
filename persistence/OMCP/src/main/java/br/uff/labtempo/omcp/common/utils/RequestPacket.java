@@ -6,8 +6,8 @@
 package br.uff.labtempo.omcp.common.utils;
 
 import br.uff.labtempo.omcp.common.Request;
-import br.uff.labtempo.omcp.common.Method;
-import static br.uff.labtempo.omcp.common.Method.*;
+import br.uff.labtempo.omcp.common.RequestMethod;
+import static br.uff.labtempo.omcp.common.RequestMethod.*;
 import br.uff.labtempo.omcp.common.exceptions.BadRequestException;
 import java.text.ParseException;
 import java.util.Calendar;
@@ -23,8 +23,7 @@ import java.util.Arrays;
  * @author Felipe
  */
 public class RequestPacket {
-
-    private Method method;
+    private RequestMethod method;
     private String protocolVersion;
     private String resource;
     private Calendar date;
@@ -89,7 +88,7 @@ public class RequestPacket {
     private void defineFirstLine(Queue<String> lines) throws BadRequestException {
         String[] firstLine = lines.poll().split(s);
         try {
-            this.method = Enum.valueOf(Method.class, firstLine[0]);
+            this.method= Enum.valueOf(RequestMethod.class, firstLine[0]);
         } catch (IllegalArgumentException ex) {
             throw new BadRequestException("Method is not correct");
         }

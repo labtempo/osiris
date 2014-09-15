@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.uff.labtempo.omcp.server.packets;
+package br.uff.labtempo.omcp.common.utils;
 
 import br.uff.labtempo.omcp.common.Response;
 import static br.uff.labtempo.omcp.common.StatusCode.*;
@@ -22,7 +22,7 @@ import org.junit.Test;
  *
  * @author Felipe
  */
-public class ResponseTest {
+public class ResponsePacketTest {
     private String host;
     private String module;
     private String version;

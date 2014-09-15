@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.uff.labtempo.omcp.server.packets;
+package br.uff.labtempo.omcp.common.utils;
 
 import br.uff.labtempo.omcp.common.utils.ResponseBuilder;
 import br.uff.labtempo.omcp.common.Response;
