@@ -17,5 +17,6 @@ import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
  * @author Felipe
  */
 public interface RequestHandler {
-    public Response process(Request request)  throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException;
+
+    Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException;
 }

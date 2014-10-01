@@ -23,11 +23,13 @@ import java.util.Arrays;
  * @author Felipe
  */
 public class RequestPacket {
+
     private RequestMethod method;
     private String protocolVersion;
     private String resource;
     private Calendar date;
     private String module;
+    private String source;
     private String content;
     private int contentLength;
 
@@ -44,6 +46,7 @@ public class RequestPacket {
         this.module = request.getModule();
         this.contentLength = request.getContentLength();
         this.content = request.getContent();
+        this.source = request.getSource();
 
         StringBuilder sb = new StringBuilder();
         sb.append(method)
@@ -57,6 +60,9 @@ public class RequestPacket {
                 .append(br)
                 .append(MODULE.getKey())
                 .append(module)
+                .append(br)
+                .append(SOURCE.getKey())
+                .append(source)
                 .append(br);
 
         if (POST.equals(method) || PUT.equals(method)) {
@@ -88,7 +94,7 @@ public class RequestPacket {
     private void defineFirstLine(Queue<String> lines) throws BadRequestException {
         String[] firstLine = lines.poll().split(s);
         try {
-            this.method= Enum.valueOf(RequestMethod.class, firstLine[0]);
+            this.method = Enum.valueOf(RequestMethod.class, firstLine[0]);
         } catch (IllegalArgumentException ex) {
             throw new BadRequestException("Method is not correct");
         }
@@ -132,6 +138,13 @@ public class RequestPacket {
             throw new BadRequestException("Packet is not contains host.");
         }
 
+        if (headers.containsKey(SOURCE.toString())) {
+            defineSource(headers.get(SOURCE.toString()));
+        }
+//        else {
+//            throw new BadRequestException("Packet is not contains source.");
+//        }
+
         if (POST.equals(method) || PUT.equals(method)) {
             if (headers.containsKey(CONTENT_LENGTH.toString())) {
                 this.content = defineContent(lines);
@@ -159,6 +172,10 @@ public class RequestPacket {
 
     private void defineHost(String host) {
         this.module = host;
+    }
+
+    private void defineSource(String source) {
+        this.source = source;
     }
 
     private String defineContent(Queue<String> lines) {

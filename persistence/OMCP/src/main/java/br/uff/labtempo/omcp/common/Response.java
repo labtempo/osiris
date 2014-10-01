@@ -14,14 +14,17 @@ import java.util.Calendar;
  */
 public class Response {
 
-    private final String version;
+    
     private final StatusCode statusCode;
     private final Calendar date;
-    private final String module;
     private final int contentLength;
     private final String location;
     private final String errorMessage;
     private final String content;
+    
+    private String protocolVersion;
+    private String module;
+    private String host;
 
     /**
      * Constructor - Read only object
@@ -36,7 +39,7 @@ public class Response {
      * @param errorMessage
      */
     public Response(String protocolVersion, StatusCode statusCode, Calendar date, String module, String content, int contentLength, String location, String errorMessage) {
-        this.version = protocolVersion;
+        this.protocolVersion = protocolVersion;
         this.statusCode = statusCode;
         this.date = date;
         this.module = module;
@@ -47,7 +50,7 @@ public class Response {
     }
 
     public String getProtocolVersion() {
-        return this.version;
+        return this.protocolVersion;
     }
 
     public StatusCode getStatusCode() {
@@ -71,6 +74,9 @@ public class Response {
     }
 
     public String getLocation() {
+        if (host != null) {
+            return host + location;
+        }
         return this.location;
     }
 
@@ -84,5 +90,17 @@ public class Response {
 
     public boolean hasContent() {
         return (contentLength > 0);
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public void setProtocolVersion(String protocolVersion) {
+        this.protocolVersion = protocolVersion;
+    }
+
+    public void setModule(String module) {
+        this.module = module;
     }
 }

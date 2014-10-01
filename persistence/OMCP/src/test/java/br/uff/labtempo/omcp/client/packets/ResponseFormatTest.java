@@ -35,7 +35,6 @@ public class ResponseFormatTest {
         this.host = "omcp://test-module";
         this.module = "test-java/0.1";
         this.version = "OMCP/0.1";
-        ResponseBuilder.config(host, module, version);
         
     }
     
@@ -48,6 +47,10 @@ public class ResponseFormatTest {
     public void testCreatedResponse(){
         String content = "test";
         Response response = new ResponseBuilder().ok(content).build();
+        
+        response.setHost(host);
+        response.setModule(module);
+        response.setProtocolVersion(version);
         
         String p = format.generate(response);        
         Response packet = format.parse(p);        

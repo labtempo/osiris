@@ -11,7 +11,7 @@ package br.uff.labtempo.omcp.common.utils;
  */
 public enum Headers {
 
-    DATE, MODULE, CONTENT_LENGTH, ERROR, LOCATION;
+    DATE, MODULE, CONTENT_LENGTH, ERROR, LOCATION, SOURCE;
 
     private static final String SEPARATOR = ":";
 

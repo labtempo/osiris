@@ -3,14 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.uff.labtempo.omcp.server;
 
+package br.uff.labtempo.omcp.service;
+
+import br.uff.labtempo.omcp.common.Request;
 /**
  *
  * @author Felipe
  */
-public interface OmcpServer extends AutoCloseable {
-    void start();
-    void addReference(String url);
-    void setHandler(RequestHandler handler);
+public interface EventHandler {
+    void process(Request request);
 }

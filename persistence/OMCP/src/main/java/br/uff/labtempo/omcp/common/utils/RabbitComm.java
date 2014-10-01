@@ -13,6 +13,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import java.net.InetAddress;
 
+
 /**
  *
  * @author Felipe
@@ -84,6 +85,18 @@ public class RabbitComm {
         try {
             Channel ch = connection.createChannel();
             AMQP.Queue.DeclareOk declare = ch.queueDeclarePassive(queueName);
+        } catch (Exception e) {
+            throw new UnreachableModuleException("Queue not exists!");
+        }
+    }
+
+    public void checkExchangeOrDie(String exchangeName) throws UnreachableModuleException {
+        if (!connection.isOpen()) {
+            throw new UnreachableModuleException("Not connected to broker!");
+        }
+        try {
+            Channel ch = connection.createChannel();
+            AMQP.Exchange.DeclareOk declare = ch.exchangeDeclarePassive(exchangeName);
         } catch (Exception e) {
             throw new UnreachableModuleException("Queue not exists!");
         }

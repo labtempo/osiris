@@ -3,14 +3,20 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.uff.labtempo.omcp.server;
+package br.uff.labtempo.omcp.server.rabbitmq;
 
 /**
  *
  * @author Felipe
  */
-public interface OmcpServer extends AutoCloseable {
-    void start();
+public interface ServerSocket extends AutoCloseable{
+
+    void setListener(RabbitListener listener);
+
     void addReference(String url);
-    void setHandler(RequestHandler handler);
+
+    void run();
+
+    @Override
+    void close();
 }

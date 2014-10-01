@@ -17,18 +17,6 @@ import java.util.Calendar;
  */
 public class ResponseBuilder {
 
-    private static String protocolVersion;
-    private static String moduleDescription;
-    private static String host;
-
-    {
-        if (protocolVersion == null
-                || moduleDescription == null
-                || host == null) {
-            throw new RuntimeException("Builder needs to be set up!");
-        }
-    }
-
     private StatusCode statusCode;
     private String content;
     private String location;
@@ -44,7 +32,7 @@ public class ResponseBuilder {
 
     public ResponseBuilder created(String uri) {
         this.statusCode = CREATED;
-        this.location = host + uri;
+        this.location = uri;
         return this;
     }
 
@@ -55,13 +43,7 @@ public class ResponseBuilder {
     }
 
     public Response build() {
-        Response response = new Response(protocolVersion, statusCode, Calendar.getInstance(), moduleDescription, content, contentLength, location, error);
+        Response response = new Response(null, statusCode, Calendar.getInstance(), null, content, contentLength, location, error);
         return response;
-    }
-
-    public static void config(String host, String moduleDescription, String protocolVersion) {
-        ResponseBuilder.host = host;
-        ResponseBuilder.moduleDescription = moduleDescription;
-        ResponseBuilder.protocolVersion = protocolVersion;
-    }
+    }    
 }

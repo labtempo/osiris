@@ -21,16 +21,16 @@ import org.junit.Test;
  * @author Felipe
  */
 public class ResponseBuilderTest {
+
     private String host;
-    private String description;
+    private String module;
     private String version;
 
     @Before
     public void setBuilder() {
         this.host = "omcp://test-module";
-        this.description = "test-java/0.1";
+        this.module = "test-java/0.1";
         this.version = "OMCP/0.1";
-        ResponseBuilder.config(host, description, version);
     }
 
     @Test
@@ -38,6 +38,11 @@ public class ResponseBuilderTest {
         System.out.println("ok");
         String content = "test";
         Response response = new ResponseBuilder().ok(content).build();
+
+        response.setHost(host);
+        response.setModule(module);
+        response.setProtocolVersion(version);
+
         assertEquals(OK, response.getStatusCode());
         assertEquals(content, response.getContent());
         assertEquals(content.length(), response.getContentLength());
@@ -48,6 +53,11 @@ public class ResponseBuilderTest {
         System.out.println("created");
         String uri = ("/test");
         Response response = new ResponseBuilder().created(uri).build();
+
+        response.setHost(host);
+        response.setModule(module);
+        response.setProtocolVersion(version);
+
         assertEquals(CREATED, response.getStatusCode());
         assertEquals(host + uri, response.getLocation());
     }
@@ -56,6 +66,11 @@ public class ResponseBuilderTest {
     public void testNotImplemented() {
         System.out.println("testNotImplemented");
         Response response = new ResponseBuilder().error(new NotImplementedException("error")).build();
+
+        response.setHost(host);
+        response.setModule(module);
+        response.setProtocolVersion(version);
+
         assertEquals(NOT_IMPLEMENTED, response.getStatusCode());
     }
 
@@ -64,6 +79,11 @@ public class ResponseBuilderTest {
         System.out.println("serverError");
         String error = "Test error";
         Response response = new ResponseBuilder().error(new InternalServerErrorException(error)).build();
+
+        response.setHost(host);
+        response.setModule(module);
+        response.setProtocolVersion(version);
+
         assertEquals(INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(error, response.getErrorMessage());
     }

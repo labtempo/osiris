@@ -28,7 +28,36 @@ public abstract class Controller implements RequestHandler {
     protected Response goToNext(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
         if (nextController != null) {
             return nextController.process(request);
-        }        
+        }
         throw new NotFoundException(request.getResource() + " not found!");
+    }
+
+    /**
+     * transformar para regex acima method params
+     */
+    private String createRegex(String value) {
+        String[] resources = value.split("/");
+        StringBuilder sb = new StringBuilder();
+        sb.append("^");
+        for (String resource : resources) {
+            if (resource.length() == 0) {
+                continue;
+            }
+            sb.append("/");
+            if (resource.contains(":")) {
+                sb.append("(.[^/]*)");
+            } else {
+                sb.append(resource);
+            }
+        }
+        sb.append("/?$");
+        return sb.toString();
+    }
+
+    public boolean match(String resource, String regex) {
+        if (resource != null) {
+            return resource.matches(createRegex(regex));
+        }
+        return false;
     }
 }

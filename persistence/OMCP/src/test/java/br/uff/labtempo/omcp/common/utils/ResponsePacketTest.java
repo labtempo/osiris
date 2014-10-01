@@ -23,6 +23,7 @@ import org.junit.Test;
  * @author Felipe
  */
 public class ResponsePacketTest {
+
     private String host;
     private String module;
     private String version;
@@ -33,8 +34,7 @@ public class ResponsePacketTest {
         this.host = "omcp://test-module";
         this.module = "test-java/0.1";
         this.version = "OMCP/0.1";
-        ResponseBuilder.config(host, module, version);
-        
+
         this.rPacket = new ResponsePacket();
     }
 
@@ -43,6 +43,10 @@ public class ResponsePacketTest {
         System.out.println("ok response");
         String content = "request ok!";
         Response response = new ResponseBuilder().ok(content).build();
+
+        response.setHost(host);
+        response.setModule(module);
+        response.setProtocolVersion(version);
 
         String packet = new StringBuilder()
                 .append("OMCP/0.1 200 OK\n")
@@ -58,17 +62,19 @@ public class ResponsePacketTest {
     @Test
     public void testCreatedPacket() throws URISyntaxException {
         System.out.println("created response");
-
         String location = ("/sensors/3");
-
         Response response = new ResponseBuilder().created(location).build();
-        assertEquals(host+location, response.getLocation());
 
+        response.setHost(host);
+        response.setModule(module);
+        response.setProtocolVersion(version);
+
+        assertEquals(host + location, response.getLocation());
         String packet = new StringBuilder()
                 .append("OMCP/0.1 201 CREATED\n")
                 .append("date:" + new DateUtil().generate(response.getDate()) + "\n")
                 .append("module:" + module + "\n")
-                .append("location:" + host+location + "\n")
+                .append("location:" + host + location + "\n")
                 .toString();
 
         assertEquals(packet, rPacket.generate(response));
@@ -77,8 +83,12 @@ public class ResponsePacketTest {
     @Test
     public void testNotFoundPacket() throws URISyntaxException {
         System.out.println("not found response");
-        String errorMessage = "error";        
+        String errorMessage = "error";
         Response response = new ResponseBuilder().error(new NotImplementedException(errorMessage)).build();
+
+        response.setHost(host);
+        response.setModule(module);
+        response.setProtocolVersion(version);
 
         String packet = new StringBuilder()
                 .append("OMCP/0.1 501 NOT IMPLEMENTED\n")
@@ -95,6 +105,10 @@ public class ResponsePacketTest {
         System.out.println("server error response");
         String errorMessage = "nao foi possivel criar entrada";
         Response response = new ResponseBuilder().error(new InternalServerErrorException(errorMessage)).build();
+
+        response.setHost(host);
+        response.setModule(module);
+        response.setProtocolVersion(version);
 
         String packet = new StringBuilder()
                 .append("OMCP/0.1 500 INTERNAL SERVER ERROR\n")

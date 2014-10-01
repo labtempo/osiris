@@ -20,6 +20,11 @@ public class Request {
     private final String module;
     private final String content;
     private final int contentLength;
+    /**
+     * Represents a module name
+     * Intend that is a module to module communication
+     */
+    private String source;    
 
     public Request(RequestMethod method, String resource, String version, Calendar date, String module, String content, int contentLength) {
         this.method = method;
@@ -57,5 +62,13 @@ public class Request {
 
     public int getContentLength() {
         return contentLength;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
     }
 }
