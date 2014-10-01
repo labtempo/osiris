@@ -20,7 +20,7 @@ public class Service {
     static OmcpService service;
 
     public static void main(String[] args) throws Exception {
-        service = new RabbitService("192.168.0.7", "admin", "admin");
+        service = new RabbitService("127.0.0.1", "admin", "admin");
         service.addReference("omcp://test.ex/collector/#");
         service.addReference("omcp://test.ex/*/sample");
         service.addReference("omcp://test.ex/warning/");

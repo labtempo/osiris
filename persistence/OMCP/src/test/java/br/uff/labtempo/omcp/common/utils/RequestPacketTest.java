@@ -105,14 +105,15 @@ assertEquals(RequestMethod.PUT, request.getMethod());
         String host = "sensornet";
         String resource = "/sensors";
         String version = "OMCP/0.1";
+        String content = "content";
 
-        Request request = builder.method("NOTIFY").host(host).resource(resource).version(version).buildContent();
+        Request request = builder.method("NOTIFY").host(host).resource(resource).version(version).content(content).buildContent();
 
         assertEquals(RequestMethod.NOTIFY, request.getMethod());
         assertEquals(host, request.getModule());
         assertEquals(resource, request.getResource());
         assertEquals(version, request.getVersion());
-        assertEquals(null, request.getContent());
+        assertEquals(content, request.getContent());
     }
 
     @Test(expected = BadRequestException.class)

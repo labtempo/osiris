@@ -17,13 +17,13 @@ import br.uff.labtempo.omcp.common.utils.ResponsePacket;
 public class Client {
 
     public static void main(String[] args) throws Exception {
-        try (OmcpClient connection = new OmcpClientBuilder().host("192.168.0.7").user("admin", "admin").source("generico").build()) {
-            //Response  r = connection.doGet("omcp://teste/");  
+        try (OmcpClient connection = new OmcpClientBuilder().host("127.0.0.1").user("admin", "admin").source("generico").build()) {
+            Response  r = connection.doGet("omcp://teste/sensor/01");  
             connection.doNofity("omcp://test.ex/sensor/","teste");
             connection.doNofity("omcp://test.ex/collector1/sample","teste");
             connection.doNofity("omcp://test.ex/collector/","teste");
             connection.doNofity("omcp://test.ex/collector/01","teste");
-            //System.out.println(new ResponsePacket().generate(r));
+            System.out.println(new ResponsePacket().generate(r));
         }
     }
 }

@@ -22,7 +22,7 @@ public class Server implements AutoCloseable{
     private OmcpServer server;
 
     public Server() {
-        ip = "192.168.0.7";
+        ip = "127.0.0.1";
         usr = "admin";
         pwd = "admin";
         server = new RabbitServer("teste", ip, usr, pwd);

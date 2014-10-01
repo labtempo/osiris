@@ -65,7 +65,7 @@ public class RequestPacket {
                 .append(source)
                 .append(br);
 
-        if (POST.equals(method) || PUT.equals(method)) {
+        if (POST.equals(method) || PUT.equals(method) || NOTIFY.equals(method)) {
             sb.append(CONTENT_LENGTH.getKey())
                     .append(contentLength)
                     .append(br)
@@ -145,7 +145,7 @@ public class RequestPacket {
 //            throw new BadRequestException("Packet is not contains source.");
 //        }
 
-        if (POST.equals(method) || PUT.equals(method)) {
+        if (POST.equals(method) || PUT.equals(method) || NOTIFY.equals(method)) {
             if (headers.containsKey(CONTENT_LENGTH.toString())) {
                 this.content = defineContent(lines);
                 this.contentLength = Integer.parseInt(headers.get(CONTENT_LENGTH.toString()));
