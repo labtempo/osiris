@@ -1,0 +1,64 @@
+.button {
+    -fx-font-weight: bold;
+}
+
+.right{
+    -fx-alignment: CENTER_RIGHT;  
+    -fx-text-fill: darkslateblue;
+    -fx-text-alignment: right;
+}
+
+.topbox{
+    -fx-background-color: #f1f1f1;
+    -fx-padding: 5;
+}
+
+.master-box{
+    -fx-padding: 0;    
+}
+.labelbox{
+    -fx-padding: 5;
+    -fx-background-color: #f7f7f7;
+}
+
+.master-box Label{
+    -fx-text-fill: black;
+}
+
+.title{
+    -fx-background-color: lightgrey;
+    -fx-padding: 5 10 5 10;
+    -fx-font-size:20;
+    -fx-text-fill: black;
+    -fx-font-weight: bold;
+}
+
+.title-detail{ 
+    -fx-font-weight: bold;
+}
+
+.list .list-cell:filled:selected:focused, .list-cell:filled:selected{
+    -fx-background-color: linear-gradient(#328BDB 0%, #207BCF 25%, #1973C9 75%, #0A65BF 100%);
+    -fx-text-fill: black;
+}
+
+.list .list-cell { /* <=== changed to even */
+    -fx-background-color: lightgray;
+    -fx-padding: 0;
+}
+.list .list-cell .master-box { /* <=== changed to even */
+    -fx-padding: 1;
+    //-fx-border-color: lightgray;
+    //-fx-border-style: solid;
+    //-fx-border-width: 0 0 1 0;
+}
+
+.list .list-cell:filled:hover{
+    -fx-background-color: red;
+    -fx-text-fill: black;
+}
+
+ListView, ListView:focused, ListView:selected{
+    -fx-background-color: transparent;
+    -fx-padding: 0; 
+}

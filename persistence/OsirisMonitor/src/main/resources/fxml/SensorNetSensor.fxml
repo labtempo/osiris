@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox fx:id="vBox"  xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" styleClass="master-box">
+    <children>        
+        <VBox styleClass="topbox">
+            <children>            
+                <AnchorPane  fx:id="hBox" >
+                    <children>
+                        <HBox styleClass="box">
+                            <children>
+                                <Label fx:id="labelId" styleClass="title" />
+                                <Label fx:id="labelModel" styleClass="title-detail">
+                                    <HBox.margin>
+                                        <Insets>
+                                            <left>10</left>
+                                        </Insets>
+                                    </HBox.margin>
+                                </Label>
+                            </children>
+                        </HBox>
+                        <AnchorPane AnchorPane.rightAnchor="0.0" styleClass="rightbox"> 
+                            <children>
+                                <Label fx:id="labelDate"/>
+                            </children>
+                        </AnchorPane>                    
+                    </children>
+                </AnchorPane >
+            </children>
+        </VBox>
+        <HBox styleClass="labelbox">            
+            <Label fx:id="listValues" />
+        </HBox>
+    </children>
+</VBox>

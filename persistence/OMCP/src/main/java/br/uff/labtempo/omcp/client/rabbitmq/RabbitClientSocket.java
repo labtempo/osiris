@@ -57,20 +57,19 @@ final class RabbitClientSocket {
      */
     public void publish(String queueName, String packet, String routingKey) throws UnreachableModuleException {
         String queue = "";
-        String exchange = queueName;
-        try {
-            this.comm.checkQueueOrDie(queueName);
-            queue = queueName;
-        } catch (Exception e) {
+        String exchange = "";
+
+        if (queueName.contains("osiris.ex")) {
             this.comm.checkExchangeOrDie(queueName);
             exchange = queueName;
-            if (routingKey != null) {
-                queue = routingKey;
-            }
+            queue = routingKey;
+        } else {
+            this.comm.checkQueueOrDie(queueName);
+            queue = queueName;
         }
 
         BasicProperties properties = new BasicProperties.Builder()
-                .deliveryMode(2)//persistent
+                .deliveryMode(2)//persistent mode
                 .contentType("text/plain")
                 .contentEncoding("UTF-8")
                 .build();
