@@ -12,7 +12,7 @@ import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
 import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
 import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
 import br.uff.labtempo.omcp.common.utils.ResponseBuilder;
-import br.uff.labtempo.omcp.server.Controller;
+import br.uff.labtempo.osiris.omcp.Controller;
 
 /**
  *

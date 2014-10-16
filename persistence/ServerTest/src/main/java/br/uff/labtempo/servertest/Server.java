@@ -5,7 +5,7 @@
  */
 package br.uff.labtempo.servertest;
 
-import br.uff.labtempo.omcp.server.Controller;
+import br.uff.labtempo.osiris.omcp.Controller;
 import br.uff.labtempo.omcp.server.OmcpServer;
 import br.uff.labtempo.omcp.server.rabbitmq.RabbitServer;
 
