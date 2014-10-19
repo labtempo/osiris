@@ -12,13 +12,15 @@ import br.uff.labtempo.omcp.common.exceptions.InternalServerErrorException;
 import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
 import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
 import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
-import br.uff.labtempo.omcp.common.utils.ResponseBuilder;
 import br.uff.labtempo.osiris.omcp.Controller;
-import br.uff.labtempo.osiris.collector.Collector;
 import br.uff.labtempo.osiris.sensornet.model.CollectorWrapper;
 import br.uff.labtempo.osiris.sensornet.model.NetworkWrapper;
+import br.uff.labtempo.osiris.sensornet.model.jpa.Collector;
+import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
 import br.uff.labtempo.osiris.sensornet.persistence.CollectorDao;
+import br.uff.labtempo.osiris.sensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.sensornet.persistence.NetworkDao;
+import br.uff.labtempo.osiris.sensornet.to.CollectorTo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,78 +30,82 @@ import java.util.Map;
  * @author Felipe
  */
 public class CollectorController extends Controller {
-    
+
+    private final String ALL = ControllerPath.COLLECTOR_ALL.toString();
+    private final String UNIQUE = ControllerPath.COLLECTOR_BY_ID.toString();
+
+    private DaoFactory factory;
+
+    public CollectorController(DaoFactory factory) {
+        this.factory = factory;
+    }
+
+    @Override
     public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
-        
+        String contentType = request.getContentType();
         String networkId = null;
         String collectorId = null;
-        
-        String pathA ="/:network/collectors/";
-        if(match(request.getResource(),pathA)){
-            Map<String,String> map = extract(request.getResource(),pathA);
-            networkId = map.get(":network");
-            
-            if(request.getMethod() != RequestMethod.GET)
-                throw getNotImplementedException("Action not implemented");
-            
-            return getAll(networkId); 
+
+        if (match(request.getResource(), ALL)) {
+            Map<String, String> map = extract(request.getResource(), ALL);
+            networkId = map.get(ControllerPath.NETWORK_KEY.toString());
+
+            if (request.getMethod() != RequestMethod.GET) {
+                throw new NotImplementedException("Action not implemented");
+            }
+            return builder(getAll(networkId), contentType);
         }
-        
-        String pathB = "/:network/collectors/:collector/";
-        if(match(request.getResource(),pathB)){
-            Map<String,String> map = extract(request.getResource(),pathB);
-            networkId = map.get(":network");
-            collectorId = map.get(":collector");
-            
-            if(request.getMethod() != RequestMethod.GET)
-                throw getNotImplementedException("Action not implemented");
-            
-            return getById(networkId,collectorId);
+
+        if (match(request.getResource(), UNIQUE)) {
+            Map<String, String> map = extract(request.getResource(), UNIQUE);
+            networkId = map.get(ControllerPath.NETWORK_KEY.toString());
+            collectorId = map.get(ControllerPath.COLLECTOR_KEY.toString());
+
+            if (request.getMethod() != RequestMethod.GET) {
+                throw new NotImplementedException("Action not implemented");
+            }
+            return builder(getById(networkId, collectorId), contentType);
         }
-        return goToNext(request);
+        return null;
     }
 
-    private Response getAll(String networkId) throws NotFoundException {
-        CollectorDao cdao = new CollectorDao();
-        NetworkDao ndao = new NetworkDao();        
-        
-        NetworkWrapper nw = ndao.getById(networkId);
-        
-        if(nw == null)
-            throw getNotFoundException("Network not exists");
-        
-        List<CollectorWrapper> list = cdao.getAll(nw);
+    private List<CollectorTo> getAll(String networkId) throws NotFoundException {
+        NetworkDao<Network> ndao = factory.getNetworkDao();
+        CollectorDao<Collector> cdao = factory.getCollectorDao();
 
-        List<Collector> collectors = new ArrayList<>();
+        Network nw = ndao.get(networkId);
 
-        for (CollectorWrapper cw : list) {
-            collectors.add(cw.getContent());
+        if (nw == null) {
+            throw new NotFoundException("Network not exists");
         }
-        
-        Response response = new ResponseBuilder().ok(super.toJson(collectors)).build();
-        return response;
+
+        List<Collector> cwlist = cdao.getAll(networkId);
+
+        List<CollectorTo> collectors = new ArrayList<>();
+
+        for (Collector cw : cwlist) {
+            collectors.add(cw.getTransferObject());
+        }
+
+        return collectors;
     }
 
-    private Response getById(String networkId, String collectorId) throws NotFoundException {
-        NetworkDao ndao = new NetworkDao();        
-        
-        NetworkWrapper nw = ndao.getById(networkId);
-        
-        if(nw == null)
-            throw getNotFoundException("Network not exists");
-        
-        CollectorDao cdao = new CollectorDao();
+    private CollectorTo getById(String networkId, String collectorId) throws NotFoundException {
+        NetworkDao<Network> ndao = factory.getNetworkDao();
+        CollectorDao<Collector> cdao = factory.getCollectorDao();
 
-        CollectorWrapper cw = cdao.getById(collectorId,nw);
-              
-        Response response = new ResponseBuilder().ok(super.toJson(cw.getContent())).build();
-        return response;
-    }
-    
-    private NotFoundException getNotFoundException(String msg){
-        return new NotFoundException(msg);
-    }
-    private NotImplementedException getNotImplementedException(String msg){
-        return new NotImplementedException(msg);
+        Network nw = ndao.get(networkId);
+
+        if (nw == null) {
+            throw new NotFoundException("Network not exists");
+        }
+
+        Collector cw = cdao.get(nw.getId(), collectorId);
+
+        if (cw == null) {
+            throw new NotFoundException("Collector not exists");
+        }
+
+        return cw.getTransferObject();
     }
 }

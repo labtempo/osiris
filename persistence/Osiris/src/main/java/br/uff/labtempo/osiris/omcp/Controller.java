@@ -11,6 +11,7 @@ import br.uff.labtempo.omcp.common.exceptions.InternalServerErrorException;
 import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
 import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
 import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
+import br.uff.labtempo.omcp.common.utils.ResponseBuilder;
 import br.uff.labtempo.omcp.server.RequestHandler;
 import com.google.gson.Gson;
 import java.util.ArrayList;
@@ -32,9 +33,20 @@ public abstract class Controller implements RequestHandler {
         this.nextController = controller;
     }
 
+    public abstract Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException;
+
+    @Override
+    public Response handler(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
+        Response response = process(request);
+        if (response == null) {
+            return goToNext(request);
+        }
+        return response;
+    }
+
     protected Response goToNext(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
         if (nextController != null) {
-            return nextController.process(request);
+            return nextController.handler(request);
         }
         throw new NotFoundException(request.getResource() + " not found!");
     }
@@ -52,12 +64,12 @@ public abstract class Controller implements RequestHandler {
             }
             sb.append("/");
             if (resource.contains(":")) {
-                sb.append("(.[^/]*)");
+                sb.append("(.[^/\\?]*)");
             } else {
                 sb.append(resource);
             }
         }
-        sb.append("/?$");
+        sb.append("/?.*$");
         return sb.toString();
     }
 
@@ -87,6 +99,13 @@ public abstract class Controller implements RequestHandler {
                 map.put(cusromKeys.get(i), args.get(i));
             }
         }
+
+        Map<String, String> params = getParams(path);
+
+        if (params != null) {
+            map.putAll(params);
+        }
+
         return map;
     }
 
@@ -101,6 +120,22 @@ public abstract class Controller implements RequestHandler {
             customKeys.add(matcher.group(0));
         }
         return customKeys;
+    }
+
+    private Map<String, String> getParams(String path) {
+        if (path != null && path.contains("?")) {
+            Map<String, String> map = new HashMap<>();
+
+            String query = (path.split("\\?"))[1];
+            String[] params = query.split("&");
+
+            for (String param : params) {
+                String[] keyValue = param.split("=");
+                map.put(keyValue[0], keyValue[1]);
+            }
+            return map;
+        }
+        return null;
     }
 
     protected <T> T fromXml(String xml, Class klass) {
@@ -119,5 +154,16 @@ public abstract class Controller implements RequestHandler {
     protected <T> T fromJson(String json, Class klass) {
         Gson gson = new Gson();
         return (T) gson.<T>fromJson(json, klass);
+    }
+
+    protected Response builder(Object obj, String contentType) {
+        Response response = null;
+        if (contentType == null) {
+            response = new ResponseBuilder().ok(obj, ResponseBuilder.ContentType.JSON).build();
+        } else {
+            response = new ResponseBuilder().ok(obj, contentType).build();
+        }
+        return response;
+
     }
 }

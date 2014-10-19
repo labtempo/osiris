@@ -33,6 +33,7 @@ public class ResponsePacket {
     private String module;
     private String content;
     private int contentLength;
+    private String contentType;
     private String errorMessage;
     private String location;
 
@@ -53,7 +54,8 @@ public class ResponsePacket {
 
         this.date = response.getDate();
         this.module = response.getModule();
-        this.contentLength = response.getContentLength();
+        this.contentLength = response.getContentLength();        
+        this.contentType = response.getContentType();
         this.content = response.getContent();
         this.location = response.getLocation();
         this.errorMessage = response.getErrorMessage();
@@ -76,6 +78,9 @@ public class ResponsePacket {
             case OK:
                 sb.append(CONTENT_LENGTH.getKey())
                         .append(contentLength)
+                        .append(br)
+                        .append(CONTENT_TYPE.getKey())
+                        .append(contentType)
                         .append(br)
                         .append(br)
                         .append(content)
@@ -103,7 +108,7 @@ public class ResponsePacket {
      */
     public Response parse(String response) {
         this.process(response);
-        return new Response(protocolVersion, statusCode, date, module, content, contentLength, location, errorMessage);
+        return new Response(protocolVersion, statusCode, date, module, content, contentLength, contentType, location, errorMessage);
     }
 
     private void process(String message) {
@@ -151,6 +156,7 @@ public class ResponsePacket {
                 if (headers.containsKey(CONTENT_LENGTH.toString())) {
                     this.content = defineContent(lines);
                     this.contentLength = Integer.parseInt(headers.get(CONTENT_LENGTH.toString()));
+                    this.contentType = headers.get(CONTENT_TYPE.toString());
                 } else {
                     throw new BadResponseException("Packet not has content!");
                 }

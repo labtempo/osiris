@@ -6,6 +6,10 @@
 
 package br.uff.labtempo.osiris.collector;
 
+import br.uff.labtempo.osiris.collector.temp.Collector;
+import br.uff.labtempo.osiris.collector.temp.Network;
+import br.uff.labtempo.osiris.collector.temp.Sample;
+import br.uff.labtempo.osiris.collector.temp.Sensor;
 import com.google.gson.Gson;
 import org.junit.Test;
 import static org.junit.Assert.*;

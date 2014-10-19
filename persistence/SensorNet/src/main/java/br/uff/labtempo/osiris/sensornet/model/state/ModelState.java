@@ -16,7 +16,7 @@ public enum ModelState {
     NEW() {
                 @Override
                 public void deactivate(Model model) {
-                    model.state = ModelState.INATIVE;
+                     change(model, ModelState.INATIVE);
                 }
 
                 @Override
@@ -26,7 +26,7 @@ public enum ModelState {
 
                 @Override
                 public void update(Model model) {
-                    model.state = ModelState.UPDATED;
+                    change(model, ModelState.UPDATED);
                 }
 
             },
@@ -38,7 +38,7 @@ public enum ModelState {
 
                 @Override
                 public void reactivate(Model model) {
-                    model.state = ModelState.REACTIVATED;
+                     change(model, ModelState.REACTIVATED);
                 }
 
                 @Override
@@ -49,7 +49,7 @@ public enum ModelState {
     UPDATED() {
                 @Override
                 public void deactivate(Model model) {
-                    model.state = ModelState.INATIVE;
+                     change(model, ModelState.INATIVE);
                 }
 
                 @Override
@@ -59,13 +59,13 @@ public enum ModelState {
 
                 @Override
                 public void update(Model model) {
-                    model.state = ModelState.UPDATED;
+                   change(model, ModelState.UPDATED);
                 }
             },
     REACTIVATED() {
                 @Override
                 public void deactivate(Model model) {
-                    model.state = ModelState.INATIVE;
+                    change(model, ModelState.INATIVE);
                 }
 
                 @Override
@@ -75,7 +75,7 @@ public enum ModelState {
 
                 @Override
                 public void update(Model model) {
-                    model.state = ModelState.UPDATED;
+                    change(model, ModelState.UPDATED);
                 }
             };
 
@@ -85,13 +85,8 @@ public enum ModelState {
 
     public abstract void update(Model model);
 
-    private Calendar date;
-
-    ModelState() {
-        this.date = Calendar.getInstance();
-    }
-
-    public Calendar getDate() {
-        return date;
+    protected void change(Model model, ModelState state) {
+        model.state = state;
+        model.lastModified = Calendar.getInstance();
     }
 }

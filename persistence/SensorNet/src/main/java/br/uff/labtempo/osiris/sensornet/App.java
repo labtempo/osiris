@@ -1,5 +1,8 @@
 package br.uff.labtempo.osiris.sensornet;
 
+import br.uff.labtempo.osiris.omcp.Controller;
+import br.uff.labtempo.osiris.sensornet.controller.EventController;
+import br.uff.labtempo.osiris.sensornet.persistence.memory.SensorDao;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,20 +11,14 @@ import java.util.Map;
  *
  */
 public class App {
+    private static Server server;
 
-    public static void main(String[] args) {
-        Map<String, String> map1 = new HashMap<>();
-        Map<String, String> map2 = new HashMap<>();
-
-        map1.put("chave1", "valor1");
-        map1.put("chave2", "valor2");
-        map1.put("chave3", "valor3");
-        map2.put("chave2", "valor2");
-        map2.put("chave3", "valor3");
-        map2.put("chave1", "valor1");
-
-        System.out.println(map1.equals(map2));
+    public static void main(String[] args) throws Exception {        
+        server = new Server();
+        server.start();        
     }
+    
+    
 
     /**
      * Eventos

@@ -5,20 +5,29 @@
  */
 package br.uff.labtempo.osiris.monitor.controllers;
 
-import br.uff.labtempo.osiris.monitor.model.Sensor;
+
+import br.uff.labtempo.osiris.collector.temp.Sensor;
+import br.uff.labtempo.osiris.monitor.omcp.DataDao;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
 
 /**
@@ -28,6 +37,10 @@ import javafx.util.Callback;
  */
 public class SensorNetController implements Initializable {
 
+    @FXML
+    public void handleMouseClick(MouseEvent arg0) {
+        System.out.println("clicked on " + listViewNetworks.getSelectionModel().getSelectedItem());
+    }
     @FXML
     private ListView<String> listViewNetworks;
 
@@ -39,20 +52,33 @@ public class SensorNetController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        final DataDao dao = new DataDao("192.168.0.7", "admin", "admin");
+
         if (listViewNetworks == null) {
             listViewNetworks = new ListView<>();
         }
-
+        
+        listViewNetworks.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                String nid = listViewNetworks.getSelectionModel().getSelectedItem();
+                
+                try {
+                    setListView(dao.getSensors(nid));
+                } catch (Exception ex) {
+                    Logger.getLogger(SensorNetController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+               
+            }
+        });
+        
+        
         ObservableList<String> items = listViewNetworks.getItems();
 
-        items.add("Network One");
-        items.add("Network Two");
-        items.add("Network Three");
-        items.add("Network Four");
-        items.add("Network Five");
+        try {
+            items.addAll(dao.getNetworks());
 
-        setListView();
-
+            //setListView();
 //        ObservableList<String> items2 = listViewSensors.getItems();
 //
 //        items2.add("Sensor\n One");
@@ -60,42 +86,19 @@ public class SensorNetController implements Initializable {
 //        items2.add("Sensor\n Three");
 //        items2.add("Sensor\n Four");
 //        items2.add("Sensor\n Five");
+        } catch (Exception ex) {
+            Logger.getLogger(SensorNetController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
-    public void setListView() {
-        Set<Sensor> stringSet = new HashSet<>();
+    public void setListView(List<Sensor> sensors) {
         ObservableList observableList = FXCollections.observableArrayList();
-        Map<String, String> v1 = new HashMap<>();
-        Map<String, String> v2 = new HashMap<>();
-        Map<String, String> v3 = new HashMap<>();
-        Map<String, String> v4 = new HashMap<>();
-
-        v1.put("Temperatura", "20");
-        v1.put("Luminosidade", "30");
-        v1.put("Bateria", "10");
-
-        v2.put("Temperatura", "24");
-        v2.put("Luminosidade", "35");
-        v2.put("Bateria", "16");
-
-        v3.put("Temperatura", "21");
-        v3.put("Luminosidade", "32");
-        v3.put("Bateria", "13");
-
-        v4.put("Temperatura", "46");
-        v4.put("Luminosidade", "45");
-        v4.put("Bateria", "13");
-
-        stringSet.add(new Sensor("01", "Micaz", Calendar.getInstance(), v1));
-        stringSet.add(new Sensor("02", "Iris", Calendar.getInstance(), v2));
-        stringSet.add(new Sensor("03", "Micaz", Calendar.getInstance(), v3));
-        stringSet.add(new Sensor("04", "Micaz", Calendar.getInstance(), v4));
-        observableList.setAll(stringSet);
+        observableList.setAll(sensors);
         listViewSensors.setItems(observableList);
         listViewSensors.setCellFactory(new Callback<ListView<Sensor>, javafx.scene.control.ListCell<Sensor>>() {
             @Override
             public ListCell<Sensor> call(ListView<Sensor> listView) {
-                return  new ListViewCell();
+                return new ListViewCell();
             }
         });
     }

@@ -22,9 +22,11 @@ public class TestRequestBuilder {
     private String date = "Thu, 24 Jul 2014 15:40:03 GMT";
     private String hostHead = "module:";
     private String host = "sensornet";
-    private String contentHead = "content-length:";
+    private String contentLenghtHead = "content-length:";
     private String content = "message";
     private int contentLength = 0;
+    private String contentTypeHead = "content-type:";
+    private String contentType = "text/plain";
     private String method = "";
 
     private String lineEmpty = "\n\n";
@@ -54,7 +56,8 @@ public class TestRequestBuilder {
         return method + s + resource + s + version + br
                 + dateHead + date + br
                 + hostHead + host + br
-                + contentHead + contentLength + br
+                + contentLenghtHead + contentLength + br                
+                + contentTypeHead + contentType + br
                 + lineEmpty + content + br;
     }
 

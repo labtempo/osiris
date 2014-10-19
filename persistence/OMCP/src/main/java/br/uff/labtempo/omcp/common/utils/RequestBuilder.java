@@ -25,6 +25,7 @@ public class RequestBuilder {
     private String resource;
     private String module;
     private int contentLength;
+    private String contentType;
 
     public RequestBuilder() {
         this.content = "";
@@ -61,9 +62,36 @@ public class RequestBuilder {
         return this;
     }
 
-    public RequestBuilder content(String content) {
+    private void setContent(String content) {
         this.content = content;
         this.contentLength = content.length();
+    }
+
+    public RequestBuilder content(String content) {
+        this.setContent(content);
+        this.contentType = new Serializer().getTextContentType();
+        return this;
+    }
+
+    public RequestBuilder xmlContent(Object object) {
+        String content = null;
+        Serializer serializer = new Serializer();
+
+        this.contentType = serializer.getXmlContentType();
+        content = serializer.toXml(object);
+
+        this.setContent(content);
+        return this;
+    }
+
+    public RequestBuilder jsonContent(Object object) {
+        String content = null;
+        Serializer serializer = new Serializer();
+
+        this.contentType = serializer.getJsonContentType();
+        content = serializer.toJson(object);
+
+        this.setContent(content);
         return this;
     }
 
@@ -71,13 +99,16 @@ public class RequestBuilder {
         URI uri = getUri(url);
         this.resource = uri.getPath();
         this.module = uri.getHost();
+        if (uri.getQuery() != null) {
+            this.resource += "?" + uri.getQuery();
+        }
         if (!VERSION.contains(uri.getScheme().toUpperCase())) {
             throw new RequestException("wrong scheme!");
         }
     }
 
     public Request build() {
-        Request request = new Request(method, resource, VERSION, Calendar.getInstance(), module, content, contentLength);
+        Request request = new Request(method, resource, VERSION, Calendar.getInstance(), module, content, contentLength, contentType);
         return request;
     }
 
@@ -89,5 +120,10 @@ public class RequestBuilder {
             throw new RequestException("Could not parse url!", ex);
         }
         return uri;
+    }
+
+    public RequestBuilder setContentType(String contentType) {
+        this.contentType = contentType;
+        return this;
     }
 }

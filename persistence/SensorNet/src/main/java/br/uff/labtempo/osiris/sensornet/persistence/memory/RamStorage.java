@@ -3,9 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.uff.labtempo.osiris.sensornet.persistence;
+package br.uff.labtempo.osiris.sensornet.persistence.memory;
 
-import br.uff.labtempo.osiris.sensornet.Network;
 import br.uff.labtempo.osiris.sensornet.model.CollectorWrapper;
 import br.uff.labtempo.osiris.sensornet.model.NetworkWrapper;
 import br.uff.labtempo.osiris.sensornet.model.SensorWrapper;

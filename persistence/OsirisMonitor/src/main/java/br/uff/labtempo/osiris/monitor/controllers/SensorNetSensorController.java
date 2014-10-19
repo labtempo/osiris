@@ -5,7 +5,7 @@ package br.uff.labtempo.osiris.monitor.controllers;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-import br.uff.labtempo.osiris.monitor.model.Sensor;
+import br.uff.labtempo.osiris.collector.temp.Sensor;
 import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -55,14 +55,17 @@ public class SensorNetSensorController {
 
     public void setInfo(Sensor sensor) {
         labelId.setText(sensor.getId());
-        labelModel.setText(sensor.getModel());
-        labelDate.setText(generate(sensor.getDate()));
+        labelModel.setText("micaz");
+        
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(sensor.getTimestamp());        
+        labelDate.setText(generate(calendar));
         
         
         StringBuilder sb = new StringBuilder();
         
-        for (Entry<String, String> entry : sensor.getValues().entrySet()) {
-            sb.append(entry.getKey()+": "+entry.getValue());
+        for (Sensor.Value value : sensor.getValues()) {
+            sb.append(value.getName()+": "+value.getValue()+" "+value.getSymbol());
             sb.append("\n");
         }
         

@@ -20,6 +20,8 @@ public interface OmcpClient extends AutoCloseable {
 
     Response doGet(String url) throws UnreachableModuleException, RequestException, BadResponseException;
 
+    Response doGet(String url, String contentType) throws UnreachableModuleException, RequestException, BadResponseException;
+
     Response doPost(String url, String content) throws UnreachableModuleException, RequestException, BadResponseException;
 
     Response doPut(String url, String content) throws UnreachableModuleException, RequestException, BadResponseException;

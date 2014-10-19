@@ -18,6 +18,8 @@ import br.uff.labtempo.omcp.common.utils.ResponseBuilder;
 import br.uff.labtempo.omcp.common.utils.ResponsePacket;
 import br.uff.labtempo.omcp.server.OmcpServer;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -59,12 +61,12 @@ public class RabbitServer implements OmcpServer, RabbitListener {
     @Override
     public boolean incoming(String message, ServerResponseContainer responseContainer) {
         Response response;
-        boolean process = false;
+        boolean isDone = false;
 
         try {
             Request request = new RequestPacket().parse(message);
-            response = handler.process(request);
-            process = true;
+            response = handler.handler(request);
+            isDone = true;
         } catch (BadRequestException ex) {
             response = new ResponseBuilder().error(ex).build();
         } catch (MethodNotAllowedException ex) {
@@ -75,6 +77,9 @@ public class RabbitServer implements OmcpServer, RabbitListener {
             response = new ResponseBuilder().error(ex).build();
         } catch (NotImplementedException ex) {
             response = new ResponseBuilder().error(ex).build();
+        }catch(Exception ex){
+            response = new ResponseBuilder().error(new InternalServerErrorException(ex)).build();
+            Logger.getLogger(RabbitServer.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         if (responseContainer != null && response != null) {
@@ -84,7 +89,7 @@ public class RabbitServer implements OmcpServer, RabbitListener {
             responseContainer.exec(new ResponsePacket().generate(response));
         }
 
-        return process;
+        return isDone;
     }
 
     @Override

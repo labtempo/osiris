@@ -6,6 +6,7 @@
 package br.uff.labtempo.omcp.common;
 
 import br.uff.labtempo.omcp.common.StatusCode.*;
+import br.uff.labtempo.omcp.common.utils.Serializer;
 import java.util.Calendar;
 
 /**
@@ -14,14 +15,14 @@ import java.util.Calendar;
  */
 public class Response {
 
-    
     private final StatusCode statusCode;
     private final Calendar date;
     private final int contentLength;
     private final String location;
     private final String errorMessage;
     private final String content;
-    
+    private final String contentType;
+
     private String protocolVersion;
     private String module;
     private String host;
@@ -38,7 +39,7 @@ public class Response {
      * @param location
      * @param errorMessage
      */
-    public Response(String protocolVersion, StatusCode statusCode, Calendar date, String module, String content, int contentLength, String location, String errorMessage) {
+    public Response(String protocolVersion, StatusCode statusCode, Calendar date, String module, String content, int contentLength, String contentType, String location, String errorMessage) {
         this.protocolVersion = protocolVersion;
         this.statusCode = statusCode;
         this.date = date;
@@ -47,6 +48,7 @@ public class Response {
         this.contentLength = contentLength;
         this.errorMessage = errorMessage;
         this.location = location;
+        this.contentType = contentType;
     }
 
     public String getProtocolVersion() {
@@ -71,6 +73,16 @@ public class Response {
 
     public String getContent() {
         return this.content;
+    }
+    
+    public String getContentType() {
+        return this.contentType;
+    }
+
+    public <T> T getContent(Class klass) {
+        Serializer serializer = new Serializer();
+        T obj = serializer.<T>deserialize(content, contentType, klass);
+        return obj;
     }
 
     public String getLocation() {

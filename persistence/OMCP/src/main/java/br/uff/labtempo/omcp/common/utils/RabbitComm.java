@@ -13,7 +13,6 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import java.net.InetAddress;
 
-
 /**
  *
  * @author Felipe
@@ -85,6 +84,7 @@ public class RabbitComm {
         try {
             Channel ch = connection.createChannel();
             AMQP.Queue.DeclareOk declare = ch.queueDeclarePassive(queueName);
+            ch.close();
         } catch (Exception e) {
             throw new UnreachableModuleException("Queue not exists!");
         }
@@ -97,6 +97,7 @@ public class RabbitComm {
         try {
             Channel ch = connection.createChannel();
             AMQP.Exchange.DeclareOk declare = ch.exchangeDeclarePassive(exchangeName);
+            ch.close();
         } catch (Exception e) {
             throw new UnreachableModuleException("Queue not exists!");
         }
@@ -109,6 +110,7 @@ public class RabbitComm {
         try {
             Channel ch = connection.createChannel();
             AMQP.Queue.DeclareOk declare = ch.queueDeclarePassive(queueName);
+            ch.close();
             if (declare.getConsumerCount() <= 0) {
                 throw new UnreachableModuleException("Module is not online");
             }
@@ -125,8 +127,9 @@ public class RabbitComm {
         }
         try {
             Channel ch = connection.createChannel();
-            AMQP.Queue.DeclareOk declare = ch.queueDeclarePassive(queueName);
+            AMQP.Queue.DeclareOk declare = ch.queueDeclarePassive(queueName);            
             int consumers = declare.getConsumerCount();
+            ch.close();
             if (consumers > 0) {
                 throw new UnreachableModuleException("Has " + consumers + " consumers!");
             }
@@ -143,8 +146,9 @@ public class RabbitComm {
         }
         try {
             Channel ch = connection.createChannel();
-            AMQP.Queue.DeclareOk declare = ch.queueDeclarePassive(queueName);
+            AMQP.Queue.DeclareOk declare = ch.queueDeclarePassive(queueName);            
             int consumers = declare.getConsumerCount();
+            ch.close();
             if (consumers != 1) {
                 throw new UnreachableModuleException("Has " + consumers + " consumers!");
             }
@@ -159,6 +163,7 @@ public class RabbitComm {
         try {
             Channel ch = connection.createChannel();
             AMQP.Queue.DeclareOk declare = ch.queueDeclarePassive(queueName);
+            ch.close();
             return declare.getMessageCount();
         } catch (Exception e) {
             throw new UnreachableModuleException("Queue not exists!");
@@ -169,6 +174,7 @@ public class RabbitComm {
         try {
             Channel ch = connection.createChannel();
             ch.queuePurge(queueName);
+            ch.close();
         } catch (Exception e) {
             throw new UnreachableModuleException("Could not purge queue!");
         }

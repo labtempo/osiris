@@ -22,11 +22,54 @@ public class ResponseBuilder {
     private String location;
     private String error;
     private int contentLength;
+    private String contentType;
 
-    public ResponseBuilder ok(String content) {
+    private void setContent(String content) {
         this.statusCode = OK;
         this.content = content;
         this.contentLength = content.length();
+    }
+
+    public ResponseBuilder ok(String content) {
+        if (content == null) {
+            content = "";
+        }
+        this.setContent(content);
+        this.contentType = new Serializer().getTextContentType();
+        return this;
+    }
+
+    public ResponseBuilder ok(Object object, ContentType type) {
+        String content = "";
+
+        if (object == null) {
+            object = "";
+        }
+
+        Serializer serializer = new Serializer();
+        switch (type) {
+            case XML:
+                this.contentType = serializer.getXmlContentType();
+                content = serializer.toXml(object);
+                break;
+            case JSON:
+                this.contentType = serializer.getJsonContentType();
+                content = serializer.toJson(object);
+                break;
+        }
+        this.setContent(content);
+        return this;
+    }
+
+    public ResponseBuilder ok(Object object, String contentType) {
+        
+        if (object == null) {
+            object = "";
+        }
+        Serializer serializer = new Serializer();
+        this.contentType = serializer.fixContentTypeByReference(contentType);
+        String content = serializer.serialize(object, this.contentType);
+        this.setContent(content);
         return this;
     }
 
@@ -43,7 +86,17 @@ public class ResponseBuilder {
     }
 
     public Response build() {
-        Response response = new Response(null, statusCode, Calendar.getInstance(), null, content, contentLength, location, error);
+        Response response = new Response(null, statusCode, Calendar.getInstance(), null, content, contentLength, contentType, location, error);
         return response;
-    }    
+    }
+
+    public Response buildNull() {
+        Response response = new Response(null, null, null, null, null, 0, null, null, null);
+        return response;
+    }
+
+    public enum ContentType {
+
+        XML, JSON;
+    }
 }

@@ -53,6 +53,12 @@ public class RabbitClient implements OmcpClient {
     }
 
     @Override
+    public Response doGet(String url, String contentType) throws UnreachableModuleException, RequestException, BadResponseException {
+        Request request = new RequestBuilder().onGet(url).setContentType(contentType).build();
+        return call(request);
+    }
+
+    @Override
     public Response doPost(String url, String content) throws UnreachableModuleException, RequestException, BadResponseException {
         Request request = new RequestBuilder().onPost(url).content(content).build();
         return call(request);

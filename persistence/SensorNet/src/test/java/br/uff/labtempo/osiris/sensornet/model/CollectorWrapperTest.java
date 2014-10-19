@@ -5,8 +5,8 @@
  */
 package br.uff.labtempo.osiris.sensornet.model;
 
-import br.uff.labtempo.osiris.collector.Collector;
-import br.uff.labtempo.osiris.collector.Info;
+import br.uff.labtempo.osiris.collector.temp.Collector;
+import br.uff.labtempo.osiris.collector.temp.Info;
 import java.util.Calendar;
 import org.junit.Test;
 import static org.junit.Assert.*;

@@ -6,7 +6,7 @@
 package br.uff.labtempo.osiris.sensornet.model;
 
 import br.uff.labtempo.osiris.sensornet.model.state.Model;
-import br.uff.labtempo.osiris.collector.Collector;
+import br.uff.labtempo.osiris.collector.temp.Collector;
 import java.util.Objects;
 
 /**

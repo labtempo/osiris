@@ -5,6 +5,7 @@
  */
 package br.uff.labtempo.omcp.common;
 
+import br.uff.labtempo.omcp.common.utils.Serializer;
 import java.util.Calendar;
 
 /**
@@ -20,13 +21,13 @@ public class Request {
     private final String module;
     private final String content;
     private final int contentLength;
+    private final String contentType;
     /**
-     * Represents a module name
-     * Intend that is a module to module communication
+     * Represents a module name Intend that is a module to module communication
      */
-    private String source;    
+    private String source;
 
-    public Request(RequestMethod method, String resource, String version, Calendar date, String module, String content, int contentLength) {
+    public Request(RequestMethod method, String resource, String version, Calendar date, String module, String content, int contentLength, String contentType) {
         this.method = method;
         this.resource = resource;
         this.version = version;
@@ -34,6 +35,7 @@ public class Request {
         this.module = module;
         this.content = content;
         this.contentLength = contentLength;
+        this.contentType = contentType;
     }
 
     public RequestMethod getMethod() {
@@ -60,8 +62,18 @@ public class Request {
         return content;
     }
 
+    public <T> T getContent(Class klass) {
+        Serializer serializer = new Serializer();
+        T obj = serializer.<T>deserialize(content, contentType, klass);
+        return obj;
+    }
+
     public int getContentLength() {
         return contentLength;
+    }
+
+    public String getContentType() {
+        return contentType;
     }
 
     public String getSource() {

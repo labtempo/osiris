@@ -5,6 +5,9 @@
  */
 package br.uff.labtempo.osiris.collector;
 
+import br.uff.labtempo.osiris.collector.temp.Rule;
+import br.uff.labtempo.osiris.collector.temp.Sensor;
+import br.uff.labtempo.osiris.collector.temp.Info;
 import com.google.gson.Gson;
 import java.util.Calendar;
 import java.util.List;

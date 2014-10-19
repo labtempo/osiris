@@ -93,5 +93,4 @@ public enum StatusCode {
         }
         throw new IllegalArgumentException("No enum constant " + StatusCode.class.getName());
     }
-
 }

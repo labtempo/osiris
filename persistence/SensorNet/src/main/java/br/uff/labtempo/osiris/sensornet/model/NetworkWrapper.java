@@ -6,7 +6,7 @@
 package br.uff.labtempo.osiris.sensornet.model;
 
 import br.uff.labtempo.osiris.sensornet.model.state.Model;
-import br.uff.labtempo.osiris.collector.Network;
+import br.uff.labtempo.osiris.collector.temp.Network;
 
 /**
  *
@@ -15,6 +15,10 @@ import br.uff.labtempo.osiris.collector.Network;
 public class NetworkWrapper extends Model<NetworkWrapper> {
 
     private Network network;
+
+    public NetworkWrapper(Network network) {
+        this.network = network;
+    }
 
     public Object getId() {
         return network.getId();
@@ -38,6 +42,10 @@ public class NetworkWrapper extends Model<NetworkWrapper> {
             network = obj.network;
             super.update();
         }
+    }
+
+    public Network getContent() {
+        return network;
     }
 
 }

@@ -5,6 +5,11 @@
  */
 package br.uff.labtempo.osiris.collector;
 
+import br.uff.labtempo.osiris.collector.temp.Rule;
+import br.uff.labtempo.osiris.collector.temp.Collector;
+import br.uff.labtempo.osiris.collector.temp.Network;
+import br.uff.labtempo.osiris.collector.temp.Sensor;
+import br.uff.labtempo.osiris.collector.temp.Info;
 import java.util.Calendar;
 
 /**

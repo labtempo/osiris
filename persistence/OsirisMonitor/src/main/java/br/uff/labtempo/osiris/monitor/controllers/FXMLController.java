@@ -1,5 +1,6 @@
 package br.uff.labtempo.osiris.monitor.controllers;
 
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;

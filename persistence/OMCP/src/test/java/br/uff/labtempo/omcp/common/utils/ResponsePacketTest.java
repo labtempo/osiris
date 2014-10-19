@@ -52,7 +52,8 @@ public class ResponsePacketTest {
                 .append("OMCP/0.1 200 OK\n")
                 .append("date:" + new DateUtil().generate(response.getDate()) + "\n")
                 .append("module:" + module + "\n")
-                .append("content-length:" + content.length() + "\n\n")
+                .append("content-length:" + content.length() + "\n")
+                .append("content-type:" + "text/plain" + "\n\n")
                 .append(content + "\n")
                 .toString();
 

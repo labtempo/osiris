@@ -3,28 +3,28 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.uff.labtempo.osiris.collector;
+package br.uff.labtempo.osiris.collector.to;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
  *
  * @author Felipe
  */
-public class Info {
+public class NetworkTo {
+    private final String id;
+    private final Map<String, String> info;
 
-    private Map<String, String> info;
-
-    public Info() {
-        this.info = new HashMap<>();
+    public NetworkTo(String id, Map<String, String> info) {
+        this.id = id;
+        this.info = info;
     }
 
     public Map<String, String> getInfo() {
         return info;
     }
 
-    public void add(String key, String value) {
-        info.put(key, value);
+    public String getId() {
+        return id;
     }
 }

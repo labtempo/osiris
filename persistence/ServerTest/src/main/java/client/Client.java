@@ -18,12 +18,14 @@ public class Client {
 
     public static void main(String[] args) throws Exception {
         try (OmcpClient connection = new OmcpClientBuilder().host("192.168.0.7").user("admin", "admin").source("generico").build()) {
-            Response  r = connection.doGet("omcp://teste/sensor/01");  
-            connection.doNofity("omcp://teste/","teste");
-            connection.doNofity("omcp://test.ex/sensor/","teste");
-            connection.doNofity("omcp://test.ex/collector1/sample","teste");
-            connection.doNofity("omcp://test.ex/collector/","teste");
-            connection.doNofity("omcp://test.ex/collector/01","teste");
+            Response  r = connection.doGet("omcp://sensornet/labtempo/collectors/datacenter/sensors/50/?chave=valor&chave2=valor2");
+            System.out.println(new ResponsePacket().generate(r));
+             r = connection.doGet("omcp://sensornet/labtempo/collectors/datacenter/sensors/50/");  
+//            connection.doNofity("omcp://teste/","teste");
+//            connection.doNofity("omcp://test.ex/sensor/","teste");
+//            connection.doNofity("omcp://test.ex/collector1/sample","teste");
+//            connection.doNofity("omcp://test.ex/collector/","teste");
+//            connection.doNofity("omcp://test.ex/collector/01","teste");
             System.out.println(new ResponsePacket().generate(r));
         }
     }

@@ -20,32 +20,81 @@ import static org.junit.Assert.*;
  * @author Felipe
  */
 public class ControllerTest {
-    
+
     public ControllerTest() {
     }
 
     @Test
-    public void testSomeMethod() throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
-        Controller c= new Controller() {
+    public void testUrl() throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
+        Controller c = new Controller() {
 
             @Override
             public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
-                
-              String path = "/:aid/controller/:bid/";  
-              
-              String requestPath = "/23s/controller/ds3/";
-              
-                Map<String,String> map = extract(requestPath, path);
-                
-                
+
+                String path = "/:aid/controller/:bid/";
+
+                String requestPath = "/23s/controller/ds3/";
+
+                Map<String, String> map = extract(requestPath, path);
+
                 assertTrue(map.containsKey(":aid"));
-                 assertTrue(map.containsKey(":bid"));
-                
-                return null;            
+                assertTrue(map.containsKey(":bid"));
+
+                return null;
             }
         };
         c.process(null);
-        
+
     }
-    
+
+    @Test
+    public void testUrlWithParams() throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
+        Controller c = new Controller() {
+
+            @Override
+            public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
+
+                String path = "/:aid/controller/:bid/";
+
+                String requestPath = "/23s/controller/ds3?chave=valor&chave2=valor2";
+
+                Map<String, String> map = extract(requestPath, path);
+
+                assertTrue(map.containsKey(":aid"));
+                assertTrue(map.containsKey(":bid"));
+
+                assertTrue(map.containsKey("chave"));
+                assertTrue(map.containsKey("chave2"));
+
+                return null;
+            }
+        };
+        c.process(null);
+
+    }
+    @Test
+    public void testUrlWithOneParam() throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
+        Controller c = new Controller() {
+
+            @Override
+            public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
+
+                String path = "/:aid/controller/:bid/";
+
+                String requestPath = "/23s/controller/ds3/?chave=valor";
+
+                Map<String, String> map = extract(requestPath, path);
+
+                assertTrue(map.containsKey(":aid"));
+                assertTrue(map.containsKey(":bid"));
+
+                assertTrue(map.containsKey("chave"));
+
+                return null;
+            }
+        };
+        c.process(null);
+
+    }
+
 }

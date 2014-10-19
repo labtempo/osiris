@@ -37,14 +37,17 @@ public class RequestPacket {
     private final String br = "\n";
     private final String s = " ";
     private final String r = "\r";
+    private String contentType;
 
     public String generate(Request request) {
+        //TODO: falta teste para este item
         this.protocolVersion = request.getVersion();
         this.method = request.getMethod();
         this.resource = request.getResource();
         this.date = request.getDate();
         this.module = request.getModule();
         this.contentLength = request.getContentLength();
+        this.contentType = request.getContentType();
         this.content = request.getContent();
         this.source = request.getSource();
 
@@ -65,6 +68,11 @@ public class RequestPacket {
                 .append(source)
                 .append(br);
 
+        if (contentType != null) {
+            sb.append(CONTENT_TYPE.getKey())
+                    .append(contentType)
+                    .append(br);
+        }
         if (POST.equals(method) || PUT.equals(method) || NOTIFY.equals(method)) {
             sb.append(CONTENT_LENGTH.getKey())
                     .append(contentLength)
@@ -80,7 +88,7 @@ public class RequestPacket {
     public Request parse(String message) throws BadRequestException {
         this.process(message);
 
-        Request request = new Request(this.method, this.resource, this.protocolVersion, this.date, this.module, this.content, this.contentLength);
+        Request request = new Request(this.method, this.resource, this.protocolVersion, this.date, this.module, this.content, this.contentLength, this.contentType);
         return request;
     }
 
@@ -93,6 +101,7 @@ public class RequestPacket {
 
     private void defineFirstLine(Queue<String> lines) throws BadRequestException {
         String[] firstLine = lines.poll().split(s);
+
         try {
             this.method = Enum.valueOf(RequestMethod.class, firstLine[0]);
         } catch (IllegalArgumentException ex) {
@@ -145,6 +154,10 @@ public class RequestPacket {
 //            throw new BadRequestException("Packet is not contains source.");
 //        }
 
+        if (GET.equals(method) || POST.equals(method) || PUT.equals(method) || NOTIFY.equals(method)) {
+            this.contentType = headers.get(CONTENT_TYPE.toString());
+        }
+
         if (POST.equals(method) || PUT.equals(method) || NOTIFY.equals(method)) {
             if (headers.containsKey(CONTENT_LENGTH.toString())) {
                 this.content = defineContent(lines);
@@ -153,6 +166,10 @@ public class RequestPacket {
                 //is content null? is content empty?
                 if (this.content == null || this.content.length() == 0) {
                     throw new BadRequestException("Method '" + this.method + "' needs a content.");
+                }
+
+                if (this.contentType == null) {
+                    throw new BadRequestException("The content type needs to be declared.");
                 }
 
             } else {
