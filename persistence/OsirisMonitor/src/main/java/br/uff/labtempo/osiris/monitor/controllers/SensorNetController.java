@@ -1,25 +1,14 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.uff.labtempo.osiris.monitor.controllers;
 
 
-import br.uff.labtempo.osiris.collector.temp.Sensor;
+
 import br.uff.labtempo.osiris.monitor.omcp.DataDao;
+import br.uff.labtempo.osiris.sensornet.to.SensorSnTo;
 import java.net.URL;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -45,7 +34,7 @@ public class SensorNetController implements Initializable {
     private ListView<String> listViewNetworks;
 
     @FXML
-    private ListView<Sensor> listViewSensors;
+    private ListView<SensorSnTo> listViewSensors;
 
     /**
      * Initializes the controller class.
@@ -91,22 +80,22 @@ public class SensorNetController implements Initializable {
         }
     }
 
-    public void setListView(List<Sensor> sensors) {
+    public void setListView(List<SensorSnTo> sensors) {
         ObservableList observableList = FXCollections.observableArrayList();
         observableList.setAll(sensors);
         listViewSensors.setItems(observableList);
-        listViewSensors.setCellFactory(new Callback<ListView<Sensor>, javafx.scene.control.ListCell<Sensor>>() {
+        listViewSensors.setCellFactory(new Callback<ListView<SensorSnTo>, javafx.scene.control.ListCell<SensorSnTo>>() {
             @Override
-            public ListCell<Sensor> call(ListView<Sensor> listView) {
+            public ListCell<SensorSnTo> call(ListView<SensorSnTo> listView) {
                 return new ListViewCell();
             }
         });
     }
 
-    public class ListViewCell extends ListCell<Sensor> {
+    public class ListViewCell extends ListCell<SensorSnTo> {
 
         @Override
-        public void updateItem(Sensor sensor, boolean empty) {
+        public void updateItem(SensorSnTo sensor, boolean empty) {
             super.updateItem(sensor, empty);
             if (sensor != null) {
                 SensorNetSensorController data = new SensorNetSensorController();

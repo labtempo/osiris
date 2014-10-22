@@ -5,16 +5,24 @@
  */
 package br.uff.labtempo.osiris.sensornet.model.jpa;
 
+import br.uff.labtempo.osiris.collector.to.SensorCoTo;
 import br.uff.labtempo.osiris.sensornet.model.state.Model;
-import br.uff.labtempo.osiris.sensornet.to.SensorTo;
+import br.uff.labtempo.osiris.sensornet.model.state.ModelState;
+import br.uff.labtempo.osiris.sensornet.model.util.ModelUtil;
+import br.uff.labtempo.osiris.sensornet.to.SensorSnTo;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
@@ -26,10 +34,12 @@ import javax.persistence.OrderBy;
 @Entity
 public class Sensor extends Model<Sensor> {
 
+    @Id
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    private long sid;
     /**
      * hardware id in wsn
      */
-    @Id
     private String id;
 
     /**
@@ -50,34 +60,116 @@ public class Sensor extends Model<Sensor> {
      * sensing values{name of field, value, value type, metric unit, metric
      * symbol}
      */
-    @OneToMany(cascade = CascadeType.ALL)
-    @OrderBy("name ASC")
+//    @ElementCollection
+//    @CollectionTable(
+//          name="VALUE",
+//          joinColumns=@JoinColumn(name="SENSOR_ID")
+//    )
+//    @OrderBy("name ASC")
+    @ElementCollection
     private List<Value> values;
 
     /**
      * watchable hardware resources
      */
+//    @ElementCollection
+//    @CollectionTable(
+//          name="CONSUMABLE",
+//          joinColumns=@JoinColumn(name="SENSOR_ID")
+//    )
+//    @OrderBy("name ASC")
     @OneToMany(cascade = CascadeType.ALL)
-    @OrderBy("name ASC")
     private List<Consumable> consumables;
 
-    public SensorTo getTransferObject() {
-        Map<String, Integer> _consumables = new HashMap<>();
-        for (Consumable consumable : this.consumables) {
-            _consumables.put(consumable.getName(), consumable.getValue());
+    protected Sensor() {
+    }
+
+    public Sensor(String id, long timestamp, List<Value> values, List<Consumable> consumables, Map<String, String> info) {
+        this.id = id;
+        this.timestamp = timestamp;
+        this.values = values;
+        this.consumables = consumables;
+        setInfo(info);
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public Network getNetwork() {
+        return network;
+    }
+
+    public Collector getCollector() {
+        return collector;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public List<Value> getValues() {
+        return values;
+    }
+
+    public void setValues(List<Value> values) {
+        this.values = values;
+    }
+
+    public List<Consumable> getConsumables() {
+        return consumables;
+    }
+
+    public void setConsumables(List<Consumable> consumables) {
+        this.consumables = consumables;
+    }
+
+    public void setNetwork(Network network) {
+        this.network = network;
+    }
+
+    public void setCollector(Collector collector) {
+        this.collector = collector;
+    }
+
+    public SensorSnTo getTransferObject() {
+        return new ModelUtil().toTransferObject(this);
+    }
+
+    public static Sensor generate(SensorCoTo to) {
+        return new ModelUtil().fromTransferObject(to);
+    }
+
+    public boolean update(SensorCoTo sensorTo) {
+        boolean isUpdate = new ModelUtil().updateFromTransferObject(this, sensorTo);
+        if (isUpdate) {
+            update();
+        }
+        return isUpdate;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
         }
 
-        List<Map<String, String>> _values = new ArrayList<>();
-        for (Value value : this.values) {
-            Map<String, String> map = new HashMap<>();
-            map.put("name", value.getName());
-            map.put("value", value.getValue());
-            map.put("type", value.getType());
-            map.put("unit", value.getUnit());
-            map.put("symbol", value.getSymbol());
-            _values.add(map);
-        }
+        Sensor other = (Sensor) obj;
 
-        return new SensorTo(id, getLastModifiedDate().getTimeInMillis(), getState().toString(), network.getId(), collector.getId(), timestamp, _values, _consumables, getInfo());
+        if (!id.equals(other.id)) {
+            return false;
+        }        
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
     }
 }

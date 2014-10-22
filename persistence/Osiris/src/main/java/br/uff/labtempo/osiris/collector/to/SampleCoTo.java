@@ -9,26 +9,26 @@ package br.uff.labtempo.osiris.collector.to;
  *
  * @author Felipe
  */
-public class SampleTo {
-    private final NetworkTo network;
-    private final CollectorTo collector;
-    private final SensorTo sensor;
+public class SampleCoTo {
+    private final NetworkCoTo network;
+    private final CollectorCoTo collector;
+    private final SensorCoTo sensor;
 
-    public SampleTo(NetworkTo network, CollectorTo collector, SensorTo sensor) {
+    public SampleCoTo(NetworkCoTo network, CollectorCoTo collector, SensorCoTo sensor) {
         this.sensor = sensor;
         this.collector = collector;
         this.network = network;
     }
 
-    public NetworkTo getNetwork() {
+    public NetworkCoTo getNetwork() {
         return network;
     }
 
-    public CollectorTo getCollector() {
+    public CollectorCoTo getCollector() {
         return collector;
     }
 
-    public SensorTo getSensor() {
+    public SensorCoTo getSensor() {
         return sensor;
     }
 }

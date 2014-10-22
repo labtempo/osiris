@@ -16,7 +16,7 @@ public enum ModelState {
     NEW() {
                 @Override
                 public void deactivate(Model model) {
-                     change(model, ModelState.INATIVE);
+                    change(model, ModelState.INATIVE);
                 }
 
                 @Override
@@ -38,7 +38,7 @@ public enum ModelState {
 
                 @Override
                 public void reactivate(Model model) {
-                     change(model, ModelState.REACTIVATED);
+                    change(model, ModelState.REACTIVATED);
                 }
 
                 @Override
@@ -49,7 +49,7 @@ public enum ModelState {
     UPDATED() {
                 @Override
                 public void deactivate(Model model) {
-                     change(model, ModelState.INATIVE);
+                    change(model, ModelState.INATIVE);
                 }
 
                 @Override
@@ -59,7 +59,16 @@ public enum ModelState {
 
                 @Override
                 public void update(Model model) {
-                   change(model, ModelState.UPDATED);
+                    switch (model.state) {
+                        case INATIVE:
+                            change(model, ModelState.REACTIVATED);
+                            break;
+                        case NEW:
+                        case REACTIVATED:
+                        case UPDATED:
+                            change(model, ModelState.UPDATED);
+                            break;
+                    }
                 }
             },
     REACTIVATED() {
@@ -87,6 +96,6 @@ public enum ModelState {
 
     protected void change(Model model, ModelState state) {
         model.state = state;
-        model.lastModified = Calendar.getInstance();
+        model.updateDate();
     }
 }

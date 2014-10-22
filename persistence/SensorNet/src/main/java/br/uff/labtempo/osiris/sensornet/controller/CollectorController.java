@@ -13,14 +13,12 @@ import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
 import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
 import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
 import br.uff.labtempo.osiris.omcp.Controller;
-import br.uff.labtempo.osiris.sensornet.model.CollectorWrapper;
-import br.uff.labtempo.osiris.sensornet.model.NetworkWrapper;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Collector;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
 import br.uff.labtempo.osiris.sensornet.persistence.CollectorDao;
 import br.uff.labtempo.osiris.sensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.sensornet.persistence.NetworkDao;
-import br.uff.labtempo.osiris.sensornet.to.CollectorTo;
+import br.uff.labtempo.osiris.sensornet.to.CollectorSnTo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -69,7 +67,7 @@ public class CollectorController extends Controller {
         return null;
     }
 
-    private List<CollectorTo> getAll(String networkId) throws NotFoundException {
+    private List<CollectorSnTo> getAll(String networkId) throws NotFoundException {
         NetworkDao<Network> ndao = factory.getNetworkDao();
         CollectorDao<Collector> cdao = factory.getCollectorDao();
 
@@ -81,7 +79,7 @@ public class CollectorController extends Controller {
 
         List<Collector> cwlist = cdao.getAll(networkId);
 
-        List<CollectorTo> collectors = new ArrayList<>();
+        List<CollectorSnTo> collectors = new ArrayList<>();
 
         for (Collector cw : cwlist) {
             collectors.add(cw.getTransferObject());
@@ -90,7 +88,7 @@ public class CollectorController extends Controller {
         return collectors;
     }
 
-    private CollectorTo getById(String networkId, String collectorId) throws NotFoundException {
+    private CollectorSnTo getById(String networkId, String collectorId) throws NotFoundException {
         NetworkDao<Network> ndao = factory.getNetworkDao();
         CollectorDao<Collector> cdao = factory.getCollectorDao();
 

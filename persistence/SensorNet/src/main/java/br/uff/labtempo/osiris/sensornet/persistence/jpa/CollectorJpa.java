@@ -6,13 +6,17 @@
 package br.uff.labtempo.osiris.sensornet.persistence.jpa;
 
 import br.uff.labtempo.osiris.sensornet.model.jpa.Collector;
+import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
 import br.uff.labtempo.osiris.sensornet.persistence.CollectorDao;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.SetJoin;
+import javax.persistence.metamodel.EntityType;
 
 /**
  *
@@ -37,9 +41,9 @@ public class CollectorJpa implements CollectorDao<Collector> {
         CriteriaBuilder cb = data.getCriteriaBuilder();
         CriteriaQuery<Collector> criteriaQuery = cb.createQuery(Collector.class);
         Root<Collector> root = criteriaQuery.from(Collector.class);
-
+        Join<Collector, Network> subroot = root.join("network");
         List<Predicate> predicates = new ArrayList<>();
-        predicates.add(cb.equal(root.<String>get("network"), networkId));
+        predicates.add(cb.equal(subroot.<String>get("id"), networkId));
         predicates.add(cb.equal(root.<String>get("id"), collectorId));
         criteriaQuery.where(predicates.toArray(new Predicate[]{}));
         criteriaQuery.select(root);
@@ -51,7 +55,8 @@ public class CollectorJpa implements CollectorDao<Collector> {
         CriteriaBuilder cb = data.getCriteriaBuilder();
         CriteriaQuery<Collector> criteriaQuery = cb.createQuery(Collector.class);
         Root<Collector> root = criteriaQuery.from(Collector.class);
-        criteriaQuery.where(cb.equal(root.<String>get("network"), networkId));
+        Join<Collector, Network> subroot = root.join("network");
+        criteriaQuery.where(cb.equal(subroot.<String>get("id"), networkId));
         criteriaQuery.select(root);
         List<Collector> collectors = data.getQuery(criteriaQuery);
 
@@ -59,7 +64,7 @@ public class CollectorJpa implements CollectorDao<Collector> {
     }
 
     @Override
-    public void insert(Collector o) {
+    public void save(Collector o) {
         data.save(o);
     }
 

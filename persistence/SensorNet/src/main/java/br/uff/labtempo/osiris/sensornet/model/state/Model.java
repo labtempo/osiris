@@ -7,10 +7,13 @@ package br.uff.labtempo.osiris.sensornet.model.state;
 
 import java.io.Serializable;
 import java.util.Calendar;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.persistence.CascadeType;
+import javax.persistence.ElementCollection;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.ManyToOne;
 import javax.persistence.MapKey;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
@@ -22,20 +25,22 @@ import javax.persistence.TemporalType;
  * @author Felipe
  */
 @MappedSuperclass
-public abstract class Model<T extends Model> implements Serializable{
+public abstract class Model<T extends Model> implements Serializable {
 
     @Enumerated(EnumType.STRING)
-    ModelState state;
+    protected ModelState state;
 
     @Temporal(TemporalType.TIMESTAMP)
     Calendar lastModified;
-    
-    @OneToMany(cascade = CascadeType.ALL)
-    @MapKey(name = "info")
+
+    //@ManyToOne(cascade = CascadeType.ALL)
+    @ElementCollection
     private Map<String, String> info;
 
     public Model() {
+        this.info = new LinkedHashMap<>();
         this.state = ModelState.NEW;
+        updateDate();
     }
 
     public void deactivate() {
@@ -46,7 +51,7 @@ public abstract class Model<T extends Model> implements Serializable{
         state.reactivate(this);
     }
 
-    protected final void update() {
+    public final void update() {
         state.update(this);
     }
 
@@ -61,6 +66,13 @@ public abstract class Model<T extends Model> implements Serializable{
     public Map<String, String> getInfo() {
         return info;
     }
-    
-    
+
+    public void setInfo(Map<String, String> info) {
+        this.info = info;
+    }
+
+    void updateDate() {
+        lastModified = Calendar.getInstance();
+    }
+
 }

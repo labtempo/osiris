@@ -5,9 +5,12 @@
  */
 package br.uff.labtempo.osiris.sensornet.model;
 
-import br.uff.labtempo.osiris.collector.temp.Collector;
-import br.uff.labtempo.osiris.collector.temp.Info;
+import br.uff.labtempo.osiris.collector.to.CollectorCoTo;
+import br.uff.labtempo.osiris.sensornet.model.jpa.Collector;
+import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -17,16 +20,14 @@ import static org.junit.Assert.*;
  */
 public class CollectorWrapperTest {
 
-    private Collector collectorA, collectorB;
+    private CollectorCoTo collectorA, collectorB;
 
     public CollectorWrapperTest() {
-        this.collectorA = new Collector(10);
-        this.collectorB = new Collector(50);
-        Info info = new Info();
-        info.add("chave", "valor");
+        Map<String, String> info = new HashMap<>();
+        info.put("chave", "valor");
+        this.collectorA = new CollectorCoTo("10", info);
+        this.collectorB = new CollectorCoTo("50", info);
 
-        this.collectorA.setInfo(info);
-        this.collectorB.setInfo(info);
     }
 
     @Test
@@ -34,13 +35,13 @@ public class CollectorWrapperTest {
 
         Calendar calendar;
 
-        CollectorWrapper cw = new CollectorWrapper(collectorA);
-        CollectorWrapper cw2 = new CollectorWrapper(collectorB);
-        CollectorWrapper cw3 = new CollectorWrapper(collectorA);
+        Collector cw = Collector.build(collectorA);
+        Collector cw2 = Collector.build(collectorB);
+        Collector cw3 = Collector.build(collectorA);
 
         calendar = cw.getLastModifiedDate();
 
-        cw.update(cw2);
+        cw.update();
 
         assertNotSame(calendar, cw.getLastModifiedDate());
 
@@ -58,7 +59,7 @@ public class CollectorWrapperTest {
 
         calendar = cw.getLastModifiedDate();
 
-        cw.update(cw3);
+        cw.update();
 
         assertNotSame(calendar, cw.getLastModifiedDate());
 
@@ -85,8 +86,8 @@ public class CollectorWrapperTest {
     @Test(expected = RuntimeException.class)
     public void stateWrongTransitionNewToReactivatedTest() {
 
-        CollectorWrapper cw = new CollectorWrapper(collectorA);
-
+        Collector cw = Collector.build(collectorA);
+        
         cw.reactivate();
 
     }
@@ -94,7 +95,7 @@ public class CollectorWrapperTest {
     @Test(expected = RuntimeException.class)
     public void stateWrongTransitionReactivatedToReactivatedTest() {
 
-        CollectorWrapper cw = new CollectorWrapper(collectorA);
+        Collector cw = Collector.build(collectorA);
         cw.deactivate();
         cw.reactivate();
         cw.reactivate();
@@ -104,19 +105,19 @@ public class CollectorWrapperTest {
     @Test(expected = RuntimeException.class)
     public void stateWrongTransitionDeactivateToUpdatedTest() {
 
-        CollectorWrapper cw = new CollectorWrapper(collectorA);
-        CollectorWrapper cw2 = new CollectorWrapper(collectorB);
+        Collector cw = Collector.build(collectorA);
+        Collector cw2 = Collector.build(collectorA);
 
         cw.deactivate();
-        cw.update(cw2);
+        cw.update();
 
     }
 
     @Test(expected = RuntimeException.class)
     public void stateWrongTransitionDeactivateToDeactivateTest() {
 
-        CollectorWrapper cw = new CollectorWrapper(collectorA);
-
+        Collector cw = Collector.build(collectorA);
+        
         cw.deactivate();
         cw.deactivate();
 

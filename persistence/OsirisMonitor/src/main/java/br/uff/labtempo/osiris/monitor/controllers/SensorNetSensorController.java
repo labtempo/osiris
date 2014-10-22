@@ -6,11 +6,13 @@ package br.uff.labtempo.osiris.monitor.controllers;
  * and open the template in the editor.
  */
 import br.uff.labtempo.osiris.collector.temp.Sensor;
+import br.uff.labtempo.osiris.sensornet.to.SensorSnTo;
 import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.TimeZone;
@@ -53,7 +55,7 @@ public class SensorNetSensorController {
         }
     }
 
-    public void setInfo(Sensor sensor) {
+    public void setInfo(SensorSnTo sensor) {
         labelId.setText(sensor.getId());
         labelModel.setText("micaz");
         
@@ -64,8 +66,9 @@ public class SensorNetSensorController {
         
         StringBuilder sb = new StringBuilder();
         
-        for (Sensor.Value value : sensor.getValues()) {
-            sb.append(value.getName()+": "+value.getValue()+" "+value.getSymbol());
+        for (Map<String, String> value : sensor.getValues()) {           
+            
+            sb.append(value.get("name")+": "+value.get("value")+" "+value.get("symbol"));
             sb.append("\n");
         }
         

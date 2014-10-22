@@ -12,7 +12,7 @@ import java.util.Map;
  *
  * @author Felipe
  */
-public class SensorTo {
+public class SensorCoTo {
 
     private final String id;
     private final long timestamp;
@@ -21,7 +21,7 @@ public class SensorTo {
     private final List<Map<String, String>> values;
     private final Map<String, String> info;
 
-    public SensorTo(String id, long timestamp, Map<String, Integer> consumables, List<Map<String, String>> rules, List<Map<String, String>> values, Map<String, String> info) {
+    public SensorCoTo(String id, long timestamp, Map<String, Integer> consumables, List<Map<String, String>> rules, List<Map<String, String>> values, Map<String, String> info) {
         this.id = id;
         this.timestamp = timestamp;
         this.consumables = consumables;

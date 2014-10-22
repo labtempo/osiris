@@ -11,7 +11,7 @@ import java.util.Map;
  *
  * @author Felipe
  */
-public class NetworkTo {
+public class NetworkSnTo {
     /** id */
     private final String id;
     
@@ -26,7 +26,7 @@ public class NetworkTo {
     /** domain, os, model, network type and more related to network... */
     private final Map<String,String> info;
 
-    public NetworkTo(String id, long lastModifiedDate, String networkState, int collectors, int sensors, Map<String, String> info) {
+    public NetworkSnTo(String id, long lastModifiedDate, String networkState, int collectors, int sensors, Map<String, String> info) {
         this.id = id;
         this.modified = lastModifiedDate;
         this.state = networkState;
@@ -47,11 +47,11 @@ public class NetworkTo {
         return state;
     }
 
-    public int getCollectors() {
+    public int countCollectors() {
         return collectors;
     }
 
-    public int getSensors() {
+    public int countSensors() {
         return sensors;
     }
 

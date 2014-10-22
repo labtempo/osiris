@@ -11,11 +11,11 @@ import java.util.Map;
  *
  * @author Felipe
  */
-public class CollectorTo {
+public class CollectorCoTo {
     private final String id;
     private final Map<String, String> info;
 
-    public CollectorTo(String id, Map<String, String> info) {
+    public CollectorCoTo(String id, Map<String, String> info) {
         this.id = id;
         this.info = info;
     }

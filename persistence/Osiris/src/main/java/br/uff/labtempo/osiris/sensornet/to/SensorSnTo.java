@@ -13,7 +13,7 @@ import java.util.Map;
  *
  * @author Felipe
  */
-public class SensorTo {
+public class SensorSnTo {
     /** hardware id in wsn */
     private final String id;
     
@@ -37,7 +37,7 @@ public class SensorTo {
     /** parent, typeof, model, role and more... */
     private final Map<String,String> info;
 
-    public SensorTo(String id, long lastModifiedDate, String sensorState, String networkId, String collectorId, long captureTimestamp, List<Map<String, String>> values, Map<String, Integer> consumables, Map<String, String> info) {
+    public SensorSnTo(String id, long lastModifiedDate, String sensorState, String networkId, String collectorId, long captureTimestamp, List<Map<String, String>> values, Map<String, Integer> consumables, Map<String, String> info) {
         this.id = id;
         this.modified = lastModifiedDate;
         this.state = sensorState;
@@ -53,7 +53,7 @@ public class SensorTo {
         return id;
     }
 
-    public long getModified() {
+    public long getLastModified() {
         return modified;
     }
 
@@ -61,11 +61,11 @@ public class SensorTo {
         return state;
     }
 
-    public String getNetwork() {
+    public String getNetworkId() {
         return network;
     }
 
-    public String getCollector() {
+    public String getCollectorId() {
         return collector;
     }
 

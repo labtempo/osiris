@@ -6,7 +6,7 @@
 package br.uff.labtempo.osiris.sensornet.model.jpa;
 
 import java.io.Serializable;
-import javax.persistence.Entity;
+import javax.persistence.Embeddable;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -15,17 +15,16 @@ import javax.persistence.Id;
  *
  * @author Felipe
  */
-@Entity
-public class Value implements Serializable{
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+@Embeddable
+public class Value implements Serializable{    
     private String name;
     private String type;
     private String value;
     private String unit;
     private String symbol;
+
+    protected Value() {
+    }
 
     public Value(String name, String type, String value, String unit, String symbol) {
         this.name = name;
@@ -70,4 +69,43 @@ public class Value implements Serializable{
     public String getSymbol() {
         return symbol;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+
+        Value other = (Value) obj;
+
+        if (!name.equals(other.name)) {
+            return false;
+        }
+        if (!type.equals(other.type)) {
+            return false;
+        }
+        if (!value.equals(other.value)) {
+            return false;
+        }
+        if (!unit.equals(other.unit)) {
+            return false;
+        }
+        if (!symbol.equals(other.symbol)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
+    
+    
 }

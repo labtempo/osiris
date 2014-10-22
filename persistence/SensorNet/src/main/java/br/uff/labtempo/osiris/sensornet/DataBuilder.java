@@ -5,13 +5,15 @@
  */
 package br.uff.labtempo.osiris.sensornet;
 
-import br.uff.labtempo.osiris.collector.temp.Collector;
-import br.uff.labtempo.osiris.collector.temp.Info;
-import br.uff.labtempo.osiris.collector.temp.Rule;
-import br.uff.labtempo.osiris.collector.temp.Sample;
-import br.uff.labtempo.osiris.collector.temp.Sensor;
-import br.uff.labtempo.osiris.collector.temp.Network;
+import br.uff.labtempo.osiris.collector.to.CollectorCoTo;
+import br.uff.labtempo.osiris.collector.to.NetworkCoTo;
+import br.uff.labtempo.osiris.collector.to.SampleCoTo;
+import br.uff.labtempo.osiris.collector.to.SensorCoTo;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -19,66 +21,79 @@ import java.util.Calendar;
  */
 public class DataBuilder {
 
-    private static long index;
+    private long index = 1;
     private final String networkId;
     private final String collectorId;
 
     DataBuilder(String networkId, String collectorId) {
         this.networkId = networkId;
-        this.collectorId = collectorId;    }
+        this.collectorId = collectorId;
+    }
 
-    public Sample generateSample() {
-        Sample sample = new Sample(getNetwork(), getCollector(), getSensor());
+    public SampleCoTo generateSample() {
+        SampleCoTo sample = new SampleCoTo(getNetwork(), getCollector(), getSensor());
         return sample;
     }
 
-    Sensor getSensor() {
-        Sensor sensor = new Sensor(index++, Calendar.getInstance().getTimeInMillis());
-        Info info = new Info();
-        info.add("chave", "valor");
-        info.add("chave2", "valor2");
+    SensorCoTo getSensor() {
+        Map<String, String> info = new HashMap<>();
+        info.put("chave", "valor");
+        info.put("chave2", "valor2");
 
-        sensor.setInfo(info);
+        List<Map<String, String>> _values = new ArrayList<>();
 
-        sensor.addValue("temperature", 35.5, "celsius", "°C");
-        sensor.addValue("luminosity", 200.0, "candela", "cd");
-        sensor.addValue("battery", 50, "volt", "V");
+        Map<String, String> map = new HashMap<>();
+        map.put("name", "temperature");
+        map.put("value", "35.5");
+        map.put("type", "real");
+        map.put("unit", "celsius");
+        map.put("symbol", "°C");
+        _values.add(map);
+        map = new HashMap<>();
+        map.put("name", "luminosity");
+        map.put("value", "200.0");
+        map.put("type", "real");
+        map.put("unit", "candela");
+        map.put("symbol", "cd");
+        _values.add(map);
+        map = new HashMap<>();
+        map.put("name", "battery");
+        map.put("value", "50");
+        map.put("type", "integer");
+        map.put("unit", "volt");
+        map.put("symbol", "V");
+        _values.add(map);        
+        
+        Map<String, Integer> consumables = new HashMap<>();
+        consumables.put("batrery", 75);
+        
+        
+        List<Map<String, String>> _rules = new ArrayList<>();
 
-        Rule r1 = new Rule("battery");
-        r1.add("low", 30);
-        r1.add("full", 100);
-
-        Rule r2 = new Rule("interval");
-        r2.add("amount", 30);
-        r2.add("unit", "seconds");
-
-        sensor.addRule(r1);
-        sensor.addRule(r2);
-
-        return sensor;
+        map = new HashMap<>();
+        map.put("name", "low battery");
+        map.put("operator", "<");
+        map.put("consumable", "battery");
+        map.put("value", "30");
+        map.put("message", "Battery has low charge, you need change it!");
+        _rules.add(map);
+        
+        return new SensorCoTo(""+index++, Calendar.getInstance().getTimeInMillis(),consumables,_rules,_values,info);
 
     }
 
-    Network getNetwork() {
-        Network network = new Network(networkId);
-        Info info = new Info();
-        info.add("domain", "br.uff.ic");
-        info.add("type", "wireless");
-        info.add("OS", "TinyOS");
-
-        network.setInfo(info);
-
-        return network;
+    NetworkCoTo getNetwork() {
+        Map<String, String> info = new HashMap<>();
+        info.put("domain", "br.uff.ic");
+        info.put("type", "wireless");
+        info.put("OS", "TinyOS");
+        return new NetworkCoTo(networkId, info);
     }
 
-    Collector getCollector() {
-        Collector collector = new Collector(collectorId);
-        Info info = new Info();
-        info.add("chave", "valor");
-        info.add("chave2", "valor2");
-
-        collector.setInfo(info);
-
-        return collector;
+    CollectorCoTo getCollector() {
+        Map<String, String> info = new HashMap<>();
+        info.put("descricao", "sala do laboratorio");
+        info.put("numero", "2");
+        return new CollectorCoTo(collectorId, info);
     }
 }

@@ -10,7 +10,7 @@ package br.uff.labtempo.osiris.sensornet.persistence;
  * @author Felipe
  */
 interface Dao<T> {
-    public void insert(T o);
+    public void save(T o);
 
     public void update(T o);
 

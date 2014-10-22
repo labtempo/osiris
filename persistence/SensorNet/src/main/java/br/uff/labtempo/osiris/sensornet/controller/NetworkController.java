@@ -13,11 +13,10 @@ import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
 import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
 import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
 import br.uff.labtempo.osiris.omcp.Controller;
-import br.uff.labtempo.osiris.sensornet.model.NetworkWrapper;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
 import br.uff.labtempo.osiris.sensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.sensornet.persistence.NetworkDao;
-import br.uff.labtempo.osiris.sensornet.to.NetworkTo;
+import br.uff.labtempo.osiris.sensornet.to.NetworkSnTo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -62,12 +61,12 @@ public class NetworkController extends Controller {
         return null;
     }
 
-    private List<NetworkTo> getAll() throws NotFoundException {
+    private List<NetworkSnTo> getAll() throws NotFoundException {
         NetworkDao<Network> ndao = factory.getNetworkDao();
 
         List<Network> nwlist = ndao.getAll();
 
-        List<NetworkTo> networks = new ArrayList<>();
+        List<NetworkSnTo> networks = new ArrayList<>();
 
         for (Network nw : nwlist) {
             networks.add(nw.getTransferObject());
@@ -76,7 +75,7 @@ public class NetworkController extends Controller {
         return networks;
     }
 
-    private NetworkTo getById(String networkId) throws NotFoundException {
+    private NetworkSnTo getById(String networkId) throws NotFoundException {
         NetworkDao<Network> ndao = factory.getNetworkDao();
 
         Network nw = ndao.get(networkId);

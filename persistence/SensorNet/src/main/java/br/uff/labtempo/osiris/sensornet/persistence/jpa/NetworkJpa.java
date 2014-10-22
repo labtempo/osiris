@@ -46,7 +46,7 @@ public class NetworkJpa implements NetworkDao<Network> {
     }
 
     @Override
-    public void insert(Network o) {
+    public void save(Network o) {
         data.save(o);
     }
 

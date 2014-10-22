@@ -14,8 +14,6 @@ import br.uff.labtempo.osiris.sensornet.controller.NetworkController;
 import br.uff.labtempo.osiris.sensornet.controller.SensorController;
 import br.uff.labtempo.osiris.sensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.sensornet.persistence.jpa.JpaDaoFactory;
-import br.uff.labtempo.osiris.sensornet.persistence.memory.SensorDao;
-
 /**
  *
  * @author Felipe
@@ -67,23 +65,23 @@ public class Server implements AutoCloseable{
     }
     public static void populate( DaoFactory factory){
         EventController controller = new EventController(factory);
-        DataBuilder db = new DataBuilder("labtempo","lab");
-        for (int i = 0; i < 50; i++) {
+        DataBuilder db = null;
+        
+        db = new DataBuilder("labtempo","lab");
+        for (int i = 0; i < 2; i++) {
             controller.insert(db.generateSample());
         }
         
         db = new DataBuilder("labtempo","datacenter");
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 2; i++) {
             controller.insert(db.generateSample());
         }
         
-        db = new DataBuilder("pos","lab");
-        for (int i = 0; i < 20; i++) {
+        db = new DataBuilder("posgrad","lab2");
+        for (int i = 0; i < 6; i++) {
             controller.insert(db.generateSample());
         }
         
-        SensorDao sdao =  new SensorDao();
         
-        sdao.getClass();
     }
 }

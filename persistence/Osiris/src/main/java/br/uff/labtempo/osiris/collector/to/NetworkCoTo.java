@@ -11,11 +11,11 @@ import java.util.Map;
  *
  * @author Felipe
  */
-public class NetworkTo {
+public class NetworkCoTo {
     private final String id;
     private final Map<String, String> info;
 
-    public NetworkTo(String id, Map<String, String> info) {
+    public NetworkCoTo(String id, Map<String, String> info) {
         this.id = id;
         this.info = info;
     }

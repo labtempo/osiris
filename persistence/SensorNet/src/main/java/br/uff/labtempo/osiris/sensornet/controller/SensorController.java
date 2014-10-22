@@ -13,9 +13,6 @@ import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
 import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
 import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
 import br.uff.labtempo.osiris.omcp.Controller;
-import br.uff.labtempo.osiris.sensornet.model.CollectorWrapper;
-import br.uff.labtempo.osiris.sensornet.model.NetworkWrapper;
-import br.uff.labtempo.osiris.sensornet.model.SensorWrapper;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Collector;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Sensor;
@@ -23,7 +20,7 @@ import br.uff.labtempo.osiris.sensornet.persistence.CollectorDao;
 import br.uff.labtempo.osiris.sensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.sensornet.persistence.NetworkDao;
 import br.uff.labtempo.osiris.sensornet.persistence.SensorDao;
-import br.uff.labtempo.osiris.sensornet.to.SensorTo;
+import br.uff.labtempo.osiris.sensornet.to.SensorSnTo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +86,7 @@ public class SensorController extends Controller {
         return null;
     }
 
-    private List<SensorTo> getAllOfNetwork(String networkId) throws NotFoundException {
+    private List<SensorSnTo> getAllOfNetwork(String networkId) throws NotFoundException {
         NetworkDao<Network> ndao = factory.getNetworkDao();
         SensorDao<Sensor> sdao = factory.getSensorDao();
 
@@ -101,7 +98,7 @@ public class SensorController extends Controller {
 
         List<Sensor> swlist = sdao.getAll(networkId);
 
-        List<SensorTo> sensors = new ArrayList<>();
+        List<SensorSnTo> sensors = new ArrayList<>();
         for (Sensor sw : swlist) {
             sensors.add(sw.getTransferObject());
         }
@@ -109,7 +106,7 @@ public class SensorController extends Controller {
         return sensors;
     }
 
-    private List<SensorTo> getAll(String networkId, String collectorId) throws NotFoundException {
+    private List<SensorSnTo> getAll(String networkId, String collectorId) throws NotFoundException {
         NetworkDao<Network> ndao = factory.getNetworkDao();        
         CollectorDao<Collector> cdao = factory.getCollectorDao();
         SensorDao<Sensor> sdao = factory.getSensorDao();
@@ -128,7 +125,7 @@ public class SensorController extends Controller {
 
         List<Sensor> swlist = sdao.getAll(networkId, collectorId);
 
-        List<SensorTo> sensors = new ArrayList<>();
+        List<SensorSnTo> sensors = new ArrayList<>();
         for (Sensor sw : swlist) {
             sensors.add(sw.getTransferObject());
         }
@@ -136,7 +133,7 @@ public class SensorController extends Controller {
         return sensors;
     }
 
-    private SensorTo getById(String networkId, String collectorId, String sensorId) throws NotFoundException {
+    private SensorSnTo getById(String networkId, String collectorId, String sensorId) throws NotFoundException {
         NetworkDao<Network> ndao = factory.getNetworkDao();        
         CollectorDao<Collector> cdao = factory.getCollectorDao();
         SensorDao<Sensor> sdao = factory.getSensorDao();

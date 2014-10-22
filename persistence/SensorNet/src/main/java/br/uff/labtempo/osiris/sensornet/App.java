@@ -1,10 +1,7 @@
 package br.uff.labtempo.osiris.sensornet;
 
-import br.uff.labtempo.osiris.omcp.Controller;
-import br.uff.labtempo.osiris.sensornet.controller.EventController;
-import br.uff.labtempo.osiris.sensornet.persistence.memory.SensorDao;
-import java.util.HashMap;
-import java.util.Map;
+import br.uff.labtempo.osiris.sensornet.persistence.jpa.JpaDaoFactory;
+
 
 /**
  * Hello world!
@@ -15,7 +12,9 @@ public class App {
 
     public static void main(String[] args) throws Exception {        
         server = new Server();
-        server.start();        
+        server.start(); 
+        
+        //new JpaDaoFactory();
     }
     
     

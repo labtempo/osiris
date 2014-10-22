@@ -11,7 +11,7 @@ import java.util.Map;
  *
  * @author Felipe
  */
-public class CollectorTo {
+public class CollectorSnTo {
     /** id */
     private final String id;
     
@@ -28,7 +28,7 @@ public class CollectorTo {
     /** description, role, location and more related to collector... */
     private final Map<String,String> info;
 
-    public CollectorTo(String id, long lastModifiedDate, String collectorState, String networkId, int sensors, Map<String, String> info) {
+    public CollectorSnTo(String id, long lastModifiedDate, String collectorState, String networkId, int sensors, Map<String, String> info) {
         this.id = id;
         this.modified = lastModifiedDate;
         this.state = collectorState;
@@ -49,11 +49,11 @@ public class CollectorTo {
         return state;
     }
 
-    public String getNetwork() {
+    public String getNetworkId() {
         return network;
     }
 
-    public int getSensors() {
+    public int countSensors() {
         return sensors;
     }
 
