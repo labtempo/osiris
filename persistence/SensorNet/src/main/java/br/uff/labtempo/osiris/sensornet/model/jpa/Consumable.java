@@ -5,6 +5,7 @@
  */
 package br.uff.labtempo.osiris.sensornet.model.jpa;
 
+import br.uff.labtempo.osiris.sensornet.model.util.ModelUtil;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,13 +31,12 @@ import javax.persistence.Table;
 public class Consumable implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.TABLE)
     private long id;
     private String name;
     private int val;
 
     //@ElementCollection
-    
 //    @OrderBy("name ASC")
     @ElementCollection
     private List<Rule> rules;
@@ -79,6 +79,25 @@ public class Consumable implements Serializable {
         if (!name.equals(other.name)) {
             return false;
         }
+        return true;
+    }
+
+    public boolean equalsAll(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+
+        Consumable other = (Consumable) obj;
+
+        if (!name.equals(other.name)) {
+            return false;
+        }
 
         if (val != (other.val)) {
             return false;
@@ -94,8 +113,16 @@ public class Consumable implements Serializable {
         return name.hashCode();
     }
 
-    public void setRule(Rule rule) {
+    public void addRule(Rule rule) {
         rules.add(rule);
+    }
+
+    public void setValue(int value) {
+        this.val = value;
+    }
+
+    public void setRules(List<Rule> rules) {
+        this.rules = rules;
     }
 
 }

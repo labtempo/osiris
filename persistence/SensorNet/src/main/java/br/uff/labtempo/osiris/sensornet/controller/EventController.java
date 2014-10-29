@@ -22,10 +22,13 @@ import br.uff.labtempo.osiris.omcp.Notification;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Collector;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Sensor;
+import br.uff.labtempo.osiris.sensornet.model.state.ModelState;
+import br.uff.labtempo.osiris.sensornet.persistence.AnnouncerDao;
 import br.uff.labtempo.osiris.sensornet.persistence.CollectorDao;
 import br.uff.labtempo.osiris.sensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.sensornet.persistence.NetworkDao;
 import br.uff.labtempo.osiris.sensornet.persistence.SensorDao;
+import java.util.List;
 
 /**
  *
@@ -64,18 +67,69 @@ public class EventController extends Controller {
         if (nw == null) {
             insertNetwork(networkTo, collectorTo, sensorTo);
         } else if (cw == null) {
-            nw.update(networkTo);
+            modelUpdate(nw, networkTo);
             insertCollector(nw, collectorTo, sensorTo);
         } else if (sw == null) {
-            nw.update(networkTo);
-            cw.update(collectorTo);
+            modelUpdate(nw, networkTo);
+            modelUpdate(cw, collectorTo);
             insertSensor(nw, cw, sensorTo);
         } else {
-            nw.update(networkTo);
-            cw.update(collectorTo);
-            sw.update(sensorTo);
+            modelUpdate(nw, networkTo);
+            modelUpdate(cw, collectorTo);
+            modelUpdate(sw, sensorTo);
             applyUpdateToAll(nw, cw, sw);
         }
+    }
+
+    private void modelUpdate(Network obj, NetworkCoTo to) {
+        if (obj.update(to)) {
+            announce("Network atualizado");
+        }
+    }
+
+    private void modelUpdate(Collector obj, CollectorCoTo to) {
+        if (obj.update(to)) {
+            announce("Collector atualizado");
+        }
+    }
+
+    private void modelUpdate(Sensor obj, SensorCoTo to) {
+        if (obj.update(to)) {
+            List<String> warnings = obj.checkConsumables();
+            StringBuilder sb = new StringBuilder();
+
+            if (obj.getState() == ModelState.REACTIVATED) {
+                sb.append("Sensor reativado");
+                //network reactivation
+                if (obj.getNetwork().getState() == ModelState.INACTIVE) {
+                    obj.getNetwork().reactivate();
+                    announce("Network reactivated!");
+                }
+                //collector reactivation
+                if (obj.getCollector().getState() == ModelState.INACTIVE) {
+                    obj.getCollector().reactivate();
+                    announce("Collector reactivated!");
+                }
+            } else {
+                sb.append("Sensor atualizado");
+            }
+
+            if (warnings != null && warnings.size() > 0) {
+                sb.append("\n");
+                for (String warning : warnings) {
+                    sb.append(warning);
+                    sb.append("\n");
+                }
+                sb.append("\n");
+            }
+
+            announce(sb.toString());
+        }
+    }
+
+    private void announce(String msg) {
+        AnnouncerDao aDao = factory.getAnnouncerDao();
+        aDao.save(msg);
     }
 
     private Sensor getSensor(String networkId, String collectorId, String sensorId) {
@@ -124,6 +178,7 @@ public class EventController extends Controller {
         cw.addSensor(sw);
 
         ndao.save(nw);
+        announce("Nova rede");
 //        cdao.save(cw);
 //        sdao.save(sw);
     }
@@ -145,6 +200,7 @@ public class EventController extends Controller {
         cw.addSensor(sw);
 
         ndao.update(nw);
+        announce("Novo coletor");
 //        cdao.save(cw);
 //        sdao.save(sw);
     }
@@ -153,7 +209,7 @@ public class EventController extends Controller {
      * POST /:networkid/collectors/:collectorid/sensors/
      *
      * PUT /:networkid/collectors/:collectorid/
-     * 
+     *
      * PUT /:networkid/
      */
     private void insertSensor(Network nw, Collector cw, SensorCoTo sensorTo) {
@@ -163,9 +219,12 @@ public class EventController extends Controller {
 
         Sensor sw = Sensor.generate(sensorTo);
 
+        int i = sdao.getAllInactive(nw.getId()).size();
+
         nw.addSensor(sw);
         cw.addSensor(sw);
         ndao.update(nw);
+        announce("Novo sensor");
 //        cdao.update(cw);
 //        sdao.save(sw);
     }

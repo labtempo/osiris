@@ -34,7 +34,7 @@ public class Server implements AutoCloseable{
         pwd = "admin";
         server = new RabbitServer("sensornet", ip, usr, pwd);
         
-        factory = new JpaDaoFactory();
+        factory = new JpaDaoFactory(ip, usr, pwd);
         
         Controller eCtrl = new EventController(factory);
         Controller sCtrl = new SensorController(factory);        
@@ -67,17 +67,17 @@ public class Server implements AutoCloseable{
         EventController controller = new EventController(factory);
         DataBuilder db = null;
         
-        db = new DataBuilder("labtempo","lab");
+        db = new DataBuilder("labtempo","labpos");
         for (int i = 0; i < 2; i++) {
             controller.insert(db.generateSample());
         }
         
-        db = new DataBuilder("labtempo","datacenter");
+        db = new DataBuilder("labtempo","datacenter2");
         for (int i = 0; i < 2; i++) {
             controller.insert(db.generateSample());
         }
         
-        db = new DataBuilder("posgrad","lab2");
+        db = new DataBuilder("posgradS","lab");
         for (int i = 0; i < 6; i++) {
             controller.insert(db.generateSample());
         }

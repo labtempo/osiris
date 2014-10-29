@@ -31,7 +31,7 @@ import javax.persistence.OneToMany;
 public class Collector extends Model<Collector> {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.TABLE)
     private long cid;
     
     private String id;

@@ -73,4 +73,22 @@ public class Rule implements Serializable {
     public int hashCode() {
         return name.hashCode();
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getOperator() {
+        return operator;
+    }
+
+    public int getValue() {
+        return value;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+    
+    
 }

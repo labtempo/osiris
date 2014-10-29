@@ -5,9 +5,11 @@
  */
 package br.uff.labtempo.osiris.sensornet.persistence.jpa;
 
+import br.uff.labtempo.osiris.sensornet.announcer.Announcer;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Collector;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Sensor;
+import br.uff.labtempo.osiris.sensornet.persistence.AnnouncerDao;
 import br.uff.labtempo.osiris.sensornet.persistence.CollectorDao;
 import br.uff.labtempo.osiris.sensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.sensornet.persistence.NetworkDao;
@@ -19,10 +21,20 @@ import br.uff.labtempo.osiris.sensornet.persistence.SensorDao;
  */
 public class JpaDaoFactory implements DaoFactory, AutoCloseable {
 
-    DataManager data;
+    public static DataManager data;
+    public static Announcer announcer;
 
     public JpaDaoFactory() throws Exception {
-        data = new DataManager();
+        if (data == null) {
+            data = new DataManager();
+        }
+    }
+
+    public JpaDaoFactory(String ip, String usr, String pwd) throws Exception {
+        this();
+        if (announcer == null) {
+            announcer = new Announcer(ip, usr, pwd);
+        }
     }
 
     @Override
@@ -43,6 +55,14 @@ public class JpaDaoFactory implements DaoFactory, AutoCloseable {
     @Override
     public void close() throws Exception {
         data.close();
+    }
+
+    @Override
+    public AnnouncerDao getAnnouncerDao() {
+        if (announcer == null) {
+            throw new RuntimeException("Announcer is null");
+        }
+        return announcer.getProducer();
     }
 
 }

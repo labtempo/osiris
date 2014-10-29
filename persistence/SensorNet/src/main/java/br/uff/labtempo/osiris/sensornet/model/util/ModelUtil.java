@@ -48,7 +48,7 @@ public class ModelUtil {
     }
 
     public Sensor fromTransferObject(SensorCoTo sensorTo) {
-        return new Sensor(sensorTo.getId(),sensorTo.getTimestamp(),creatValueListFromMapList(sensorTo.getValues()),createConsumable(sensorTo.getConsumables(), sensorTo.getRules()),sensorTo.getInfo());
+        return new Sensor(sensorTo.getId(), sensorTo.getTimestamp(), creatValueListFromMapList(sensorTo.getValues()), createConsumable(sensorTo.getConsumables(), sensorTo.getRules()), sensorTo.getInfo());
     }
 
     public boolean updateFromTransferObject(Sensor object, SensorCoTo to) {
@@ -64,16 +64,13 @@ public class ModelUtil {
                 object.setValues(creatValueListFromMapList(to.getValues()));
                 isUpdated = true;
             }
-
-            if (to.getConsumables() != null) {
-                List<Consumable> consumables = createConsumable(to.getConsumables(), to.getRules());
-                if (!object.getConsumables().equals(consumables)) {
-                    object.setConsumables(consumables);
-                    isUpdated = true;
-                }
+            //update consumables
+            if (updateSensorConsumables(object, to)) {
+                isUpdated = true;
             }
+            //check consumables
+            checkConsumables(object.getConsumables());
         }
-
         return isUpdated;
     }
 
@@ -83,7 +80,7 @@ public class ModelUtil {
     }
 
     public Collector fromTransferObject(CollectorCoTo collectorTo) {
-        return new Collector(collectorTo.getId(),collectorTo.getInfo());
+        return new Collector(collectorTo.getId(), collectorTo.getInfo());
     }
 
     public boolean updateFromTransferObject(Collector object, CollectorCoTo to) {
@@ -102,7 +99,7 @@ public class ModelUtil {
     }
 
     public Network fromTransferObject(NetworkCoTo networkTo) {
-        return new Network(networkTo.getId(),networkTo.getInfo());
+        return new Network(networkTo.getId(), networkTo.getInfo());
     }
 
     public boolean updateFromTransferObject(Network object, NetworkCoTo to) {
@@ -156,7 +153,7 @@ public class ModelUtil {
                             ruleMap.get("operator"),
                             ruleMap.get("value"),
                             ruleMap.get("message"));
-                    consumable.setRule(rule);
+                    consumable.addRule(rule);
                 }
             }
 
@@ -164,4 +161,100 @@ public class ModelUtil {
         }
         return consumables;
     }
+
+    private boolean updateSensorConsumables(Sensor object, SensorCoTo to) {
+        boolean isUpdated = false;
+
+        List<Consumable> current, newer, add, remove, update;
+
+        current = object.getConsumables();
+        newer = createConsumable(to.getConsumables(), to.getRules());
+
+        add = new ArrayList<>(newer);
+        add.removeAll(current);
+
+        remove = new ArrayList<>(current);
+        remove.removeAll(newer);
+
+        update = new ArrayList<>(newer);
+        update.removeAll(add);
+
+        current.removeAll(remove);
+
+        for (Consumable consumable : current) {
+            if (update.contains(consumable)) {
+                for (Consumable updatedConsumable : update) {
+                    if (updatedConsumable.equals(consumable) && !updatedConsumable.equalsAll(consumable)) {
+                        consumable.setValue(updatedConsumable.getValue());
+                        consumable.setRules(updatedConsumable.getRules());
+                        isUpdated = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        current.addAll(add);
+
+        return isUpdated;
+    }
+
+    public List<String> checkConsumables(List<Consumable> consumables) {
+        List<String> list = new ArrayList<>();
+        for (Consumable consumable : consumables) {            
+            int value = consumable.getValue();
+            for (Rule rule : consumable.getRules()) {
+                if (ruleTest(rule.getOperator(), value, rule.getValue())) {
+                    list.add(rule.getName() + ":" + rule.getMessage());
+                }
+            }
+        }
+        return list;
+    }
+
+    private boolean ruleTest(String operator, int valueA, int valueB) {
+        switch (operator) {
+            //equal
+            case "=":
+            case "==":
+                if (valueA == valueB) {
+                    return true;
+                }
+                break;
+            //not equal
+            case "!=":
+            case "<>":
+                if (valueA != valueB) {
+                    return true;
+                }
+                break;
+            //greater than
+            case ">":
+                if (valueA > valueB) {
+                    return true;
+                }
+                break;
+            //less than
+            case "<":
+                if (valueA < valueB) {
+                    return true;
+                }
+                break;
+
+            //greater than or equal
+            case ">=":
+                if (valueA >= valueB) {
+                    return true;
+                }
+                break;
+            //less than or equal
+            case "<=":
+                if (valueA <= valueB) {
+                    return true;
+                }
+                break;
+        }
+        return false;
+    }
+
 }

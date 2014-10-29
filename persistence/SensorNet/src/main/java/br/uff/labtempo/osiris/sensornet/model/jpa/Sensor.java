@@ -35,7 +35,7 @@ import javax.persistence.OrderBy;
 public class Sensor extends Model<Sensor> {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.TABLE)
     private long sid;
     /**
      * hardware id in wsn
@@ -147,7 +147,7 @@ public class Sensor extends Model<Sensor> {
         }
         return isUpdate;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -164,12 +164,16 @@ public class Sensor extends Model<Sensor> {
 
         if (!id.equals(other.id)) {
             return false;
-        }        
+        }
         return true;
     }
 
     @Override
     public int hashCode() {
         return id.hashCode();
+    }
+
+    public List<String> checkConsumables() {
+        return new ModelUtil().checkConsumables(consumables);
     }
 }

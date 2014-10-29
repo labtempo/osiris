@@ -12,6 +12,7 @@ import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
 import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
 import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
 import br.uff.labtempo.omcp.common.utils.ResponseBuilder;
+import br.uff.labtempo.omcp.server.Context;
 import br.uff.labtempo.omcp.server.RequestHandler;
 import com.google.gson.Gson;
 import java.util.ArrayList;
@@ -28,9 +29,20 @@ import java.util.regex.Pattern;
 public abstract class Controller implements RequestHandler {
 
     private Controller nextController;
+    private Context context;
 
     public void setNext(Controller controller) {
         this.nextController = controller;
+        controller.setContext(context);
+    }
+
+    @Override
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+    public Context getContext() {
+        return context;
     }
 
     public abstract Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException;

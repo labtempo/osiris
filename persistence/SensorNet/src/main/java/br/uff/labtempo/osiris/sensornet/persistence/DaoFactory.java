@@ -14,7 +14,12 @@ import br.uff.labtempo.osiris.sensornet.model.jpa.Sensor;
  * @author Felipe
  */
 public interface DaoFactory {
+
     SensorDao<Sensor> getSensorDao();
+
     CollectorDao<Collector> getCollectorDao();
+
     NetworkDao<Network> getNetworkDao();
+
+    AnnouncerDao getAnnouncerDao();
 }

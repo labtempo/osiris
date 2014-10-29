@@ -8,6 +8,7 @@ package br.uff.labtempo.osiris.sensornet.persistence.jpa;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Collector;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Sensor;
+import br.uff.labtempo.osiris.sensornet.model.state.ModelState;
 import br.uff.labtempo.osiris.sensornet.persistence.SensorDao;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,7 @@ public class SensorJpa implements SensorDao<Sensor> {
         Join<Sensor, Collector> colroot = root.join("collector");
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.equal(netroot.<String>get("id"), networkId));
-        predicates.add(cb.equal(colroot.<String>get("id"), networkId));
+        predicates.add(cb.equal(colroot.<String>get("id"), collectorId));
         predicates.add(cb.equal(root.<String>get("id"), sensorId));
         criteriaQuery.where(predicates.toArray(new Predicate[]{}));
 
@@ -76,7 +77,7 @@ public class SensorJpa implements SensorDao<Sensor> {
         Join<Sensor, Collector> colroot = root.join("collector");
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.equal(netroot.<String>get("id"), networkId));
-        predicates.add(cb.equal(colroot.<String>get("id"), networkId));
+        predicates.add(cb.equal(colroot.<String>get("id"), collectorId));
         criteriaQuery.where(predicates.toArray(new Predicate[]{}));
 
         criteriaQuery.select(root);
@@ -99,5 +100,40 @@ public class SensorJpa implements SensorDao<Sensor> {
     public void delete(Sensor o) {
         data.delete(o);
     }
+
+    @Override
+    public List<Sensor> getAllInactive(String networkId) {
+        CriteriaBuilder cb = data.getCriteriaBuilder();
+        CriteriaQuery<Sensor> criteriaQuery = cb.createQuery(Sensor.class);
+        Root<Sensor> root = criteriaQuery.from(Sensor.class);
+        Join<Sensor, Network> netroot = root.join("network");
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(cb.equal(netroot.<String>get("id"), networkId));            
+        predicates.add(cb.equal(root.<String>get("state"), ModelState.INACTIVE));
+        criteriaQuery.where(predicates.toArray(new Predicate[]{}));
+
+        criteriaQuery.select(root);
+        List<Sensor> sensors = data.getQuery(criteriaQuery);
+
+        return sensors;
+    }
+
+    @Override
+    public List<Sensor> getAllInactive(String networkId, String collectorId) {
+        CriteriaBuilder cb = data.getCriteriaBuilder();
+        CriteriaQuery<Sensor> criteriaQuery = cb.createQuery(Sensor.class);
+        Root<Sensor> root = criteriaQuery.from(Sensor.class);
+        Join<Sensor, Network> netroot = root.join("network");
+        Join<Sensor, Collector> colroot = root.join("collector");
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(cb.equal(netroot.<String>get("id"), networkId));
+        predicates.add(cb.equal(colroot.<String>get("id"), collectorId));        
+        predicates.add(cb.equal(root.<String>get("state"), ModelState.INACTIVE));
+        criteriaQuery.where(predicates.toArray(new Predicate[]{}));
+
+        criteriaQuery.select(root);
+        List<Sensor> sensors = data.getQuery(criteriaQuery);
+
+        return sensors;}
 
 }

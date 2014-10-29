@@ -52,7 +52,11 @@ public abstract class Model<T extends Model> implements Serializable {
     }
 
     public final void update() {
-        state.update(this);
+        if (state == ModelState.INACTIVE) {
+            state.reactivate(this);
+        } else {
+            state.update(this);
+        }
     }
 
     public Calendar getLastModifiedDate() {

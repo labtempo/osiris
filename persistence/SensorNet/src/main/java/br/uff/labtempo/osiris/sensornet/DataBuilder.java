@@ -14,6 +14,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 /**
  *
@@ -24,8 +25,12 @@ public class DataBuilder {
     private long index = 1;
     private final String networkId;
     private final String collectorId;
+    private final int value;
 
     DataBuilder(String networkId, String collectorId) {
+        Random gerador = new Random();
+
+        this.value = gerador.nextInt(3);
         this.networkId = networkId;
         this.collectorId = collectorId;
     }
@@ -44,30 +49,30 @@ public class DataBuilder {
 
         Map<String, String> map = new HashMap<>();
         map.put("name", "temperature");
-        map.put("value", "35.5");
+        map.put("value", String.valueOf(35.5 + value));
         map.put("type", "real");
         map.put("unit", "celsius");
         map.put("symbol", "°C");
         _values.add(map);
         map = new HashMap<>();
         map.put("name", "luminosity");
-        map.put("value", "200.0");
+        map.put("value", String.valueOf(200.0 + value));
         map.put("type", "real");
         map.put("unit", "candela");
         map.put("symbol", "cd");
         _values.add(map);
         map = new HashMap<>();
         map.put("name", "battery");
-        map.put("value", "50");
+        map.put("value", String.valueOf(50 + value));
         map.put("type", "integer");
         map.put("unit", "volt");
         map.put("symbol", "V");
-        _values.add(map);        
-        
+        _values.add(map);
+
         Map<String, Integer> consumables = new HashMap<>();
-        consumables.put("batrery", 75);
-        
-        
+        consumables.put("battery", 25 + value);
+        consumables.put("fuel", 50 + value);
+
         List<Map<String, String>> _rules = new ArrayList<>();
 
         map = new HashMap<>();
@@ -77,8 +82,15 @@ public class DataBuilder {
         map.put("value", "30");
         map.put("message", "Battery has low charge, you need change it!");
         _rules.add(map);
-        
-        return new SensorCoTo(""+index++, Calendar.getInstance().getTimeInMillis(),consumables,_rules,_values,info);
+        map = new HashMap<>();
+        map.put("name", "low fuel");
+        map.put("operator", "<");
+        map.put("consumable", "fuel");
+        map.put("value", "70");
+        map.put("message", "Low fuel message!");
+        _rules.add(map);
+
+        return new SensorCoTo("" + index++, Calendar.getInstance().getTimeInMillis(), consumables, _rules, _values, info);
 
     }
 
@@ -87,6 +99,7 @@ public class DataBuilder {
         info.put("domain", "br.uff.ic");
         info.put("type", "wireless");
         info.put("OS", "TinyOS");
+        info.put("Topologia", "barra");
         return new NetworkCoTo(networkId, info);
     }
 
@@ -94,6 +107,7 @@ public class DataBuilder {
         Map<String, String> info = new HashMap<>();
         info.put("descricao", "sala do laboratorio");
         info.put("numero", "2");
+        info.put("Topologia", "estrela");
         return new CollectorCoTo(collectorId, info);
     }
 }

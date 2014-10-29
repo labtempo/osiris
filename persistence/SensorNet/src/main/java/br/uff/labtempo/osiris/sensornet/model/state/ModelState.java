@@ -16,7 +16,7 @@ public enum ModelState {
     NEW() {
                 @Override
                 public void deactivate(Model model) {
-                    change(model, ModelState.INATIVE);
+                    change(model, ModelState.INACTIVE);
                 }
 
                 @Override
@@ -30,7 +30,7 @@ public enum ModelState {
                 }
 
             },
-    INATIVE() {
+    INACTIVE() {
                 @Override
                 public void deactivate(Model model) {
                     throw new RuntimeException("Cannot deactivate a disabled item!");
@@ -49,7 +49,7 @@ public enum ModelState {
     UPDATED() {
                 @Override
                 public void deactivate(Model model) {
-                    change(model, ModelState.INATIVE);
+                    change(model, ModelState.INACTIVE);
                 }
 
                 @Override
@@ -59,22 +59,13 @@ public enum ModelState {
 
                 @Override
                 public void update(Model model) {
-                    switch (model.state) {
-                        case INATIVE:
-                            change(model, ModelState.REACTIVATED);
-                            break;
-                        case NEW:
-                        case REACTIVATED:
-                        case UPDATED:
-                            change(model, ModelState.UPDATED);
-                            break;
-                    }
+                    change(model, ModelState.UPDATED);
                 }
             },
     REACTIVATED() {
                 @Override
                 public void deactivate(Model model) {
-                    change(model, ModelState.INATIVE);
+                    change(model, ModelState.INACTIVE);
                 }
 
                 @Override

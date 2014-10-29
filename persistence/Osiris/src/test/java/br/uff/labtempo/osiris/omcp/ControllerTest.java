@@ -11,6 +11,7 @@ import br.uff.labtempo.omcp.common.exceptions.InternalServerErrorException;
 import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
 import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
 import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
+import br.uff.labtempo.omcp.server.Context;
 import java.util.Map;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -42,6 +43,10 @@ public class ControllerTest {
 
                 return null;
             }
+
+            @Override
+            public void setContext(Context context) {
+            }
         };
         c.process(null);
 
@@ -68,10 +73,15 @@ public class ControllerTest {
 
                 return null;
             }
+
+            @Override
+            public void setContext(Context context) {
+            }
         };
         c.process(null);
 
     }
+
     @Test
     public void testUrlWithOneParam() throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
         Controller c = new Controller() {
@@ -91,6 +101,10 @@ public class ControllerTest {
                 assertTrue(map.containsKey("chave"));
 
                 return null;
+            }
+
+            @Override
+            public void setContext(Context context) {
             }
         };
         c.process(null);

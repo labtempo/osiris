@@ -20,5 +20,9 @@ public interface SensorDao<T> extends Dao<T> {
     public List<T> getAll(String networkId);
 
     public List<T> getAll(String networkId, String collectorId);
+    
+    public List<T> getAllInactive(String networkId);
+
+    public List<T> getAllInactive(String networkId, String collectorId);
 
 }

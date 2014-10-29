@@ -95,6 +95,7 @@ public class RabbitServer implements OmcpServer, RabbitListener {
     @Override
     public void setHandler(RequestHandler handler) {
         this.handler = handler;
+        this.handler.setContext(new RabbitContext(HOST, PROTOCOL_VERSION, MODULE_DESCRIPTION));
     }
 
     @Override
