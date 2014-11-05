@@ -81,7 +81,7 @@ public abstract class Controller implements RequestHandler {
                 sb.append(resource);
             }
         }
-        sb.append("/?.*$");
+        sb.append("/?$?[\\?.]*?");
         return sb.toString();
     }
 

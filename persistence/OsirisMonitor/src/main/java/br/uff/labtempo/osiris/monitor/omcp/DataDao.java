@@ -12,6 +12,7 @@ import br.uff.labtempo.omcp.common.utils.ResponsePacket;
 import br.uff.labtempo.osiris.collector.temp.Network;
 import br.uff.labtempo.osiris.collector.temp.Sensor;
 import br.uff.labtempo.osiris.collector.to.SensorCoTo;
+import br.uff.labtempo.osiris.sensornet.to.CollectorSnTo;
 import br.uff.labtempo.osiris.sensornet.to.NetworkSnTo;
 import br.uff.labtempo.osiris.sensornet.to.SensorSnTo;
 import java.util.ArrayList;
@@ -56,5 +57,29 @@ public class DataDao {
             return names;
         }
     }
+    
+    public List<CollectorSnTo> getCollectors(String networkId) throws Exception {
+        try (OmcpClient connection = new OmcpClientBuilder().host(ip).user(user, password).source("generico").build()) {
+            Response r = connection.doGet("omcp://sensornet/"+networkId+"/collectors");
+            CollectorSnTo[] collectors = r.getContent(CollectorSnTo[].class);            
+            List<CollectorSnTo> names = new ArrayList<>();
+            for (CollectorSnTo collector : collectors) {
+               names.add(collector);
+            }
+            return names;
+        }
+    }
+
+    public List<SensorSnTo> getSensors(String nid, String cid) throws Exception{
+        try (OmcpClient connection = new OmcpClientBuilder().host(ip).user(user, password).source("generico").build()) {
+            Response r = connection.doGet("omcp://sensornet/"+nid+"/collectors/"+cid+"/sensors");
+            SensorSnTo[] sensors = r.getContent(SensorSnTo[].class);            
+            List<SensorSnTo> names = new ArrayList<>();
+            for (SensorSnTo sensor : sensors) {
+               names.add(sensor);
+            }
+            return names;
+        }}
+
 
 }

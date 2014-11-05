@@ -67,9 +67,7 @@ public class ModelUtil {
             //update consumables
             if (updateSensorConsumables(object, to)) {
                 isUpdated = true;
-            }
-            //check consumables
-            checkConsumables(object.getConsumables());
+            }            
         }
         return isUpdated;
     }

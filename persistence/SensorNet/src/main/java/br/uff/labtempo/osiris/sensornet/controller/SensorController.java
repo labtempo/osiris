@@ -47,30 +47,6 @@ public class SensorController extends Controller {
         String networkId = null;
         String collectorId = null;
         String sensorId = null;
-
-        //All of Network
-        if (match(request.getResource(), ALL_OF_NETWORK)) {
-            Map<String, String> map = extract(request.getResource(), ALL_OF_NETWORK);
-            networkId = map.get(ControllerPath.NETWORK_KEY.toString());
-
-            if (request.getMethod() != RequestMethod.GET) {
-                throw new NotImplementedException("Action not implemented");
-            }
-            return builder(getAllOfNetwork(networkId), contentType);
-        }
-
-        //All of Collector
-        if (match(request.getResource(), ALL_OF_COLLECTOR)) {
-            Map<String, String> map = extract(request.getResource(), ALL_OF_COLLECTOR);
-            networkId = map.get(ControllerPath.NETWORK_KEY.toString());
-            collectorId = map.get(ControllerPath.COLLECTOR_BY_ID.toString());
-
-            if (request.getMethod() != RequestMethod.GET) {
-                throw new NotImplementedException("Action not implemented");
-            }
-            return builder(getAll(networkId, collectorId), contentType);
-        }
-
         //One sensor
         if (match(request.getResource(), UNIQUE)) {
             Map<String, String> map = extract(request.getResource(), UNIQUE);
@@ -83,18 +59,40 @@ public class SensorController extends Controller {
             }
             return builder(getById(networkId, collectorId, sensorId), contentType);
         }
+        //All of Collector
+        if (match(request.getResource(), ALL_OF_COLLECTOR)) {
+            Map<String, String> map = extract(request.getResource(), ALL_OF_COLLECTOR);
+            networkId = map.get(ControllerPath.NETWORK_KEY.toString());
+            collectorId = map.get(ControllerPath.COLLECTOR_KEY.toString());
+
+            if (request.getMethod() != RequestMethod.GET) {
+                throw new NotImplementedException("Action not implemented");
+            }
+            return builder(getAll(networkId, collectorId), contentType);
+        }
+        //All of Network
+        if (match(request.getResource(), ALL_OF_NETWORK)) {
+            Map<String, String> map = extract(request.getResource(), ALL_OF_NETWORK);
+            networkId = map.get(ControllerPath.NETWORK_KEY.toString());
+
+            if (request.getMethod() != RequestMethod.GET) {
+                throw new NotImplementedException("Action not implemented");
+            }
+            return builder(getAllOfNetwork(networkId), contentType);
+        }
+
         return null;
     }
 
     private List<SensorSnTo> getAllOfNetwork(String networkId) throws NotFoundException {
-        NetworkDao<Network> ndao = factory.getNetworkDao();
+//        NetworkDao<Network> ndao = factory.getNetworkDao();
         SensorDao<Sensor> sdao = factory.getSensorDao();
 
-        Network nw = ndao.get(networkId);
-
-        if (nw == null) {
-            throw new NotFoundException("Network not exists");
-        }
+//        Network nw = ndao.get(networkId);
+//
+//        if (nw == null) {
+//            throw new NotFoundException("Network not exists");
+//        }
 
         List<Sensor> swlist = sdao.getAll(networkId);
 
@@ -107,21 +105,21 @@ public class SensorController extends Controller {
     }
 
     private List<SensorSnTo> getAll(String networkId, String collectorId) throws NotFoundException {
-        NetworkDao<Network> ndao = factory.getNetworkDao();        
-        CollectorDao<Collector> cdao = factory.getCollectorDao();
+//        NetworkDao<Network> ndao = factory.getNetworkDao();
+//        CollectorDao<Collector> cdao = factory.getCollectorDao();
         SensorDao<Sensor> sdao = factory.getSensorDao();
 
-        Network nw = ndao.get(networkId);
+//        Network nw = ndao.get(networkId);
+//
+//        if (nw == null) {
+//            throw new NotFoundException("Network not exists");
+//        }
 
-        if (nw == null) {
-            throw new NotFoundException("Network not exists");
-        }
+        //Collector cw = cdao.get(networkId, collectorId);
 
-        Collector cw = cdao.get(networkId, collectorId);
-
-        if (cw == null) {
-            throw new NotFoundException("Collector not exists");
-        }
+        //if (cw == null) {
+            //throw new NotFoundException("Collector not exists");
+        //}
 
         List<Sensor> swlist = sdao.getAll(networkId, collectorId);
 
@@ -134,32 +132,32 @@ public class SensorController extends Controller {
     }
 
     private SensorSnTo getById(String networkId, String collectorId, String sensorId) throws NotFoundException {
-        NetworkDao<Network> ndao = factory.getNetworkDao();        
-        CollectorDao<Collector> cdao = factory.getCollectorDao();
+//        NetworkDao<Network> ndao = factory.getNetworkDao();
+//        CollectorDao<Collector> cdao = factory.getCollectorDao();
         SensorDao<Sensor> sdao = factory.getSensorDao();
 
-        Network nw = ndao.get(networkId);
-
-        if (nw == null) {
-            throw new NotFoundException("Network not exists");
-        }
-
-        Collector cw = cdao.get(networkId, collectorId);
-
-        if (cw == null) {
-            throw new NotFoundException("Collector not exists");
-        }
+//        Network nw = ndao.get(networkId);
+//
+//        if (nw == null) {
+//            throw new NotFoundException("Network not exists");
+//        }
+//
+//        Collector cw = cdao.get(networkId, collectorId);
+//
+//        if (cw == null) {
+//            throw new NotFoundException("Collector not exists");
+//        }
 
         Sensor sw = sdao.get(networkId, collectorId, sensorId);
 
-        if (cw == null) {
-            throw new NotFoundException("Sensor not exists");
-        }
+//        if (sw == null) {
+//            throw new NotFoundException("Sensor not exists");
+//        }
 
         if (sw != null) {
             return sw.getTransferObject();
         }
         return null;
     }
-    
+
 }

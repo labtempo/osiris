@@ -110,5 +110,38 @@ public class ControllerTest {
         c.process(null);
 
     }
+    
+    @Test
+    public void testAmbiguousInput() throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
+        Controller c = new Controller() {
+
+            @Override
+            public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
+
+                String path = "/:aid/controller/";
+
+                String requestPath = "/23s/controller/215/nkjg";
+                
+                assertFalse(match(requestPath, path));
+                
+                requestPath = "/23s/controller/215/nkjg/?chave=valor";
+                
+                assertFalse(match(requestPath, path));
+                
+                
+                path = "/:aid/controller/:bid";
+                
+                assertFalse(match(requestPath, path)); 
+
+                return null;
+            }
+
+            @Override
+            public void setContext(Context context) {
+            }
+        };
+        c.process(null);
+
+    }
 
 }

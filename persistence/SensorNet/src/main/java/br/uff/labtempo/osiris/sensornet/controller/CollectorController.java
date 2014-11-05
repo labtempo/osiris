@@ -68,14 +68,14 @@ public class CollectorController extends Controller {
     }
 
     private List<CollectorSnTo> getAll(String networkId) throws NotFoundException {
-        NetworkDao<Network> ndao = factory.getNetworkDao();
+//        NetworkDao<Network> ndao = factory.getNetworkDao();
         CollectorDao<Collector> cdao = factory.getCollectorDao();
 
-        Network nw = ndao.get(networkId);
-
-        if (nw == null) {
-            throw new NotFoundException("Network not exists");
-        }
+//        Network nw = ndao.get(networkId);
+//
+//        if (nw == null) {
+//            throw new NotFoundException("Network not exists");
+//        }
 
         List<Collector> cwlist = cdao.getAll(networkId);
 
@@ -89,20 +89,20 @@ public class CollectorController extends Controller {
     }
 
     private CollectorSnTo getById(String networkId, String collectorId) throws NotFoundException {
-        NetworkDao<Network> ndao = factory.getNetworkDao();
+//        NetworkDao<Network> ndao = factory.getNetworkDao();
         CollectorDao<Collector> cdao = factory.getCollectorDao();
 
-        Network nw = ndao.get(networkId);
+//        Network nw = ndao.get(networkId);
+//
+//        if (nw == null) {
+//            throw new NotFoundException("Network not exists");
+//        }
 
-        if (nw == null) {
-            throw new NotFoundException("Network not exists");
-        }
+        Collector cw = cdao.get(networkId, collectorId);
 
-        Collector cw = cdao.get(nw.getId(), collectorId);
-
-        if (cw == null) {
-            throw new NotFoundException("Collector not exists");
-        }
+//        if (cw == null) {
+//            throw new NotFoundException("Collector not exists");
+//        }
 
         return cw.getTransferObject();
     }

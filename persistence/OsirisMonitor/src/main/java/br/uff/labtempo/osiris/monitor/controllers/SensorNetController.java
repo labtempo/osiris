@@ -1,8 +1,7 @@
 package br.uff.labtempo.osiris.monitor.controllers;
 
-
-
 import br.uff.labtempo.osiris.monitor.omcp.DataDao;
+import br.uff.labtempo.osiris.sensornet.to.CollectorSnTo;
 import br.uff.labtempo.osiris.sensornet.to.SensorSnTo;
 import java.net.URL;
 import java.util.List;
@@ -36,6 +35,9 @@ public class SensorNetController implements Initializable {
     @FXML
     private ListView<SensorSnTo> listViewSensors;
 
+    @FXML
+    private ListView<CollectorSnTo> listViewCollectors;
+
     /**
      * Initializes the controller class.
      */
@@ -46,22 +48,45 @@ public class SensorNetController implements Initializable {
         if (listViewNetworks == null) {
             listViewNetworks = new ListView<>();
         }
-        
+
         listViewNetworks.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
                 String nid = listViewNetworks.getSelectionModel().getSelectedItem();
-                
+
                 try {
-                    setListView(dao.getSensors(nid));
+                    try {
+                        listViewCollectors.getSelectionModel().clearSelection();
+                        listViewSensors.getSelectionModel().clearSelection();
+                    } catch (Exception ex) {
+                    }
+                    setSensorListView(dao.getSensors(nid));
+                    setCollectorListView(dao.getCollectors(nid));
                 } catch (Exception ex) {
                     Logger.getLogger(SensorNetController.class.getName()).log(Level.SEVERE, null, ex);
                 }
-               
+
             }
         });
-        
-        
+
+        listViewCollectors.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                String nid = listViewNetworks.getSelectionModel().getSelectedItem();
+                String cid = listViewCollectors.getSelectionModel().getSelectedItem().getId();
+                try {
+                    try {
+                        listViewSensors.getSelectionModel().clearSelection();
+                    } catch (Exception ex) {
+                    }
+                    setSensorListView(dao.getSensors(nid, cid));
+                } catch (Exception ex) {
+                    Logger.getLogger(SensorNetController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            }
+        });
+
         ObservableList<String> items = listViewNetworks.getItems();
 
         try {
@@ -80,19 +105,31 @@ public class SensorNetController implements Initializable {
         }
     }
 
-    public void setListView(List<SensorSnTo> sensors) {
+    public void setSensorListView(List<SensorSnTo> sensors) {
         ObservableList observableList = FXCollections.observableArrayList();
         observableList.setAll(sensors);
         listViewSensors.setItems(observableList);
         listViewSensors.setCellFactory(new Callback<ListView<SensorSnTo>, javafx.scene.control.ListCell<SensorSnTo>>() {
             @Override
             public ListCell<SensorSnTo> call(ListView<SensorSnTo> listView) {
-                return new ListViewCell();
+                return new SensorListViewCell();
             }
         });
     }
 
-    public class ListViewCell extends ListCell<SensorSnTo> {
+    public void setCollectorListView(List<CollectorSnTo> collectors) {
+        ObservableList observableList = FXCollections.observableArrayList();
+        observableList.setAll(collectors);
+        listViewCollectors.setItems(observableList);
+        listViewCollectors.setCellFactory(new Callback<ListView<CollectorSnTo>, javafx.scene.control.ListCell<CollectorSnTo>>() {
+            @Override
+            public ListCell<CollectorSnTo> call(ListView<CollectorSnTo> listView) {
+                return new CollectorListViewCell();
+            }
+        });
+    }
+
+    public class SensorListViewCell extends ListCell<SensorSnTo> {
 
         @Override
         public void updateItem(SensorSnTo sensor, boolean empty) {
@@ -100,6 +137,19 @@ public class SensorNetController implements Initializable {
             if (sensor != null) {
                 SensorNetSensorController data = new SensorNetSensorController();
                 data.setInfo(sensor);
+                setGraphic(data.getBox());
+            }
+        }
+    }
+
+    public class CollectorListViewCell extends ListCell<CollectorSnTo> {
+
+        @Override
+        public void updateItem(CollectorSnTo collector, boolean empty) {
+            super.updateItem(collector, empty);
+            if (collector != null) {
+                SensorNetCollectorController data = new SensorNetCollectorController();
+                data.setInfo(collector);
                 setGraphic(data.getBox());
             }
         }

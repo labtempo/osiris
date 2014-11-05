@@ -102,7 +102,7 @@ public class CollectorWrapperTest {
 
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void stateWrongTransitionDeactivateToUpdatedTest() {
 
         Collector cw = Collector.build(collectorA);

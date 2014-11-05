@@ -72,12 +72,21 @@ public class Server implements AutoCloseable{
             controller.insert(db.generateSample());
         }
         
+        db = new DataBuilder("labtempo","datacenter1");
+        for (int i = 0; i < 2; i++) {
+            controller.insert(db.generateSample());
+        }
         db = new DataBuilder("labtempo","datacenter2");
         for (int i = 0; i < 2; i++) {
             controller.insert(db.generateSample());
         }
         
-        db = new DataBuilder("posgradS","lab");
+        db = new DataBuilder("posgradS","lab1");
+        for (int i = 0; i < 6; i++) {
+            controller.insert(db.generateSample());
+        }
+        
+        db = new DataBuilder("posgradS","lab2");
         for (int i = 0; i < 6; i++) {
             controller.insert(db.generateSample());
         }

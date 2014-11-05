@@ -41,14 +41,17 @@ public class CollectorJpa implements CollectorDao<Collector> {
     public Collector get(String networkId, String collectorId) {
         CriteriaBuilder cb = data.getCriteriaBuilder();
         CriteriaQuery<Collector> criteriaQuery = cb.createQuery(Collector.class);
-        Root<Collector> root = criteriaQuery.from(Collector.class);
+        
+        Root<Collector> root = criteriaQuery.from(Collector.class);        
         Join<Collector, Network> subroot = root.join("network");
+        
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.equal(subroot.<String>get("id"), networkId));
         predicates.add(cb.equal(root.<String>get("id"), collectorId));
         criteriaQuery.where(predicates.toArray(new Predicate[]{}));
+        
         criteriaQuery.select(root);
-        return data.getQuerySingle(criteriaQuery);
+            return data.getQuerySingle(criteriaQuery);
     }
 
     @Override

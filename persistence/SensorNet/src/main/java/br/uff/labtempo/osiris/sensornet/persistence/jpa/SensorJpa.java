@@ -56,8 +56,10 @@ public class SensorJpa implements SensorDao<Sensor> {
     public List<Sensor> getAll(String networkId) {
         CriteriaBuilder cb = data.getCriteriaBuilder();
         CriteriaQuery<Sensor> criteriaQuery = cb.createQuery(Sensor.class);
+        
         Root<Sensor> root = criteriaQuery.from(Sensor.class);
         Join<Sensor, Network> netroot = root.join("network");
+        
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.equal(netroot.<String>get("id"), networkId));
         criteriaQuery.where(predicates.toArray(new Predicate[]{}));
