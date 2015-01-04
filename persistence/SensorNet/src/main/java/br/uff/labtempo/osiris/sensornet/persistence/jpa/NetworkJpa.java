@@ -16,7 +16,7 @@ import javax.persistence.criteria.Root;
  *
  * @author Felipe
  */
-public class NetworkJpa implements NetworkDao<Network> {
+public class NetworkJpa implements NetworkDao {
 
     private final DataManager data;
 

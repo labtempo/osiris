@@ -16,14 +16,12 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.SetJoin;
-import javax.persistence.metamodel.EntityType;
 
 /**
  *
  * @author Felipe
  */
-public class CollectorJpa implements CollectorDao<Collector> {
+public class CollectorJpa implements CollectorDao {
 
     private final DataManager data;
 
@@ -51,7 +49,7 @@ public class CollectorJpa implements CollectorDao<Collector> {
         criteriaQuery.where(predicates.toArray(new Predicate[]{}));
         
         criteriaQuery.select(root);
-            return data.getQuerySingle(criteriaQuery);
+        return data.getQuerySingle(criteriaQuery);
     }
 
     @Override

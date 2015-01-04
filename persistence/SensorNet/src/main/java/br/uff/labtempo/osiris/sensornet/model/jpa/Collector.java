@@ -5,18 +5,18 @@
  */
 package br.uff.labtempo.osiris.sensornet.model.jpa;
 
-import br.uff.labtempo.osiris.collector.to.CollectorCoTo;
+import br.uff.labtempo.osiris.to.collector.CollectorCoTo;
 import br.uff.labtempo.osiris.sensornet.model.state.Model;
-import br.uff.labtempo.osiris.sensornet.model.state.ModelState;
 import br.uff.labtempo.osiris.sensornet.model.util.ModelUtil;
-import br.uff.labtempo.osiris.sensornet.to.CollectorSnTo;
-import java.util.ArrayList;
+import br.uff.labtempo.osiris.to.sensornet.CollectorSnTo;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -31,10 +31,14 @@ import javax.persistence.OneToMany;
 public class Collector extends Model<Collector> {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.TABLE)
+    @GeneratedValue(strategy = GenerationType.TABLE)
     private long cid;
-    
+
     private String id;
+    private long interval;
+
+    @Enumerated(EnumType.STRING)
+    private TimeUnit timeUnit;
 
     @ManyToOne
     private Network network;
@@ -45,18 +49,28 @@ public class Collector extends Model<Collector> {
     protected Collector() {
     }
 
-    public Collector(String id) {
+    public Collector(String id, long interval, TimeUnit timeUnit) {
         this.id = id;
+        this.interval = interval;
+        this.timeUnit = timeUnit;
         this.sensors = new HashSet<>();
     }
 
-    public Collector(String id, Map<String, String> info) {
-        this(id);
+    public Collector(String id, long interval, TimeUnit timeUnit, Map<String, String> info) {
+        this(id, interval, timeUnit);
         setInfo(info);
     }
 
     public String getId() {
         return id;
+    }
+
+    public long getInterval() {
+        return interval;
+    }
+
+    public TimeUnit getTimeUnit() {
+        return timeUnit;
     }
 
     public Network getNetwork() {
@@ -88,6 +102,11 @@ public class Collector extends Model<Collector> {
         this.id = id;
     }
 
+    public void setInterval(long interval, TimeUnit timeUnit) {
+        this.interval = interval;
+        this.timeUnit = timeUnit;
+    }
+
     public void setNetwork(Network network) {
         this.network = network;
     }
@@ -107,7 +126,7 @@ public class Collector extends Model<Collector> {
         }
         return isUpdate;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -124,7 +143,7 @@ public class Collector extends Model<Collector> {
 
         if (!id.equals(other.id)) {
             return false;
-        }        
+        }
         return true;
     }
 

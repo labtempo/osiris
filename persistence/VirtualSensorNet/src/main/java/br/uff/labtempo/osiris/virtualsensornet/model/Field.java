@@ -5,116 +5,155 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 /**
  *
  * @author Felipe
  */
-public class Field {
+@Entity
+public class Field implements Serializable {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) 
+    private long id;
     private String name;
-    private String type;
-    private String value;
-    private String unit;
-    private String symbol;
-    private Calendar lastModified;
-
+    
+    @ManyToOne
+    private DataType defaultDataType;
+    
+    @ManyToOne
+    private Value currentValue;
+    
+    @OneToMany(mappedBy = "field", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Value> history;
+    
+    @ManyToOne
+    private Converter converter;
+    
+    @ManyToOne
+    private VirtualSensor virtualSensor;
 
-    public Field(String name, String type, String value, String unit, String symbol) {
+    public Field(String name, DataType defaultdataType) {
         this.name = name;
-        this.type = type;
-        this.value = value;
-        this.unit = unit;
-        this.symbol = symbol;
-        this.history = new ArrayList<>();
-        addValueToHistory(value);
+        this.defaultDataType = defaultdataType;
+
+        if (name == null || defaultdataType == null) {
+            throw new RuntimeException("Arguments cannot be null!");
+        }
+    }
+    
+    public void setVirtualSensor(VirtualSensor vsensor){
+        this.virtualSensor = vsensor;
     }
 
-    public Field(String name) {
-        this(name, null, null, null, null);
+    protected Field() {
+    }
+
+    public long getId() {
+        return id;
     }
 
     public String getName() {
         return name;
     }
 
-    public String getType() {
-        return type;
+    public String getValue() {
+        return currentValue.getValue();
     }
 
-    public String getValue() {
-        return value;
+    public String getType() {
+        DataType dataType = getDataType();
+        return dataType.getType();
     }
 
     public String getUnit() {
-        return unit;
+        DataType dataType = getDataType();
+        return dataType.getUnit();
     }
 
     public String getSymbol() {
-        return symbol;
+        DataType dataType = getDataType();
+        return dataType.getSymbol();
+    }
+
+    public DataType getDefaultDataType() {
+        return defaultDataType;
+    }
+
+    public DataType getDataType() {
+        if (converter != null) {
+            return converter.getDataType();
+        }
+        return defaultDataType;
+    }
+
+    public Converter getConverter() {
+        return converter;
     }
 
     public Calendar getLastModified() {
-        return lastModified;
+        return currentValue.getDate();
     }
-    
 
-    public List<String> getHistory() {
-        List<String> values = new ArrayList<>();
-        for (Value v : history) {
-            values.add(v.getValue());
+    public List<Value> getHistory() {
+        return history;
+    }
+
+    public void setDataType(DataType dataType) {
+        this.defaultDataType = dataType;
+    }
+
+    public void setConverter(Converter converter) {
+        this.converter = converter;
+    }
+
+    public boolean removeConverter() {
+        if (converter != null) {
+            converter = null;
+            return true;
         }
-        return values;
+        return false;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public void addValue(String value) {
+        DataType dataType = getDataType();
+        Value newer = new Value(value, dataType, this);
+        currentValue = newer;
 
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public void setUnit(String unit) {
-        this.unit = unit;
-    }
-
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-        addValueToHistory(value);
-    }
-
-    private void addValueToHistory(String v) {
-        if (v != null) {
-            Value newer = new Value(v);
-            this.history.add(newer);
-            this.lastModified = newer.getDate();
+        if (history == null) {
+            history = new ArrayList<>();
         }
+
+        history.add(newer);
     }
 
-    public boolean equalsMetadata(Field obj) {
+    public void addInstantaneousValue(String value) {
+        DataType dataType = getDataType();
+        Value newer = new Value(value, dataType, this);
+        currentValue = newer;
+    }
 
-        if (obj == null) {
+    public boolean equalsValue(Field obj) {
+
+        if (!equals(obj)) {
             return false;
         }
-        if (!name.equals(obj.name)) {
-            return false;
-        }
-        if (!type.equals(obj.type)) {
-            return false;
-        }
-        if (!unit.equals(obj.unit)) {
-            return false;
-        }
-        if (!symbol.equals(obj.symbol)) {
+
+        Field other = (Field) obj;
+
+        if (!currentValue.equals(other.currentValue)) {
             return false;
         }
         return true;
@@ -134,10 +173,10 @@ public class Field {
 
         Field other = (Field) obj;
 
-        if (!equalsMetadata(other)) {
+        if (!name.equals(other.name)) {
             return false;
         }
-        if (!value.equals(other.value)) {
+        if (!defaultDataType.equals(other.defaultDataType)) {
             return false;
         }
         return true;

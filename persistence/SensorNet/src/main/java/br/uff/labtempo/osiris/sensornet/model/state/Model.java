@@ -9,14 +9,10 @@ import java.io.Serializable;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.ManyToOne;
-import javax.persistence.MapKey;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -59,11 +55,15 @@ public abstract class Model<T extends Model> implements Serializable {
         }
     }
 
+    public void malfunction() {
+        state.malfunction(this);
+    }
+
     public Calendar getLastModifiedDate() {
         return lastModified;
     }
 
-    public ModelState getState() {
+    public ModelState getModelState() {
         return state;
     }
 

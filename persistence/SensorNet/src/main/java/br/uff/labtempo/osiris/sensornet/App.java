@@ -1,6 +1,5 @@
 package br.uff.labtempo.osiris.sensornet;
 
-import br.uff.labtempo.osiris.sensornet.persistence.jpa.JpaDaoFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -10,12 +9,12 @@ import java.util.logging.Logger;
  */
 public class App {
 
-    private static Server server;
+    private static Bootstrap boot;
 
     public static void main(String[] args) throws Exception {
         shutdownHook();
-        server = new Server();
-        server.start();      
+        boot = new Bootstrap();
+        boot.start();
     }
 
     /**
@@ -48,7 +47,7 @@ public class App {
                 System.out.println("ShutdownHook is running...");
                 thread.setName("Shutdown hook");
                 try {
-                    server.close();
+                    boot.close();
                     thread.join();
                 } catch (Exception ex) {
                     Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);

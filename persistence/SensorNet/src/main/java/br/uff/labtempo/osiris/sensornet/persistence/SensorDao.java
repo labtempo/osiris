@@ -5,24 +5,25 @@
  */
 package br.uff.labtempo.osiris.sensornet.persistence;
 
+import br.uff.labtempo.osiris.sensornet.model.jpa.Sensor;
 import java.util.List;
 
 /**
  *
  * @author Felipe
  */
-public interface SensorDao<T> extends Dao<T> {
+public interface SensorDao extends Dao<Sensor> {
 
-    public T get(T o);
+    public Sensor get(Sensor o);
 
-    public T get(String networkId, String collectorId, String sensorId);
+    public Sensor get(String networkId, String collectorId, String sensorId);
 
-    public List<T> getAll(String networkId);
+    public List<Sensor> getAll(String networkId);
 
-    public List<T> getAll(String networkId, String collectorId);
+    public List<Sensor> getAll(String networkId, String collectorId);
     
-    public List<T> getAllInactive(String networkId);
+    public List<Sensor> getAllInactive(String networkId);
 
-    public List<T> getAllInactive(String networkId, String collectorId);
+    public List<Sensor> getAllInactive(String networkId, String collectorId);
 
 }

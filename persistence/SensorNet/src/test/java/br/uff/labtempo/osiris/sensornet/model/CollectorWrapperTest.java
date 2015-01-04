@@ -5,12 +5,12 @@
  */
 package br.uff.labtempo.osiris.sensornet.model;
 
-import br.uff.labtempo.osiris.collector.to.CollectorCoTo;
+import br.uff.labtempo.osiris.to.collector.CollectorCoTo;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Collector;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -25,8 +25,12 @@ public class CollectorWrapperTest {
     public CollectorWrapperTest() {
         Map<String, String> info = new HashMap<>();
         info.put("chave", "valor");
-        this.collectorA = new CollectorCoTo("10", info);
-        this.collectorB = new CollectorCoTo("50", info);
+
+        this.collectorA = new CollectorCoTo("10", 2, TimeUnit.MINUTES);
+        this.collectorB = new CollectorCoTo("50", 2, TimeUnit.MINUTES);
+
+        collectorA.addInfo(info);
+        collectorB.addInfo(info);
 
     }
 
@@ -87,7 +91,7 @@ public class CollectorWrapperTest {
     public void stateWrongTransitionNewToReactivatedTest() {
 
         Collector cw = Collector.build(collectorA);
-        
+
         cw.reactivate();
 
     }
@@ -117,7 +121,7 @@ public class CollectorWrapperTest {
     public void stateWrongTransitionDeactivateToDeactivateTest() {
 
         Collector cw = Collector.build(collectorA);
-        
+
         cw.deactivate();
         cw.deactivate();
 

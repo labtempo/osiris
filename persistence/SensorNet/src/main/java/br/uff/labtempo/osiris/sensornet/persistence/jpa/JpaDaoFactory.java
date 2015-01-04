@@ -5,15 +5,14 @@
  */
 package br.uff.labtempo.osiris.sensornet.persistence.jpa;
 
-import br.uff.labtempo.osiris.sensornet.announcer.Announcer;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Collector;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Sensor;
 import br.uff.labtempo.osiris.sensornet.persistence.AnnouncerDao;
 import br.uff.labtempo.osiris.sensornet.persistence.CollectorDao;
 import br.uff.labtempo.osiris.sensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.sensornet.persistence.NetworkDao;
+import br.uff.labtempo.osiris.sensornet.persistence.SchedulerDao;
 import br.uff.labtempo.osiris.sensornet.persistence.SensorDao;
+import br.uff.labtempo.osiris.sensornet.thirdparty.announcer.AnnouncementBootstrap;
+import br.uff.labtempo.osiris.sensornet.thirdparty.scheduler.SchedulerBootstrap;
 
 /**
  *
@@ -21,48 +20,77 @@ import br.uff.labtempo.osiris.sensornet.persistence.SensorDao;
  */
 public class JpaDaoFactory implements DaoFactory, AutoCloseable {
 
-    public static DataManager data;
-    public static Announcer announcer;
+    private static JpaDaoFactory instance;
 
-    public JpaDaoFactory() throws Exception {
-        if (data == null) {
+    private DataManager data;
+    private AnnouncementBootstrap announcementConfig;
+    private SchedulerBootstrap schedulingConfig;
+
+    private JpaDaoFactory(String ip, String usr, String pwd, String moduleName) throws Exception {
+        try {
+            announcementConfig = new AnnouncementBootstrap(ip, usr, pwd, moduleName);
             data = new DataManager();
+            schedulingConfig = new SchedulerBootstrap(data, this);           
+        } catch (Exception ex) {
+            close();
+            throw ex;
         }
     }
 
-    public JpaDaoFactory(String ip, String usr, String pwd) throws Exception {
-        this();
-        if (announcer == null) {
-            announcer = new Announcer(ip, usr, pwd);
+    public static JpaDaoFactory newInstance(String ip, String usr, String pwd, String moduleName) throws Exception {
+        if (instance == null) {
+            instance = new JpaDaoFactory(ip, usr, pwd, moduleName);
         }
+        return instance;
+    }
+
+    public static JpaDaoFactory getInstance() {
+        if (instance == null) {
+            throw new RuntimeException("Factory need be created as a new instance!");
+        }
+        return instance;
     }
 
     @Override
-    public SensorDao<Sensor> getSensorDao() {
+    public SensorDao getSensorDao() {
         return new SensorJpa(data);
     }
 
     @Override
-    public CollectorDao<Collector> getCollectorDao() {
+    public CollectorDao getCollectorDao() {
         return new CollectorJpa(data);
     }
 
     @Override
-    public NetworkDao<Network> getNetworkDao() {
+    public NetworkDao getNetworkDao() {
         return new NetworkJpa(data);
     }
 
     @Override
     public void close() throws Exception {
-        data.close();
+        try {
+
+            schedulingConfig.close();
+        } catch (Exception e) {
+        }
+        try {
+            announcementConfig.close();
+        } catch (Exception e) {
+        }
+        try {
+            data.close();
+        } catch (Exception e) {
+        }
     }
 
     @Override
     public AnnouncerDao getAnnouncerDao() {
-        if (announcer == null) {
-            throw new RuntimeException("Announcer is null");
-        }
-        return announcer.getProducer();
+        return announcementConfig.getAnnouncer();
+    }
+
+    @Override
+    public SchedulerDao getSchedulerDao() {
+        return schedulingConfig.getScheduler();
     }
 
 }

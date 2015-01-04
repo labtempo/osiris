@@ -5,27 +5,21 @@
  */
 package br.uff.labtempo.osiris.sensornet.model.jpa;
 
-import br.uff.labtempo.osiris.collector.to.SensorCoTo;
+import br.uff.labtempo.osiris.to.collector.SensorCoTo;
 import br.uff.labtempo.osiris.sensornet.model.state.Model;
-import br.uff.labtempo.osiris.sensornet.model.state.ModelState;
+import br.uff.labtempo.osiris.sensornet.model.util.ConsumableInfo;
 import br.uff.labtempo.osiris.sensornet.model.util.ModelUtil;
-import br.uff.labtempo.osiris.sensornet.to.SensorSnTo;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
+import br.uff.labtempo.osiris.to.sensornet.SensorSnTo;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 
 /**
  *
@@ -96,6 +90,10 @@ public class Sensor extends Model<Sensor> {
         return id;
     }
 
+    public long getSid() {
+        return sid;
+    }
+
     public Network getNetwork() {
         return network;
     }
@@ -136,7 +134,7 @@ public class Sensor extends Model<Sensor> {
         return new ModelUtil().toTransferObject(this);
     }
 
-    public static Sensor generate(SensorCoTo to) {
+    public static Sensor build(SensorCoTo to) {
         return new ModelUtil().fromTransferObject(to);
     }
 
@@ -173,7 +171,7 @@ public class Sensor extends Model<Sensor> {
         return id.hashCode();
     }
 
-    public List<String> checkConsumables() {
-        return new ModelUtil().checkConsumables(consumables);
+    public List<ConsumableInfo> checkConsumables() {
+        return new ModelUtil().checkBrokenConsumables(consumables);
     }
 }

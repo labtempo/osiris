@@ -11,18 +11,23 @@ package br.uff.labtempo.osiris.sensornet.controller;
  */
 public enum ControllerPath {
 
+    PROTOCOL("omcp://"),
     NETWORK_KEY(":nid"),
     COLLECTOR_KEY(":cid"),
     SENSOR_KEY(":sid"),
-    NETWORK_ALL("/"),
-    NETWORK_BY_ID("/" + NETWORK_KEY),
-    COLLECTOR_ALL(NETWORK_BY_ID.toString() + "/collectors/"),
+    SEPARATOR("/"),
+    NETWORK_ALL(SEPARATOR.toString()),
+    NETWORK_BY_ID(SEPARATOR.toString() + NETWORK_KEY),
+    COLLECTOR_UNIT(SEPARATOR.toString() + "collectors" + SEPARATOR),
+    COLLECTOR_ALL(NETWORK_BY_ID.toString() + COLLECTOR_UNIT),
     COLLECTOR_BY_ID(COLLECTOR_ALL.toString() + COLLECTOR_KEY),
-    SENSOR_ALL_BY_COLLECTOR(COLLECTOR_BY_ID.toString() + "/sensors/"),
-    SENSOR_ALL_BY_NETWORK(NETWORK_BY_ID.toString() + "/sensors/"),
+    SENSOR_UNIT(SEPARATOR.toString() + "sensors" + SEPARATOR),    
+    SENSOR_ALL_BY_COLLECTOR(COLLECTOR_BY_ID.toString() + SENSOR_UNIT),
+    SENSOR_ALL_BY_NETWORK(NETWORK_BY_ID.toString() + SENSOR_UNIT),
     SENSOR_BY_ID(SENSOR_ALL_BY_COLLECTOR.toString() + SENSOR_KEY),
-    COLLECTOR_EXCHANGE("collector.ex");
-    
+    COLLECTOR_MESSAGEGROUP("collector.messagegroup"),
+    UPDATE_MESSAGEGROUP("update.messagegroup"),
+    NOTIFICATION_MESSAGEGROUP("notification.messagegroup");
 
     private ControllerPath(String content) {
         this.content = content;

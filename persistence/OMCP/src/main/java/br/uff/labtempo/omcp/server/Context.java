@@ -13,4 +13,5 @@ public interface Context {
     String getHost();
     String getProtocolVersion();
     String getModuleDescription();
+    String getModuleName();
 }

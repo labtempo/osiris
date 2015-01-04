@@ -5,14 +5,11 @@
  */
 package br.uff.labtempo.osiris.sensornet.model.jpa;
 
-import br.uff.labtempo.osiris.collector.to.NetworkCoTo;
+import br.uff.labtempo.osiris.to.collector.NetworkCoTo;
 import br.uff.labtempo.osiris.sensornet.model.state.Model;
-import br.uff.labtempo.osiris.sensornet.model.state.ModelState;
 import br.uff.labtempo.osiris.sensornet.model.util.ModelUtil;
-import br.uff.labtempo.osiris.sensornet.to.NetworkSnTo;
-import java.util.ArrayList;
+import br.uff.labtempo.osiris.to.sensornet.NetworkSnTo;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.CascadeType;

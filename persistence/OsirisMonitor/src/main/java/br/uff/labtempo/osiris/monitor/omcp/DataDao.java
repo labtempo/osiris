@@ -8,13 +8,9 @@ package br.uff.labtempo.osiris.monitor.omcp;
 import br.uff.labtempo.omcp.client.OmcpClient;
 import br.uff.labtempo.omcp.client.OmcpClientBuilder;
 import br.uff.labtempo.omcp.common.Response;
-import br.uff.labtempo.omcp.common.utils.ResponsePacket;
-import br.uff.labtempo.osiris.collector.temp.Network;
-import br.uff.labtempo.osiris.collector.temp.Sensor;
-import br.uff.labtempo.osiris.collector.to.SensorCoTo;
-import br.uff.labtempo.osiris.sensornet.to.CollectorSnTo;
-import br.uff.labtempo.osiris.sensornet.to.NetworkSnTo;
-import br.uff.labtempo.osiris.sensornet.to.SensorSnTo;
+import br.uff.labtempo.osiris.to.sensornet.CollectorSnTo;
+import br.uff.labtempo.osiris.to.sensornet.NetworkSnTo;
+import br.uff.labtempo.osiris.to.sensornet.SensorSnTo;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -5,21 +5,19 @@
  */
 package br.uff.labtempo.osiris.sensornet.persistence;
 
-import br.uff.labtempo.osiris.sensornet.model.jpa.Collector;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Sensor;
-
 /**
  *
  * @author Felipe
  */
 public interface DaoFactory {
 
-    SensorDao<Sensor> getSensorDao();
+    SensorDao getSensorDao();
 
-    CollectorDao<Collector> getCollectorDao();
+    CollectorDao getCollectorDao();
 
-    NetworkDao<Network> getNetworkDao();
+    NetworkDao getNetworkDao();
 
     AnnouncerDao getAnnouncerDao();
+    
+    SchedulerDao getSchedulerDao();
 }

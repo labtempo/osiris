@@ -1,3 +1,4 @@
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -14,7 +15,6 @@ import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
 import br.uff.labtempo.omcp.common.utils.ResponseBuilder;
 import br.uff.labtempo.omcp.server.Context;
 import br.uff.labtempo.omcp.server.RequestHandler;
-import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -150,26 +150,8 @@ public abstract class Controller implements RequestHandler {
         return null;
     }
 
-    protected <T> T fromXml(String xml, Class klass) {
-        return null;
-    }
-
-    protected String toXml(Object object) {
-        return null;
-    }
-
-    protected String toJson(Object object) {
-        Gson gson = new Gson();
-        return gson.toJson(object);
-    }
-
-    protected <T> T fromJson(String json, Class klass) {
-        Gson gson = new Gson();
-        return (T) gson.<T>fromJson(json, klass);
-    }
-
     protected Response builder(Object obj, String contentType) {
-        Response response = null;
+        Response response;
         if (contentType == null) {
             response = new ResponseBuilder().ok(obj, ResponseBuilder.ContentType.JSON).build();
         } else {

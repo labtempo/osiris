@@ -33,7 +33,7 @@ public class Serializer {
         return gson.toJson(object);
     }
 
-    protected <T> T fromJson(String json, Class klass) {
+    public <T> T fromJson(String json, Class klass) {
         Gson gson = new Gson();
         return (T) gson.<T>fromJson(json, klass);
     }

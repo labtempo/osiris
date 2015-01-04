@@ -104,9 +104,14 @@ public class DataManager implements AutoCloseable {
         List<T> result = tquery.getResultList();
         return result;
     }
-    
+
     public <T> T getQuerySingle(CriteriaQuery<T> query) {
         TypedQuery<T> tquery = EM.createQuery(query);
-        return (T)tquery.getSingleResult();
+        List<T> list = tquery.getResultList();
+        if (list == null || list.isEmpty()) {
+            return null;
+        }
+        return (T)list.get(0);
+        //return (T) tquery.getSingleResult();
     }
 }

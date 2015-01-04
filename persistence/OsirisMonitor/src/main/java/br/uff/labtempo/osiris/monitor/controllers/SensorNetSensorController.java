@@ -5,25 +5,16 @@ package br.uff.labtempo.osiris.monitor.controllers;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-import br.uff.labtempo.osiris.collector.temp.Sensor;
-import br.uff.labtempo.osiris.sensornet.to.SensorSnTo;
+import br.uff.labtempo.osiris.to.sensornet.SensorSnTo;
 import java.io.IOException;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.ResourceBundle;
 import java.util.TimeZone;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 /**

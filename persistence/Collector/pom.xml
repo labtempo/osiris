@@ -34,8 +34,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>br.uff.labtempo.osiris.util</groupId>
-      <artifactId>Utils</artifactId>
+      <groupId>br.uff.labtempo</groupId>
+      <artifactId>Osiris</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
   </dependencies>

@@ -5,23 +5,28 @@
  */
 package br.uff.labtempo.osiris.sensornet.model.util;
 
-import br.uff.labtempo.osiris.collector.to.CollectorCoTo;
-import br.uff.labtempo.osiris.collector.to.NetworkCoTo;
-import br.uff.labtempo.osiris.collector.to.SensorCoTo;
+import br.uff.labtempo.osiris.to.collector.CollectorCoTo;
+import br.uff.labtempo.osiris.to.collector.NetworkCoTo;
+import br.uff.labtempo.osiris.to.collector.SensorCoTo;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Collector;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Consumable;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Rule;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Sensor;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Value;
-import br.uff.labtempo.osiris.sensornet.to.CollectorSnTo;
-import br.uff.labtempo.osiris.sensornet.to.NetworkSnTo;
-import br.uff.labtempo.osiris.sensornet.to.SensorSnTo;
+import br.uff.labtempo.osiris.to.common.data.ConsumableRuleTo;
+import br.uff.labtempo.osiris.to.common.data.ConsumableTo;
+import br.uff.labtempo.osiris.to.common.definitions.LogicalOperator;
+import br.uff.labtempo.osiris.to.common.data.ValueTo;
+import br.uff.labtempo.osiris.to.common.definitions.State;
+import br.uff.labtempo.osiris.to.sensornet.CollectorSnTo;
+import br.uff.labtempo.osiris.to.sensornet.NetworkSnTo;
+import br.uff.labtempo.osiris.to.sensornet.SensorSnTo;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -30,25 +35,29 @@ import java.util.Map;
 public class ModelUtil {
 
     public SensorSnTo toTransferObject(Sensor sensor) {
-        Map<String, Integer> consumables = new HashMap<>();
+        SensorSnTo sensorSnTo = new SensorSnTo(sensor.getId(), sensor.getModelState().getState(), sensor.getTimestamp(), sensor.getLastModifiedDate(), sensor.getNetwork().getId(), sensor.getCollector().getId());
+
         for (Consumable consumable : sensor.getConsumables()) {
-            consumables.put(consumable.getName(), consumable.getValue());
+            sensorSnTo.addConsumable(consumable.getName(), consumable.getValue());
         }
-        List<Map<String, String>> values = new ArrayList<>();
+
         for (Value value : sensor.getValues()) {
-            Map<String, String> map = new LinkedHashMap<>();
-            map.put("name", value.getName());
-            map.put("type", value.getType());
-            map.put("value", value.getValue());
-            map.put("unit", value.getUnit());
-            map.put("symbol", value.getSymbol());
-            values.add(map);
+            sensorSnTo.addValue(value.getName(), value.getType(), value.getValue(), value.getUnit(), value.getSymbol());
         }
-        return new SensorSnTo(sensor.getId(), sensor.getLastModifiedDate().getTimeInMillis(), sensor.getState().toString(), sensor.getNetwork().getId(), sensor.getCollector().getId(), sensor.getTimestamp(), values, consumables, sensor.getInfo());
+
+        sensorSnTo.addInfo(sensor.getInfo());
+
+        return sensorSnTo;
     }
 
     public Sensor fromTransferObject(SensorCoTo sensorTo) {
-        return new Sensor(sensorTo.getId(), sensorTo.getTimestamp(), creatValueListFromMapList(sensorTo.getValues()), createConsumable(sensorTo.getConsumables(), sensorTo.getRules()), sensorTo.getInfo());
+        String id = sensorTo.getId();
+        long timestamp = sensorTo.getTimestamp();
+        List<Value> values = creatValueListFromMapList(sensorTo.getValuesTo());
+        List<Consumable> consumables = createConsumable(sensorTo.getConsumablesTo(), sensorTo.getConsumableRulesTo());
+        Map<String, String> info = sensorTo.getInfo();
+
+        return new Sensor(id, timestamp, values, consumables, info);
     }
 
     public boolean updateFromTransferObject(Sensor object, SensorCoTo to) {
@@ -60,25 +69,37 @@ public class ModelUtil {
                 isUpdated = true;
             }
             //update values
-            if (to.getValues() != null) {
-                object.setValues(creatValueListFromMapList(to.getValues()));
+            if (to.getValuesTo() != null) {
+                object.setValues(creatValueListFromMapList(to.getValuesTo()));
                 isUpdated = true;
             }
             //update consumables
             if (updateSensorConsumables(object, to)) {
                 isUpdated = true;
-            }            
+            }
         }
         return isUpdated;
     }
 
     public CollectorSnTo toTransferObject(Collector collector) {
-        return new CollectorSnTo(collector.getId(), collector.getLastModifiedDate().getTimeInMillis(), collector.getState().toString(), collector.getNetwork().getId(), collector.getSensors().length, collector.getInfo());
+        String id = collector.getId();
+        State state = collector.getModelState().getState();
+        long interval = collector.getInterval();
+        TimeUnit timeUnit = collector.getTimeUnit();
+        Calendar lastModified = collector.getLastModifiedDate();
+        String networkId = collector.getNetwork().getId();
+        int totalSensors = collector.getSensors().length;
+        Map<String, String> info = collector.getInfo();
+
+        CollectorSnTo collectorSnTo = new CollectorSnTo(id, state, interval, timeUnit, lastModified, networkId, totalSensors);
+        collectorSnTo.addInfo(info);
+
+        return collectorSnTo;
 
     }
 
     public Collector fromTransferObject(CollectorCoTo collectorTo) {
-        return new Collector(collectorTo.getId(), collectorTo.getInfo());
+        return new Collector(collectorTo.getId(), collectorTo.getInterval(), collectorTo.getTimeUnit(), collectorTo.getInfo());
     }
 
     public boolean updateFromTransferObject(Collector object, CollectorCoTo to) {
@@ -93,7 +114,17 @@ public class ModelUtil {
     }
 
     public NetworkSnTo toTransferObject(Network network) {
-        return new NetworkSnTo(network.getId(), network.getLastModifiedDate().getTimeInMillis(), network.getState().toString(), network.getCollectors().length, network.getSensors().length, network.getInfo());
+        String id = network.getId();
+        State state = network.getModelState().getState();
+        Calendar lastModified = network.getLastModifiedDate();
+        int totalCollectors = network.getCollectors().length;
+        int totalSensors = network.getSensors().length;
+        Map<String, String> info = network.getInfo();
+
+        NetworkSnTo networkSnTo = new NetworkSnTo(id, state, lastModified, totalCollectors, totalSensors);
+        networkSnTo.addInfo(info);
+
+        return networkSnTo;
     }
 
     public Network fromTransferObject(NetworkCoTo networkTo) {
@@ -108,49 +139,33 @@ public class ModelUtil {
                 isUpdated = true;
             }
         }
-
         return isUpdated;
     }
 
-    private List<Value> creatValueListFromMapList(List<Map<String, String>> maplist) {
+    private List<Value> creatValueListFromMapList(List<? extends ValueTo> valuesTo) {
         List<Value> values = new ArrayList<>();
 
-        for (Map<String, String> map : maplist) {
-            if (map != null) {
-                if (map.containsKey("name")
-                        && map.containsKey("value")
-                        && map.containsKey("type")
-                        && map.containsKey("unit")
-                        && map.containsKey("symbol")) {
-
-                    values.add(new Value(
-                            map.get("name"),
-                            map.get("type"),
-                            map.get("value"),
-                            map.get("unit"),
-                            map.get("symbol")));
-                }
+        for (ValueTo valueTo : valuesTo) {
+            if (valueTo != null) {
+                values.add(new Value(valueTo.getName(), valueTo.getType(), valueTo.getValue(), valueTo.getUnit(), valueTo.getSymbol()));
             }
         }
+
         return values;
     }
 
-    public List<Consumable> createConsumable(Map<String, Integer> consumableMap, List<Map<String, String>> ruleMapList) {
+    public List<Consumable> createConsumable(List<? extends ConsumableTo> consumablesTo, List<? extends ConsumableRuleTo> consumableRulesTo) {
 
         List<Consumable> consumables = new ArrayList<>();
 
-        for (Map.Entry<String, Integer> entrySet : consumableMap.entrySet()) {
-            String key = entrySet.getKey();
-            Integer value = entrySet.getValue();
-            Consumable consumable = new Consumable(key, value);
+        for (ConsumableTo consumableTo : consumablesTo) {
+            String name = consumableTo.getName();
+            Integer value = consumableTo.getValue();
+            Consumable consumable = new Consumable(name, value);
 
-            for (Map<String, String> ruleMap : ruleMapList) {
-                if (ruleMap.containsKey("consumable") && ruleMap.get("consumable").equals(key)) {
-                    Rule rule = new Rule(
-                            ruleMap.get("name"),
-                            ruleMap.get("operator"),
-                            ruleMap.get("value"),
-                            ruleMap.get("message"));
+            for (ConsumableRuleTo consumableRuleTo : consumableRulesTo) {
+                if (consumableRuleTo.getConsumableName().equals(name)) {
+                    Rule rule = new Rule(consumableRuleTo.getName(), consumableRuleTo.getOperator(), consumableRuleTo.getLimitValue(), consumableRuleTo.getMessage());
                     consumable.addRule(rule);
                 }
             }
@@ -166,7 +181,7 @@ public class ModelUtil {
         List<Consumable> current, newer, add, remove, update;
 
         current = object.getConsumables();
-        newer = createConsumable(to.getConsumables(), to.getRules());
+        newer = createConsumable(to.getConsumablesTo(), to.getConsumableRulesTo());
 
         add = new ArrayList<>(newer);
         add.removeAll(current);
@@ -197,56 +212,58 @@ public class ModelUtil {
         return isUpdated;
     }
 
-    public List<String> checkConsumables(List<Consumable> consumables) {
-        List<String> list = new ArrayList<>();
-        for (Consumable consumable : consumables) {            
+    public List<ConsumableInfo> checkBrokenConsumables(List<Consumable> consumables) {
+        List<ConsumableInfo> list = new ArrayList<>();
+        for (Consumable consumable : consumables) {
+            ConsumableInfo info = new ConsumableInfo(consumable);
             int value = consumable.getValue();
             for (Rule rule : consumable.getRules()) {
-                if (ruleTest(rule.getOperator(), value, rule.getValue())) {
-                    list.add(rule.getName() + ":" + rule.getMessage());
+                if (testOfBreakingRule(rule.getOperator(), value, rule.getValue())) {
+                    info.addBrokenRule(rule);
                 }
+            }
+            if (info.isBroken()) {
+                list.add(info);
             }
         }
         return list;
     }
 
-    private boolean ruleTest(String operator, int valueA, int valueB) {
+    private boolean testOfBreakingRule(LogicalOperator operator, int valueA, int valueB) {
         switch (operator) {
             //equal
-            case "=":
-            case "==":
+            case EQUAL:
                 if (valueA == valueB) {
                     return true;
                 }
                 break;
             //not equal
-            case "!=":
-            case "<>":
+            case NOT_EQUAL:
                 if (valueA != valueB) {
                     return true;
                 }
                 break;
             //greater than
-            case ">":
+            case GREATER_THAN:
                 if (valueA > valueB) {
                     return true;
                 }
                 break;
             //less than
-            case "<":
+            case LESS_THAN:
                 if (valueA < valueB) {
                     return true;
                 }
                 break;
 
             //greater than or equal
-            case ">=":
+            case GREATER_THAN_OR_EQUAL:
                 if (valueA >= valueB) {
                     return true;
                 }
                 break;
             //less than or equal
-            case "<=":
+            case LESS_THAN_OR_EQUAL:
                 if (valueA <= valueB) {
                     return true;
                 }

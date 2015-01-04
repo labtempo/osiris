@@ -73,26 +73,26 @@ public class RequestBuilder {
         return this;
     }
 
-    public RequestBuilder xmlContent(Object object) {
-        String content = null;
+    public RequestBuilder objectContent(Object object, String contentType) {
         Serializer serializer = new Serializer();
-
-        this.contentType = serializer.getXmlContentType();
-        content = serializer.toXml(object);
-
+        String content = null;
+        try {
+            this.contentType = serializer.fixContentTypeByReference(contentType);
+            content = serializer.serialize(object, this.contentType);
+        } catch (Exception e) {
+            this.contentType = serializer.getTextContentType();
+            content = object.toString();
+        }
         this.setContent(content);
         return this;
     }
 
-    public RequestBuilder jsonContent(Object object) {
-        String content = null;
-        Serializer serializer = new Serializer();
+    public RequestBuilder xmlContent(Object object) {
+        return objectContent(object, new Serializer().getXmlContentType());
+    }
 
-        this.contentType = serializer.getJsonContentType();
-        content = serializer.toJson(object);
-
-        this.setContent(content);
-        return this;
+    public RequestBuilder jsonContent(Object object) {        
+        return objectContent(object, new Serializer().getJsonContentType());
     }
 
     private void parseUrl(String url) {

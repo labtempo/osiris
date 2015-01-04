@@ -24,9 +24,21 @@ public interface OmcpClient extends AutoCloseable {
 
     Response doPost(String url, String content) throws UnreachableModuleException, RequestException, BadResponseException;
 
+    Response doPost(String url, Object content) throws UnreachableModuleException, RequestException, BadResponseException;
+
+    Response doPost(String url, Object content, String contentType) throws UnreachableModuleException, RequestException, BadResponseException;
+
     Response doPut(String url, String content) throws UnreachableModuleException, RequestException, BadResponseException;
+
+    Response doPut(String url, Object content) throws UnreachableModuleException, RequestException, BadResponseException;
+
+    Response doPut(String url, Object content, String contentType) throws UnreachableModuleException, RequestException, BadResponseException;
 
     Response doDelete(String url) throws UnreachableModuleException, RequestException, BadResponseException;
 
     void doNofity(String url, String content) throws UnreachableModuleException, RequestException;
+
+    void doNofity(String url, Object content) throws UnreachableModuleException, RequestException;
+
+    void doNofity(String url, Object content, String contentType) throws UnreachableModuleException, RequestException;
 }

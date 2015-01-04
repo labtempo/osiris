@@ -43,7 +43,7 @@ final class RabbitClientSocket {
         comm.close();
     }
 
-    public boolean isLive() {
+    public boolean isAlive() {
         return comm.isOpen();
     }
 
@@ -59,7 +59,7 @@ final class RabbitClientSocket {
         String queue = "";
         String exchange = "";
 
-        if (queueName.contains("osiris.ex")) {
+        if (queueName.contains("osiris.messagegroup")) {
             this.comm.checkExchangeOrDie(queueName);
             exchange = queueName;
             queue = routingKey;

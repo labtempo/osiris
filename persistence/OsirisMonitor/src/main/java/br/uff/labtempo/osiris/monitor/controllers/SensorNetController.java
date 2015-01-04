@@ -1,8 +1,8 @@
 package br.uff.labtempo.osiris.monitor.controllers;
 
 import br.uff.labtempo.osiris.monitor.omcp.DataDao;
-import br.uff.labtempo.osiris.sensornet.to.CollectorSnTo;
-import br.uff.labtempo.osiris.sensornet.to.SensorSnTo;
+import br.uff.labtempo.osiris.to.sensornet.CollectorSnTo;
+import br.uff.labtempo.osiris.to.sensornet.SensorSnTo;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;

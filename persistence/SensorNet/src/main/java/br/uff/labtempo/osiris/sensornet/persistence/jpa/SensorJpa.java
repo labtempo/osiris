@@ -22,7 +22,7 @@ import javax.persistence.criteria.Root;
  *
  * @author Felipe
  */
-public class SensorJpa implements SensorDao<Sensor> {
+public class SensorJpa implements SensorDao {
 
     private final DataManager data;
 

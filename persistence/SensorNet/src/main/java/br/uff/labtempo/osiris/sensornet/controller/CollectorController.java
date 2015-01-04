@@ -14,11 +14,9 @@ import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
 import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
 import br.uff.labtempo.osiris.omcp.Controller;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Collector;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
 import br.uff.labtempo.osiris.sensornet.persistence.CollectorDao;
 import br.uff.labtempo.osiris.sensornet.persistence.DaoFactory;
-import br.uff.labtempo.osiris.sensornet.persistence.NetworkDao;
-import br.uff.labtempo.osiris.sensornet.to.CollectorSnTo;
+import br.uff.labtempo.osiris.to.sensornet.CollectorSnTo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +30,7 @@ public class CollectorController extends Controller {
     private final String ALL = ControllerPath.COLLECTOR_ALL.toString();
     private final String UNIQUE = ControllerPath.COLLECTOR_BY_ID.toString();
 
-    private DaoFactory factory;
+    private final DaoFactory factory;
 
     public CollectorController(DaoFactory factory) {
         this.factory = factory;
@@ -41,8 +39,8 @@ public class CollectorController extends Controller {
     @Override
     public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
         String contentType = request.getContentType();
-        String networkId = null;
-        String collectorId = null;
+        String networkId;
+        String collectorId;
 
         if (match(request.getResource(), ALL)) {
             Map<String, String> map = extract(request.getResource(), ALL);
@@ -51,7 +49,8 @@ public class CollectorController extends Controller {
             if (request.getMethod() != RequestMethod.GET) {
                 throw new NotImplementedException("Action not implemented");
             }
-            return builder(getAll(networkId), contentType);
+            List<CollectorSnTo> collectors = getAll(networkId);
+            return builder(collectors, contentType);
         }
 
         if (match(request.getResource(), UNIQUE)) {
@@ -62,21 +61,14 @@ public class CollectorController extends Controller {
             if (request.getMethod() != RequestMethod.GET) {
                 throw new NotImplementedException("Action not implemented");
             }
-            return builder(getById(networkId, collectorId), contentType);
+            CollectorSnTo collector = getById(networkId, collectorId);
+            return builder(collector, contentType);
         }
         return null;
     }
 
     private List<CollectorSnTo> getAll(String networkId) throws NotFoundException {
-//        NetworkDao<Network> ndao = factory.getNetworkDao();
-        CollectorDao<Collector> cdao = factory.getCollectorDao();
-
-//        Network nw = ndao.get(networkId);
-//
-//        if (nw == null) {
-//            throw new NotFoundException("Network not exists");
-//        }
-
+        CollectorDao cdao = factory.getCollectorDao();
         List<Collector> cwlist = cdao.getAll(networkId);
 
         List<CollectorSnTo> collectors = new ArrayList<>();
@@ -89,21 +81,8 @@ public class CollectorController extends Controller {
     }
 
     private CollectorSnTo getById(String networkId, String collectorId) throws NotFoundException {
-//        NetworkDao<Network> ndao = factory.getNetworkDao();
-        CollectorDao<Collector> cdao = factory.getCollectorDao();
-
-//        Network nw = ndao.get(networkId);
-//
-//        if (nw == null) {
-//            throw new NotFoundException("Network not exists");
-//        }
-
+        CollectorDao cdao = factory.getCollectorDao();
         Collector cw = cdao.get(networkId, collectorId);
-
-//        if (cw == null) {
-//            throw new NotFoundException("Collector not exists");
-//        }
-
         return cw.getTransferObject();
     }
 }

@@ -5,11 +5,9 @@
  */
 package br.uff.labtempo.osiris.sensornet.model.jpa;
 
+import br.uff.labtempo.osiris.to.common.definitions.ValueType;
 import java.io.Serializable;
 import javax.persistence.Embeddable;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 
 /**
  *
@@ -18,7 +16,7 @@ import javax.persistence.Id;
 @Embeddable
 public class Value implements Serializable{    
     private String name;
-    private String type;
+    private ValueType type;
     private String value;
     private String unit;
     private String symbol;
@@ -26,7 +24,7 @@ public class Value implements Serializable{
     protected Value() {
     }
 
-    public Value(String name, String type, String value, String unit, String symbol) {
+    public Value(String name, ValueType type, String value, String unit, String symbol) {
         this.name = name;
         this.type = type;
         this.value = value;
@@ -35,26 +33,26 @@ public class Value implements Serializable{
     }
 
     public Value(String name, long value, String unit, String symbol) {
-        this(name, "integer", String.valueOf(value), unit, symbol);
+        this(name, ValueType.NUMBER, String.valueOf(value), unit, symbol);
     }
 
     public Value(String name, double value, String unit, String symbol) {
-        this(name, "real", String.valueOf(value), unit, symbol);
+        this(name, ValueType.NUMBER, String.valueOf(value), unit, symbol);
     }
 
     public Value(String name, String value, String unit, String symbol) {
-        this(name, "text", String.valueOf(value), unit, symbol);
+        this(name, ValueType.TEXT, String.valueOf(value), unit, symbol);
     }
 
     public Value(String name, boolean value, String unit, String symbol) {
-        this(name, "boolean", String.valueOf(value), unit, symbol);
+        this(name, ValueType.LOGIC, String.valueOf(value), unit, symbol);
     }
 
     public String getName() {
         return name;
     }
 
-    public String getType() {
+    public ValueType getType() {
         return type;
     }
 

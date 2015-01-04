@@ -5,17 +5,18 @@
  */
 package br.uff.labtempo.osiris.sensornet.persistence;
 
+import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
 import java.util.List;
 
 /**
  *
  * @author Felipe
  */
-public interface NetworkDao<T> extends Dao<T> {
+public interface NetworkDao extends Dao<Network> {
 
-    public T get(T o);
+    public Network get(Network o);
 
-    public T get(String networkId);
+    public Network get(String networkId);
 
-    public List<T> getAll();
+    public List<Network> getAll();
 }

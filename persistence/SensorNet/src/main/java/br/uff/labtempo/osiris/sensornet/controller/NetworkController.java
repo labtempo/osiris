@@ -16,7 +16,7 @@ import br.uff.labtempo.osiris.omcp.Controller;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
 import br.uff.labtempo.osiris.sensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.sensornet.persistence.NetworkDao;
-import br.uff.labtempo.osiris.sensornet.to.NetworkSnTo;
+import br.uff.labtempo.osiris.to.sensornet.NetworkSnTo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +39,7 @@ public class NetworkController extends Controller {
     @Override
     public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
         String contentType = request.getContentType();
-        String networkId = null;
+        String networkId ;
 
         if (match(request.getResource(), ALL)) {
 
@@ -62,7 +62,7 @@ public class NetworkController extends Controller {
     }
 
     private List<NetworkSnTo> getAll() throws NotFoundException {
-        NetworkDao<Network> ndao = factory.getNetworkDao();
+        NetworkDao ndao = factory.getNetworkDao();
 
         List<Network> nwlist = ndao.getAll();
 
@@ -76,7 +76,7 @@ public class NetworkController extends Controller {
     }
 
     private NetworkSnTo getById(String networkId) throws NotFoundException {
-        NetworkDao<Network> ndao = factory.getNetworkDao();
+        NetworkDao ndao = factory.getNetworkDao();
 
         Network nw = ndao.get(networkId);
 

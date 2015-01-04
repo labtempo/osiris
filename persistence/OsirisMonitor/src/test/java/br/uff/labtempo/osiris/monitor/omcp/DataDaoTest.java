@@ -5,11 +5,6 @@
  */
 package br.uff.labtempo.osiris.monitor.omcp;
 
-import br.uff.labtempo.osiris.collector.temp.Network;
-import java.util.List;
-import org.junit.Test;
-import static org.junit.Assert.*;
-
 /**
  *
  * @author Felipe

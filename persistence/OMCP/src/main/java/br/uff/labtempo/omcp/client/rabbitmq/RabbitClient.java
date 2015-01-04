@@ -39,6 +39,10 @@ public class RabbitClient implements OmcpClient {
         this.socket.connect();
     }
 
+    public boolean isAlive() {
+        return socket.isAlive();
+    }
+
     @Override
     public void close() {
         if (socket != null) {
@@ -65,8 +69,32 @@ public class RabbitClient implements OmcpClient {
     }
 
     @Override
+    public Response doPost(String url, Object content) throws UnreachableModuleException, RequestException, BadResponseException {
+        Request request = new RequestBuilder().onPost(url).jsonContent(content).build();
+        return call(request);
+    }
+
+    @Override
+    public Response doPost(String url, Object content, String contentType) throws UnreachableModuleException, RequestException, BadResponseException {
+        Request request = new RequestBuilder().onPost(url).objectContent(content, contentType).build();
+        return call(request);
+    }
+
+    @Override
     public Response doPut(String url, String content) throws UnreachableModuleException, RequestException, BadResponseException {
         Request request = new RequestBuilder().onPut(url).content(content).build();
+        return call(request);
+    }
+
+    @Override
+    public Response doPut(String url, Object content) throws UnreachableModuleException, RequestException, BadResponseException {
+        Request request = new RequestBuilder().onPut(url).jsonContent(content).build();
+        return call(request);
+    }
+
+    @Override
+    public Response doPut(String url, Object content, String contentType) throws UnreachableModuleException, RequestException, BadResponseException {
+        Request request = new RequestBuilder().onPut(url).objectContent(content, contentType).build();
         return call(request);
     }
 
@@ -79,6 +107,18 @@ public class RabbitClient implements OmcpClient {
     @Override
     public void doNofity(String url, String content) throws UnreachableModuleException, RequestException {
         Request request = new RequestBuilder().onNotify(url).content(content).build();
+        publish(request);
+    }
+
+    @Override
+    public void doNofity(String url, Object content) throws UnreachableModuleException, RequestException {
+        Request request = new RequestBuilder().onNotify(url).jsonContent(content).build();
+        publish(request);
+    }
+
+    @Override
+    public void doNofity(String url, Object content, String contentType) throws UnreachableModuleException, RequestException {
+        Request request = new RequestBuilder().onNotify(url).objectContent(content, contentType).build();
         publish(request);
     }
 
@@ -100,4 +140,5 @@ public class RabbitClient implements OmcpClient {
         String packet = new RequestPacket().generate(request);
         socket.publish(RabbitUtil.getHostAddress(request, DOMAIN), packet, RabbitUtil.getRoutingKey(request));
     }
+
 }

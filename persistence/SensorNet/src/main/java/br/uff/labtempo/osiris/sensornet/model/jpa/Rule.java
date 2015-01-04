@@ -5,14 +5,9 @@
  */
 package br.uff.labtempo.osiris.sensornet.model.jpa;
 
+import br.uff.labtempo.osiris.to.common.definitions.LogicalOperator;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 
 /**
  *
@@ -22,21 +17,21 @@ import javax.persistence.Id;
 public class Rule implements Serializable {
 
     private String name;
-    private String operator;
+    private LogicalOperator operator;
     private int value;
     private String message;
 
     protected Rule() {
     }
 
-    public Rule(String name, String operator, int value, String message) {
+    public Rule(String name, LogicalOperator operator, int value, String message) {
         this.name = name;
         this.operator = operator;
         this.value = value;
         this.message = message;
     }
 
-    public Rule(String name, String operator, String value, String message) {
+    public Rule(String name, LogicalOperator operator, String value, String message) {
         this(name, operator, Integer.parseInt(value), message);
     }
 
@@ -78,7 +73,7 @@ public class Rule implements Serializable {
         return name;
     }
 
-    public String getOperator() {
+    public LogicalOperator getOperator() {
         return operator;
     }
 

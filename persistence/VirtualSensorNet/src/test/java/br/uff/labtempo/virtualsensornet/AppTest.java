@@ -1,8 +1,11 @@
 package br.uff.labtempo.virtualsensornet;
 
+import static junit.framework.Assert.assertTrue;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+
 
 /**
  * Unit test for simple App.

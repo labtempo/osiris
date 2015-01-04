@@ -13,14 +13,16 @@ import br.uff.labtempo.omcp.server.Context;
  */
 public class RabbitContext implements Context {
 
-    private String host;
-    private String ProtocolVersion;
-    private String ModuleDescription;
+    private final String host;
+    private final String protocolVersion;
+    private final String moduleDescription;
+    private final String moduleName;
 
-    public RabbitContext(String host, String ProtocolVersion, String ModuleDescription) {
+    public RabbitContext(String host, String protocolVersion, String moduleDescription, String moduleName) {
         this.host = host;
-        this.ProtocolVersion = ProtocolVersion;
-        this.ModuleDescription = ModuleDescription;
+        this.protocolVersion = protocolVersion;
+        this.moduleDescription = moduleDescription;
+        this.moduleName = moduleName;
     }
 
     @Override
@@ -30,12 +32,17 @@ public class RabbitContext implements Context {
 
     @Override
     public String getProtocolVersion() {
-        return ProtocolVersion;
+        return protocolVersion;
     }
 
     @Override
     public String getModuleDescription() {
-        return ModuleDescription;
+        return moduleDescription;
+    }
+
+    @Override
+    public String getModuleName() {
+        return moduleName;
     }
 
 }

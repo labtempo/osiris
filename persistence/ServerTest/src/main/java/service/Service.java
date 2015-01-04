@@ -21,9 +21,8 @@ public class Service {
 
     public static void main(String[] args) throws Exception {
         service = new RabbitService("192.168.0.7", "admin", "admin");
-        service.addReference("omcp://test.ex/collector/#");
-        service.addReference("omcp://test.ex/*/sample");
-        service.addReference("omcp://test.ex/warning/");
+        //service.addReference("omcp://notification.messagegroup/#");
+        service.addReference("omcp://update.messagegroup/#");
 
         //shutdown();
         service.start();

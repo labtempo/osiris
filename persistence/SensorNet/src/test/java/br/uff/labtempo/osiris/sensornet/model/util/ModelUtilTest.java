@@ -10,9 +10,9 @@ import br.uff.labtempo.osiris.sensornet.model.jpa.Consumable;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
 import br.uff.labtempo.osiris.sensornet.model.jpa.Sensor;
 import br.uff.labtempo.osiris.sensornet.model.state.ModelState;
-import br.uff.labtempo.osiris.sensornet.to.CollectorSnTo;
-import br.uff.labtempo.osiris.sensornet.to.NetworkSnTo;
-import br.uff.labtempo.osiris.sensornet.to.SensorSnTo;
+import br.uff.labtempo.osiris.to.sensornet.CollectorSnTo;
+import br.uff.labtempo.osiris.to.sensornet.NetworkSnTo;
+import br.uff.labtempo.osiris.to.sensornet.SensorSnTo;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -49,13 +49,13 @@ public class ModelUtilTest {
         NetworkSnTo neto = util.toTransferObject(ne);
         SensorSnTo seto = util.toTransferObject(se);
 
-        assertEquals(co.getState(), ModelState.NEW);
-        assertEquals(ne.getState(), ModelState.NEW);
-        assertEquals(se.getState(), ModelState.NEW);
+        assertEquals(co.getModelState(), ModelState.NEW);
+        assertEquals(ne.getModelState(), ModelState.NEW);
+        assertEquals(se.getModelState(), ModelState.NEW);
 
-        assertEquals(coto.getState(), ModelState.NEW.toString());
-        assertEquals(neto.getState(), ModelState.NEW.toString());
-        assertEquals(seto.getState(), ModelState.NEW.toString());
+        assertEquals(coto.getState(), ModelState.NEW.getState());
+        assertEquals(neto.getState(), ModelState.NEW.getState());
+        assertEquals(seto.getState(), ModelState.NEW.getState());
 
         builder = new ToBuilder();
 
@@ -63,9 +63,9 @@ public class ModelUtilTest {
         ne.update(builder.getNetwork());
         se.update(builder.getSensor());
 
-        assertEquals(co.getState(), ModelState.UPDATED);
-        assertEquals(ne.getState(), ModelState.UPDATED);
-        assertEquals(se.getState(), ModelState.UPDATED);
+        assertEquals(co.getModelState(), ModelState.UPDATED);
+        assertEquals(ne.getModelState(), ModelState.UPDATED);
+        assertEquals(se.getModelState(), ModelState.UPDATED);
     }
 
     @Test
@@ -83,22 +83,24 @@ public class ModelUtilTest {
 
         assertEquals(co.getInfo(), cto.getInfo());
         assertEquals(co.getNetwork().getId(), cto.getNetworkId());
-        assertEquals(co.getSensors().length, cto.countSensors());
+        assertEquals(co.getSensors().length, cto.getTotalSensors());
         assertEquals(co.getId(), cto.getId());
-        assertEquals(co.getState().toString(), cto.getState());
+        assertEquals(co.getModelState().getState(), cto.getState());        
+        assertEquals(co.getLastModifiedDate(), cto.getLastModified()); 
 
         assertEquals(ne.getInfo(), nto.getInfo());
-        assertEquals(ne.getCollectors().length, nto.countCollectors());
-        assertEquals(ne.getSensors().length, nto.countSensors());
+        assertEquals(ne.getCollectors().length, nto.getTotalCollectors());
+        assertEquals(ne.getSensors().length, nto.getTotalSensors());
         assertEquals(ne.getId(), nto.getId());
-        assertEquals(ne.getState().toString(), nto.getState());
+        assertEquals(ne.getModelState().getState(), nto.getState());        
+        assertEquals(ne.getLastModifiedDate(), nto.getLastModified()); 
 
         assertEquals(se.getInfo(), sto.getInfo());
         assertEquals(se.getCollector().getId(), sto.getCollectorId());
         assertEquals(se.getNetwork().getId(), sto.getNetworkId());
         assertEquals(se.getId(), sto.getId());
-        assertEquals(se.getState().toString(), sto.getState());
-        assertEquals(se.getLastModifiedDate().getTimeInMillis(), sto.getLastModified());        
+        assertEquals(se.getModelState().getState(), sto.getState());
+        assertEquals(se.getLastModifiedDate(), sto.getLastModified());        
         assertEquals(se.getTimestamp(), sto.getTimestamp());
         
         //consumables

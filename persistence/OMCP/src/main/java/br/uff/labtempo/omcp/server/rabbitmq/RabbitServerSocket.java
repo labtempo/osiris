@@ -276,7 +276,7 @@ public class RabbitServerSocket implements ServerSocket {
                     } else {
                         try {
                             //TODO: here, if server shutdowning, the message will be lost!
-                            if (this.eventConsumer(message)) {
+                            if (!this.eventConsumer(message)) {
                                 System.out.println("ERROR EVENT!");
                             }
                             channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
