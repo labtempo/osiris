@@ -121,7 +121,7 @@ public class SensorJpa implements SensorDao {
         Join<Sensor, Network> netroot = root.join("network");
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.equal(netroot.<String>get("id"), networkId));            
-        predicates.add(cb.equal(root.<String>get("state"), ModelState.INACTIVE));
+        predicates.add(cb.equal(root.<String>get("modelState"), ModelState.INACTIVE));
         criteriaQuery.where(predicates.toArray(new Predicate[]{}));
 
         criteriaQuery.select(root);
@@ -140,7 +140,7 @@ public class SensorJpa implements SensorDao {
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.equal(netroot.<String>get("id"), networkId));
         predicates.add(cb.equal(colroot.<String>get("id"), collectorId));        
-        predicates.add(cb.equal(root.<String>get("state"), ModelState.INACTIVE));
+        predicates.add(cb.equal(root.<String>get("modelState"), ModelState.INACTIVE));
         criteriaQuery.where(predicates.toArray(new Predicate[]{}));
 
         criteriaQuery.select(root);
