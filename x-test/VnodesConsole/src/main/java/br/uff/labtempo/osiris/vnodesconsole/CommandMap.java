@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class CommandMap {
 

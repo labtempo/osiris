@@ -7,7 +7,7 @@ package br.uff.labtempo.osiris.vnodes.vbox;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class VNode {
 

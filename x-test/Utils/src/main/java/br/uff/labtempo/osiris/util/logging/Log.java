@@ -13,7 +13,7 @@ import org.apache.log4j.PatternLayout;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class Log {
 

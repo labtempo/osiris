@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class Teste implements Serializable {
 

@@ -8,7 +8,7 @@ package br.uff.labtempo.osiris.util.components.conn;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public interface OnMessageListener {
     public void onReceiveMessage(String message, String subject);

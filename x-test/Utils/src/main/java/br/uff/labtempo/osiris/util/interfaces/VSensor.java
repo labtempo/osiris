@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public interface VSensor {
     public List<String> getSensors();

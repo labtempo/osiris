@@ -12,7 +12,7 @@ import br.uff.labtempo.osiris.util.interfaces.Storage;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class RPCConnection {
 

@@ -18,7 +18,7 @@ import java.util.Date;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class CollectorController extends Component {
 

@@ -13,7 +13,7 @@ import java.util.Map.Entry;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class DataPacket {
 

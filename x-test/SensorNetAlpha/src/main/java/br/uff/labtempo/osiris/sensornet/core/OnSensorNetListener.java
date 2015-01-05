@@ -10,7 +10,7 @@ import br.uff.labtempo.osiris.util.data.DataPacket;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public interface OnSensorNetListener {
     void onNodeDisable(DataPacket packet);

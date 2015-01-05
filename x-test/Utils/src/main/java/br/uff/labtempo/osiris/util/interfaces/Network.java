@@ -8,7 +8,7 @@ package br.uff.labtempo.osiris.util.interfaces;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public interface Network {
    public boolean getNode(String nodeId);           

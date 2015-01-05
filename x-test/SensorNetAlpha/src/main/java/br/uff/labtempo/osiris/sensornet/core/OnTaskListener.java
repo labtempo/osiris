@@ -8,7 +8,7 @@ package br.uff.labtempo.osiris.sensornet.core;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 interface OnTaskListener {
     void onTaskClose(Node node);

@@ -11,7 +11,7 @@ import java.util.*;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class MemoryStorage implements Storage {
 

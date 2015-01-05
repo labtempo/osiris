@@ -12,7 +12,7 @@ import br.uff.labtempo.omcp.common.utils.RequestPacket;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class TestRequestBuilder {
 

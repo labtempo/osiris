@@ -16,7 +16,7 @@ import javax.persistence.TemporalType;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 @Entity
 public class Sample implements Serializable {

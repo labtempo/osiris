@@ -7,7 +7,7 @@ package br.uff.labtempo.osiris.controller.exceptions;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class NewMoteException extends Exception {
 

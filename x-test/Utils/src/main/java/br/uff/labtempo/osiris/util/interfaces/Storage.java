@@ -10,7 +10,7 @@ import java.util.Map;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public interface Storage {
 

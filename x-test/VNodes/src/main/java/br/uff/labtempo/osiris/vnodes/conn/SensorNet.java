@@ -8,7 +8,7 @@ package br.uff.labtempo.osiris.vnodes.conn;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class SensorNet {
     

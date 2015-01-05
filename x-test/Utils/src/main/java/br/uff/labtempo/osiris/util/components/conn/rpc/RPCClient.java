@@ -7,7 +7,7 @@ package br.uff.labtempo.osiris.util.components.conn.rpc;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 interface RPCClient <T> {
 

@@ -20,7 +20,7 @@ import javax.persistence.OneToOne;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 @Entity
 public class VirtualSensor implements Serializable {

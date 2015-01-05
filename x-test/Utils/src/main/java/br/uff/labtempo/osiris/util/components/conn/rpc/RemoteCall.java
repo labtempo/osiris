@@ -13,7 +13,7 @@ import java.util.Properties;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class RemoteCall {
 

@@ -14,7 +14,7 @@ import java.util.concurrent.TimeoutException;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 class JSONRpcClient<T> implements RPCClient {
 

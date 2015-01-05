@@ -7,7 +7,7 @@ package br.uff.labtempo.osiris.util.components;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class ComponentInitializationException extends RuntimeException {
 

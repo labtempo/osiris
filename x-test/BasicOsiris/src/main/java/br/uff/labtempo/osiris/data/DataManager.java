@@ -21,7 +21,7 @@ import javax.persistence.criteria.Root;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class DataManager extends Component {
 
