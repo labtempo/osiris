@@ -17,19 +17,14 @@ package br.uff.labtempo.osiris.virtualsensornet.model;
 
 import br.uff.labtempo.osiris.to.common.definitions.ValueType;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.script.ScriptException;
 
 /**
@@ -42,28 +37,32 @@ public class Field implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private String name;
+    private String referenceName;
+    private String currentValue;
 
     @ManyToOne
-    private DataType defaultDataType;
+    private DataType dataType;
 
     @ManyToOne
-    private Value currentValue;
-
-    @OneToMany(mappedBy = "field", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Value> history;
-
-    @ManyToOne
-    private Converter converter;
+    private DataConverter converter;
 
     @ManyToOne
     private VirtualSensor virtualSensor;
 
-    public Field(String name, DataType defaultdataType) {
-        this.name = name;
-        this.defaultDataType = defaultdataType;
+    private boolean isDeleted;
 
-        if (name == null || defaultdataType == null) {
+    private boolean isStored;
+
+    public Field(String referenceName, DataType dataType) {
+        this(0, referenceName, dataType);
+    }
+
+    public Field(long id, String referenceName, DataType dataType) {
+        this.id = id;
+        this.referenceName = referenceName;
+        this.dataType = dataType;
+
+        if (referenceName == null || dataType == null) {
             throw new RuntimeException("Arguments cannot be null!");
         }
     }
@@ -79,59 +78,103 @@ public class Field implements Serializable {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public String getReferenceName() {
+        return referenceName;
     }
 
     public String getValue() {
-        return currentValue.getValue();
+        return currentValue;
     }
 
     public ValueType getValueType() {
-        DataType dataType = getDataType();
-        ValueType valueType = dataType.getValueType();
-        return valueType;
+        return dataType.getValueType();
     }
 
     public String getUnit() {
-        DataType dataType = getDataType();
         return dataType.getUnit();
     }
 
     public String getSymbol() {
-        DataType dataType = getDataType();
         return dataType.getSymbol();
     }
 
-    public DataType getDefaultDataType() {
-        return defaultDataType;
-    }
-
     public DataType getDataType() {
-        if (converter != null) {
-            return converter.getDataType();
-        }
-        return defaultDataType;
+        return dataType;
     }
 
-    public Converter getConverter() {
+    public long getDataTypeId() {
+        return dataType.getId();
+    }
+
+    public DataType getInputDataType() {
+        if (converter != null) {
+            return converter.getInputDataType();
+        }
+        return dataType;
+    }
+
+    public boolean hasConverter() {
+        if (converter != null) {
+            return true;
+        }
+        return false;
+    }
+
+    public DataConverter getConverter() {
         return converter;
     }
 
-    public Calendar getLastModified() {
-        return currentValue.getDate();
+    public long getConverterId() {
+        if (hasConverter()) {
+            return converter.getId();
+        } else {
+            return 0;
+        }
     }
 
-    public List<Value> getHistory() {
-        return history;
+    public void setStored() {
+        this.isStored = true;
+    }
+
+    public void setStored(boolean value) {
+        this.isStored = value;
+    }
+
+    public boolean isStored() {
+        return isStored;
+    }
+
+    public boolean isIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setLogicallyDeleted() {
+        isDeleted = true;
+    }
+
+    public void setLogicallyDeleted(boolean deleted) {
+        isDeleted = deleted;
+    }
+
+    public void setReferenceName(String referenceName) {
+        this.referenceName = referenceName;
     }
 
     public void setDataType(DataType dataType) {
-        this.defaultDataType = dataType;
+        this.dataType = dataType;
     }
-
-    public void setConverter(Converter converter) {
-        this.converter = converter;
+    
+    public void setConverter(DataConverter converter) {
+        if(converter == null){
+            converter = null;
+            return;
+        }
+        
+        if (converter.getOutputDataType().equals(dataType)) {
+            this.converter = converter;
+        } else {
+            throw new RuntimeException("Convert cannot be applied, because output DataType is not equal to Field's DataType!");
+        }
     }
 
     public boolean removeConverter() {
@@ -142,23 +185,8 @@ public class Field implements Serializable {
         return false;
     }
 
-    public void addValue(String value) {
-        value = convertNewValue(value);
-        DataType dataType = getDataType();
-        Value newer = new Value(value, dataType, this);
-        currentValue = newer;
-
-        if (history == null) {
-            history = new ArrayList<>();
-        }
-
-        history.add(newer);
-    }
-
-    public void addInstantaneousValue(String value) {
-        DataType dataType = getDataType();
-        Value newer = new Value(value, dataType, this);
-        currentValue = newer;
+    public void setValue(String value) {
+        this.currentValue = convertNewValue(value);
     }
 
     public boolean equalsValue(Field obj) {
@@ -175,8 +203,7 @@ public class Field implements Serializable {
         return true;
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    public boolean equalsInputReference(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -189,10 +216,10 @@ public class Field implements Serializable {
 
         Field other = (Field) obj;
 
-        if (!name.equals(other.name)) {
+        if (!referenceName.equals(other.referenceName)) {
             return false;
         }
-        if (!defaultDataType.equals(other.defaultDataType)) {
+        if (!getInputDataType().equals(other.dataType)) {
             return false;
         }
         return true;
@@ -200,7 +227,32 @@ public class Field implements Serializable {
 
     @Override
     public int hashCode() {
-        return name.hashCode();
+        int hash = 5;
+        hash = 41 * hash + Objects.hashCode(this.referenceName);
+        hash = 41 * hash + Objects.hashCode(this.dataType);
+        hash = 41 * hash + Objects.hashCode(this.converter);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Field other = (Field) obj;
+        if (!Objects.equals(this.referenceName, other.referenceName)) {
+            return false;
+        }
+        if (!Objects.equals(this.dataType, other.dataType)) {
+            return false;
+        }
+        if (!Objects.equals(this.converter, other.converter)) {
+            return false;
+        }
+        return true;
     }
 
     private String convertNewValue(String value) {
@@ -213,4 +265,5 @@ public class Field implements Serializable {
         }
         return value;
     }
+
 }

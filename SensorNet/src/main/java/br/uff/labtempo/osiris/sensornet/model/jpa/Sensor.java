@@ -22,6 +22,7 @@ import br.uff.labtempo.osiris.sensornet.model.util.ModelUtil;
 import br.uff.labtempo.osiris.to.sensornet.SensorSnTo;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -60,37 +61,24 @@ public class Sensor extends Model {
      */
     private long timestamp;
 
-    /**
-     * sensing values{name of field, value, value type, metric unit, metric
-     * symbol}
-     */
-//    @ElementCollection
-//    @CollectionTable(
-//          name="VALUE",
-//          joinColumns=@JoinColumn(name="SENSOR_ID")
-//    )
-//    @OrderBy("name ASC")
+    private TimeUnit timestampUnit;
+
+    private long timeOfCollectionInMillis;
+
     @ElementCollection
     private List<Value> values;
 
-    /**
-     * watchable hardware resources
-     */
-//    @ElementCollection
-//    @CollectionTable(
-//          name="CONSUMABLE",
-//          joinColumns=@JoinColumn(name="SENSOR_ID")
-//    )
-//    @OrderBy("name ASC")
     @OneToMany(cascade = CascadeType.ALL)
     private List<Consumable> consumables;
 
     protected Sensor() {
     }
 
-    public Sensor(String id, long timestamp, List<Value> values, List<Consumable> consumables, Map<String, String> info) {
+    public Sensor(String id, long timestamp, TimeUnit timestampTimeUnit, long timeOfCollectionInMillis, List<Value> values, List<Consumable> consumables, Map<String, String> info) {
         this.id = id;
         this.timestamp = timestamp;
+        this.timestampUnit = timestampTimeUnit;
+        this.timeOfCollectionInMillis = timeOfCollectionInMillis;
         this.values = values;
         this.consumables = consumables;
         setInfo(info);
@@ -116,6 +104,14 @@ public class Sensor extends Model {
         return timestamp;
     }
 
+    public TimeUnit getTimestampUnit() {
+        return timestampUnit;
+    }
+
+    public long getTimeOfCollectionInMillis() {
+        return timeOfCollectionInMillis;
+    }
+
     public List<Value> getValues() {
         return values;
     }
@@ -130,6 +126,14 @@ public class Sensor extends Model {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public void setTimestampUnit(TimeUnit timestampUnit) {
+        this.timestampUnit = timestampUnit;
+    }
+
+    public void setTimeOfCollectionInMillis(long timeOfCollectionInMillis) {
+        this.timeOfCollectionInMillis = timeOfCollectionInMillis;
     }
 
     public void setConsumables(List<Consumable> consumables) {

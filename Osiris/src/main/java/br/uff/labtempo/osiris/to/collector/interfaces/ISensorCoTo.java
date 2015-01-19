@@ -24,6 +24,7 @@ import br.uff.labtempo.osiris.to.common.definitions.State;
 import br.uff.labtempo.osiris.to.common.data.ValueTo;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -34,6 +35,10 @@ public interface ISensorCoTo {
     String getId();
 
     long getTimestamp();
+    
+    TimeUnit getTimestampUnit();
+    
+    long getTimeOfCollectionInMillis();
 
     State getState();
 

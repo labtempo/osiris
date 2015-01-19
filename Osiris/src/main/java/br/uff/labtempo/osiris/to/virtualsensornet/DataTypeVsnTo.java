@@ -15,41 +15,55 @@
  */
 package br.uff.labtempo.osiris.to.virtualsensornet;
 
-import br.uff.labtempo.osiris.to.common.definitions.State;
+import br.uff.labtempo.osiris.to.virtualsensornet.interfaces.IDataTypeVsnTo;
 import br.uff.labtempo.osiris.to.common.definitions.ValueType;
+import java.util.Objects;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public class DataTypeVsnTo {
+public class DataTypeVsnTo implements IDataTypeVsnTo {
 
     private long id;
-    private final String displayName;
-    private final String type;
-    private final String unit;
-    private final String symbol;
-    
+    private String displayName;
+    private String type;
+    private String unit;
+    private String symbol;
+    private long usedBy;
+
     //helper attributes
-    private transient ValueType helperValueType;
+    private transient ValueType helperValueType;    
 
     public DataTypeVsnTo(String displayName, ValueType valueType, String unit, String symbol) {
+        this(0, displayName, valueType, unit, symbol);
+    }
+
+    public DataTypeVsnTo(long id, String displayName, ValueType valueType, String unit, String symbol) {
+        this.id = id;
         this.displayName = displayName;
         this.type = valueType.toString();
         this.unit = unit;
         this.symbol = symbol;
-        
+
         this.helperValueType = valueType;
     }
 
+    public void setUsedBy(long usedBy) {
+        this.usedBy = usedBy;
+    }
+
+    @Override
     public long getId() {
         return id;
     }
 
+    @Override
     public String getDisplayName() {
         return displayName;
     }
 
+    @Override
     public ValueType getType() {
         if (helperValueType == null) {
             helperValueType = Enum.valueOf(ValueType.class, type);
@@ -57,13 +71,53 @@ public class DataTypeVsnTo {
         return helperValueType;
     }
 
+    @Override
     public String getUnit() {
         return unit;
     }
 
+    @Override
     public String getSymbol() {
         return symbol;
     }
-    
-    
+
+    @Override
+    public long getUsedBy() {
+        return usedBy;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 47 * hash + Objects.hashCode(this.displayName);
+        hash = 47 * hash + Objects.hashCode(this.type);
+        hash = 47 * hash + Objects.hashCode(this.unit);
+        hash = 47 * hash + Objects.hashCode(this.symbol);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final DataTypeVsnTo other = (DataTypeVsnTo) obj;
+        if (!Objects.equals(this.displayName, other.displayName)) {
+            return false;
+        }
+        if (!Objects.equals(this.type, other.type)) {
+            return false;
+        }
+        if (!Objects.equals(this.unit, other.unit)) {
+            return false;
+        }
+        if (!Objects.equals(this.symbol, other.symbol)) {
+            return false;
+        }
+        return true;
+    }
+
 }

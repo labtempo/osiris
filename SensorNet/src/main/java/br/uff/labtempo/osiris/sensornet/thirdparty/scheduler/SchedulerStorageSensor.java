@@ -51,7 +51,7 @@ public class SchedulerStorageSensor implements SchedulingStorage<Sensor> {
 
         //condition where
         List<Predicate> predicates = new ArrayList<>();
-        predicates.add(cb.lessThanOrEqualTo(root.<Long>get("timeToNextUpdate"), timeLimitInMillis));
+        predicates.add(cb.lessThanOrEqualTo(root.<Long>get(SchedulerItemSensor_.timeToNextUpdate), timeLimitInMillis));
         criteriaQuery.where(predicates.toArray(new Predicate[]{}));
 
         criteriaQuery.select(root);

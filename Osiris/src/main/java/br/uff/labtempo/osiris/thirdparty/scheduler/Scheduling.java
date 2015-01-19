@@ -21,5 +21,5 @@ package br.uff.labtempo.osiris.thirdparty.scheduler;
  */
 public interface Scheduling<T> extends AutoCloseable{
     void initialize();
-    void schedule(SchedulerItem<T> item);
+    Scheduler<T> getScheduler();
 }

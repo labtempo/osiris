@@ -15,6 +15,7 @@
  */
 package br.uff.labtempo.osiris.thirdparty.scheduler.core;
 
+import br.uff.labtempo.osiris.thirdparty.scheduler.Scheduler;
 import br.uff.labtempo.osiris.thirdparty.scheduler.SchedulerItem;
 import br.uff.labtempo.osiris.thirdparty.scheduler.Scheduling;
 import br.uff.labtempo.osiris.thirdparty.scheduler.SchedulingCallback;
@@ -37,24 +38,28 @@ public class SchedulingManagerTest {
 
     @Test
     public void testSomeMethod() {
-        Scheduling<Item> manager = new SchedulingManager<>(new Storage(), new Callback());
-        manager.initialize();
-        manager.schedule(new Container(new Item("1")));
-        manager.schedule(new Container(new Item("2")));
-        manager.schedule(new Container(new Item("3")));
-        manager.schedule(new Container(new Item("4")));
-        manager.schedule(new Container(new Item("5")));
-        manager.schedule(new Container(new Item("6")));
-        manager.schedule(new Container(new Item("7")));
-        manager.schedule(new Container(new Item("8")));
-        manager.schedule(new Container(new Item("9")));
-        manager.schedule(new Container(new Item("10")));
-        manager.schedule(new Container(new Item("11")));
-        manager.schedule(new Container(new Item("12")));
+        Scheduling<Item> scheduling = new SchedulingManager<>(new Storage(), new Callback(), 1, TimeUnit.SECONDS);
+        scheduling.initialize();
+
+        Scheduler<Item> scheduler = scheduling.getScheduler();
+
+        scheduler.schedule(new Container(new Item("1")));
+        scheduler.schedule(new Container(new Item("2")));
+        scheduler.schedule(new Container(new Item("3")));
+        scheduler.schedule(new Container(new Item("4")));
+        scheduler.schedule(new Container(new Item("5")));
+        scheduler.schedule(new Container(new Item("6")));
+        scheduler.schedule(new Container(new Item("7")));
+        scheduler.schedule(new Container(new Item("8")));
+        scheduler.schedule(new Container(new Item("9")));
+        scheduler.schedule(new Container(new Item("10")));
+        scheduler.schedule(new Container(new Item("11")));
+        scheduler.schedule(new Container(new Item("12")));
 
         try {
-            Thread.sleep(3000);
-            manager.close();
+            Thread.sleep(300);
+            System.out.println("closing");
+            scheduling.close();
         } catch (Exception ex) {
             Logger.getLogger(SchedulingManagerTest.class.getName()).log(Level.SEVERE, null, ex);
         }

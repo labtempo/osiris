@@ -17,6 +17,7 @@ package br.uff.labtempo.osiris.virtualsensornet.persistence.jpa;
 
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensorLink;
+import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensorLink_;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.LinkDao;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,15 +39,35 @@ public class LinkJpa implements LinkDao {
     }
 
     @Override
-    public List<VirtualSensorLink> getAll(String networkId, String collectorId, String sensorId) {
+    public VirtualSensorLink get(long id) {
+        return data.get(VirtualSensorLink.class, id);
+    }
+
+    @Override
+    public VirtualSensorLink get(VirtualSensorLink sensorLink) {
+        return get(sensorLink.getId());
+    }
+
+    @Override
+    public List<VirtualSensorLink> getAll() {
+        CriteriaBuilder cb = data.getCriteriaBuilder();
+        CriteriaQuery<VirtualSensorLink> criteriaQuery = cb.createQuery(VirtualSensorLink.class);
+        Root<VirtualSensorLink> root = criteriaQuery.from(VirtualSensorLink.class);
+        criteriaQuery.select(root);
+        List<VirtualSensorLink> virtualSensors = data.getQuery(criteriaQuery);
+        return virtualSensors;
+    }
+
+    @Override
+    public List<VirtualSensorLink> getAllByReferences(String networkId, String collectorId, String sensorId) {
         CriteriaBuilder cb = data.getCriteriaBuilder();
         CriteriaQuery<VirtualSensorLink> criteriaQuery = cb.createQuery(VirtualSensorLink.class);
         Root<VirtualSensorLink> root = criteriaQuery.from(VirtualSensorLink.class);
 
         List<Predicate> predicates = new ArrayList<>();
-        predicates.add(cb.equal(root.<String>get("networkId"), networkId));
-        predicates.add(cb.equal(root.<String>get("collectorId"), collectorId));
-        predicates.add(cb.equal(root.<String>get("sensorId"), sensorId));
+        predicates.add(cb.equal(root.<String>get(VirtualSensorLink_.networkId), networkId));
+        predicates.add(cb.equal(root.<String>get(VirtualSensorLink_.collectorId), collectorId));
+        predicates.add(cb.equal(root.<String>get(VirtualSensorLink_.sensorId), sensorId));
         criteriaQuery.where(predicates.toArray(new Predicate[]{}));
 
         criteriaQuery.select(root);

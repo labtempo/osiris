@@ -17,15 +17,22 @@ package br.uff.labtempo.osiris.virtualsensornet.controller;
 
 import br.uff.labtempo.omcp.common.Request;
 import br.uff.labtempo.omcp.common.Response;
+import br.uff.labtempo.omcp.common.exceptions.BadRequestException;
 import br.uff.labtempo.omcp.common.exceptions.InternalServerErrorException;
 import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
 import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
 import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
+import br.uff.labtempo.omcp.common.utils.ResponseBuilder;
 import br.uff.labtempo.osiris.omcp.Controller;
+import br.uff.labtempo.osiris.to.common.definitions.Path;
 import br.uff.labtempo.osiris.to.common.definitions.ValueType;
 import br.uff.labtempo.osiris.to.virtualsensornet.DataTypeVsnTo;
 import br.uff.labtempo.osiris.virtualsensornet.model.DataType;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
+import br.uff.labtempo.osiris.virtualsensornet.persistence.DataTypeDao;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -40,19 +47,176 @@ public class DataTypeController extends Controller {
     }
 
     @Override
-    public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException {
+        String contentType = request.getContentType();
+        if (match(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_DATATYPE_ALL.toString())) {
+            switch (request.getMethod()) {
+                case GET:
+                    List<DataTypeVsnTo> all = getAll();
+                    Response response = new ResponseBuilder().ok(all, contentType).build();
+                    return response;
+                case POST:
+                    DataTypeVsnTo to = request.getContent(DataTypeVsnTo.class);
+                    long id = create(to);
+                    // omcp://virtualsensornet/datatype/{id}
+                    String uri = getContext().getHost() + Path.NAMING_RESOURCE_DATATYPE + Path.SEPARATOR + String.valueOf(id);
+                    response = new ResponseBuilder().created(uri).build();
+                    return response;
+                default:
+                    throw new NotImplementedException("Action not implemented");
+            }
+        } else if (match(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_DATATYPE_BY_ID.toString())) {
+            Map<String, String> map = extract(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_DATATYPE_BY_ID.toString());
+            String urlId = map.get(Path.ID1.toString());
+            switch (request.getMethod()) {
+                case GET:
+                    long id = Long.valueOf(urlId);
+                    DataTypeVsnTo to = get(id);
+                    Response response = new ResponseBuilder().ok(to, contentType).build();
+                    return response;
+                case PUT:
+                    id = Long.valueOf(urlId);
+                    to = request.getContent(DataTypeVsnTo.class);
+                    update(id, to);
+                    response = new ResponseBuilder().ok().build();
+                    return response;
+                case DELETE:
+                    id = Long.valueOf(urlId);
+                    delete(id);
+                    response = new ResponseBuilder().ok().build();
+                    return response;
+                default:
+                    throw new NotImplementedException("Action not implemented");
+            }
+        }
+        return null;
     }
 
-    public void create(DataTypeVsnTo dataTypeTo) {
-        String displayName = dataTypeTo.getDisplayName();
-        ValueType type = dataTypeTo.getType();
-        String unit = dataTypeTo.getUnit();
-        String symbol = dataTypeTo.getSymbol();
+    public DataTypeVsnTo get(long id) throws NotFoundException, InternalServerErrorException {
+        DataTypeDao dDao;
+        try {
+            dDao = factory.getDataTypeDao();
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Data query error!");
+        }
 
-        DataType dataType = new DataType(type, unit, symbol);
+        DataType dataType = dDao.getById(id);
+        if (dataType == null) {
+            throw new NotFoundException("Selected DataType not found!");
+        }
+        long usedBy = dDao.countIndirectUseInFields(dataType);
+        return dataType.getTransferObject(usedBy);
+    }
+
+    public List<DataTypeVsnTo> getAll() throws InternalServerErrorException {
+        DataTypeDao dDao;
+        try {
+            dDao = factory.getDataTypeDao();
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Data query error!");
+        }
+
+        List<DataType> dataTypes = dDao.getAll();
+        List<DataTypeVsnTo> dtvts = new ArrayList<>();
+        for (DataType vs : dataTypes) {
+            long usedBy = dDao.countIndirectUseInFields(vs);
+            dtvts.add(vs.getTransferObject(usedBy));
+        }
+        return dtvts;
+    }
+
+    public synchronized boolean update(long id, DataTypeVsnTo dataTypeTo) throws MethodNotAllowedException, NotFoundException, BadRequestException, InternalServerErrorException {
+        String displayName;
+        String unit;
+        String symbol;
+        ValueType valueType;
+        try {
+            displayName = dataTypeTo.getDisplayName().trim();
+            unit = dataTypeTo.getUnit().trim();
+            symbol = dataTypeTo.getSymbol().trim();
+            valueType = dataTypeTo.getType();
+
+            DataType tempDataType = new DataType(displayName, valueType, unit, symbol);
+        } catch (Exception e) {
+            throw new BadRequestException(e.getMessage());
+        }
+
+        DataTypeDao dDao;
+        try {
+            dDao = factory.getDataTypeDao();
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Data query error!");
+        }
+
+        DataType dataType = dDao.getById(id);
+
+        if (dataType == null) {
+            throw new BadRequestException("Selected DataType not found!");
+        }
+
+        if (!dataType.getSymbol().equals(symbol) || !dataType.getValueType().equals(valueType) || !dataType.getUnit().equals(unit)) {
+            //change datatypes only if it is not used field, direct or indirectly
+            long countUseInFields = dDao.countIndirectUseInFields(dataType);
+            if (countUseInFields > 0) {
+                throw new BadRequestException("DataType is in using by one or more Fields, directly(DataType) or indirectly(Converter). It's locked to change critical properties!");
+            }
+            if (valueType != null && unit != null && symbol != null) {
+                dataType.setSymbol(symbol);
+                dataType.setType(valueType);
+                dataType.setUnit(unit);
+            }
+        }
         dataType.setDisplayName(displayName);
-        
-        factory.getDataTypeDao().save(dataType);
+        dDao.update(dataType);
+        return true;
+    }
+
+    public synchronized long create(DataTypeVsnTo dataTypeTo) throws BadRequestException, InternalServerErrorException {
+        DataType dataType;
+        try {
+            String displayName = dataTypeTo.getDisplayName().trim();
+            ValueType type = dataTypeTo.getType();
+            String unit = dataTypeTo.getUnit().trim();
+            String symbol = dataTypeTo.getSymbol().trim();
+            dataType = new DataType(displayName, type, unit, symbol);
+        } catch (Exception e) {
+            throw new BadRequestException(e.getMessage());
+        }
+
+        DataTypeDao dDao;
+        try {
+            dDao = factory.getDataTypeDao();
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Data query error!");
+        }
+        dDao.save(dataType);
+
+        return dataType.getId();
+    }
+
+    public boolean delete(long id) throws NotFoundException, InternalServerErrorException, BadRequestException {
+        DataTypeDao dDao;
+        try {
+            dDao = factory.getDataTypeDao();
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Data query error!");
+        }
+
+        DataType dataType = dDao.getById(id);
+        if (dataType == null) {
+            throw new NotFoundException("Selected DataType not found!");
+        }
+
+        long countUseInFields = dDao.countIndirectUseInFields(dataType);
+        if (countUseInFields > 0) {
+            throw new BadRequestException("DataType is in using by one or more Fields, directly(DataType) or indirectly(Converter). It cannot be deleted!");
+        }
+
+        try {
+            dDao.delete(dataType);
+            return true;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("DataType couldn't removed!");
+        }
     }
 }

@@ -56,7 +56,7 @@ public class NetworkController extends Controller {
             if (request.getMethod() != RequestMethod.GET) {
                 throw new NotImplementedException("Action not implemented");
             }
-            return builder(getAll(), contentType);
+            return builderOk(getAll(), contentType);
         }
 
         if (match(request.getResource(), UNIQUE)) {
@@ -66,7 +66,7 @@ public class NetworkController extends Controller {
             if (request.getMethod() != RequestMethod.GET) {
                 throw new NotImplementedException("Action not implemented");
             }
-            return builder(getById(networkId), contentType);
+            return builderOk(getById(networkId), contentType);
         }
         return null;
     }

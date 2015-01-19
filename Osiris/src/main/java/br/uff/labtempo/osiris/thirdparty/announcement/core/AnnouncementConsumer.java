@@ -22,13 +22,13 @@ import java.util.concurrent.BlockingQueue;
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-class AnnouncementConsumer implements Runnable, AutoCloseable {
+class AnnoucementConsumer implements Runnable, AutoCloseable {
 
     private final BlockingQueue<AnnouncementItem> queue;
     private final OmcpClient client;
     private Thread consumerThread;
 
-    AnnouncementConsumer(BlockingQueue<AnnouncementItem> queue, OmcpClient client) {
+    AnnoucementConsumer(BlockingQueue<AnnouncementItem> queue, OmcpClient client) {
         this.queue = queue;
         this.client = client;
     }

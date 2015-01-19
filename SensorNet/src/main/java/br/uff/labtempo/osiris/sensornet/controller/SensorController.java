@@ -63,7 +63,7 @@ public class SensorController extends Controller {
             if (request.getMethod() != RequestMethod.GET) {
                 throw new NotImplementedException("Action not implemented");
             }
-            return builder(getById(networkId, collectorId, sensorId), contentType);
+            return builderOk(getById(networkId, collectorId, sensorId), contentType);
         }
         //All of Collector
         if (match(request.getResource(), ALL_OF_COLLECTOR)) {
@@ -74,7 +74,7 @@ public class SensorController extends Controller {
             if (request.getMethod() != RequestMethod.GET) {
                 throw new NotImplementedException("Action not implemented");
             }
-            return builder(getAll(networkId, collectorId), contentType);
+            return builderOk(getAll(networkId, collectorId), contentType);
         }
         //All of Network
         if (match(request.getResource(), ALL_OF_NETWORK)) {
@@ -84,7 +84,7 @@ public class SensorController extends Controller {
             if (request.getMethod() != RequestMethod.GET) {
                 throw new NotImplementedException("Action not implemented");
             }
-            return builder(getAllOfNetwork(networkId), contentType);
+            return builderOk(getAllOfNetwork(networkId), contentType);
         }
 
         return null;

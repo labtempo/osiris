@@ -40,6 +40,7 @@ public class DataBuilder {
         this.value = gerador.nextInt(3);
         this.networkId = networkId;
         this.collectorId = collectorId;
+        
     }
 
     public SampleCoTo generateSample() {

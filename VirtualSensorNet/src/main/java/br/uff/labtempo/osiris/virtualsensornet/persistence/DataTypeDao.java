@@ -16,11 +16,17 @@
 package br.uff.labtempo.osiris.virtualsensornet.persistence;
 
 import br.uff.labtempo.osiris.virtualsensornet.model.DataType;
+import java.util.List;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
 public interface DataTypeDao extends Dao<DataType>{
-    public DataType get(long id);
+    public List<DataType> getAll();
+    public List<DataType> getAllDeleted();
+    public DataType getById(long id);
+    public long countDirectUseInFields(DataType dataType);
+    public long countIndirectUseInFields(DataType dataType);
+    public long countUseInConverters(DataType dataType);
 }

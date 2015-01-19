@@ -15,18 +15,21 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet;
 
-import br.uff.labtempo.omcp.common.utils.Serializer;
+import br.uff.labtempo.omcp.client.OmcpClient;
+import br.uff.labtempo.omcp.client.OmcpClientBuilder;
 import br.uff.labtempo.omcp.server.OmcpServer;
 import br.uff.labtempo.omcp.server.rabbitmq.RabbitServer;
-import br.uff.labtempo.osiris.to.common.definitions.ValueType;
-import br.uff.labtempo.osiris.to.virtualsensornet.ConverterVsnTo;
-import br.uff.labtempo.osiris.to.virtualsensornet.DataTypeVsnTo;
-import br.uff.labtempo.osiris.to.virtualsensornet.LinkVsnTo;
+import br.uff.labtempo.osiris.virtualsensornet.controller.AnnouncementController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.ConverterController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.DataTypeController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.NotifyController;
+import br.uff.labtempo.osiris.virtualsensornet.controller.SchedulerController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.VirtualSensorLinkController;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.jpa.JpaDaoFactory;
+import br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer.AnnouncementBootstrap;
+import br.uff.labtempo.osiris.virtualsensornet.thirdparty.scheduler.SchedulerBootstrap;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
 /**
  *
@@ -41,114 +44,89 @@ public class Bootstrap implements AutoCloseable {
 
     private JpaDaoFactory factory;
 
-    private OmcpServer server;
+    private OmcpServer omcpServer;
+    private String persistenceUnitName;
+    private final SchedulerBootstrap schedulerBootstrap;
+    private final OmcpClient omcpClient;
+    private final AnnouncementBootstrap announcementBootstrap;
 
     public Bootstrap() throws Exception {
+
         ip = "192.168.0.7";
         usr = "admin";
         pwd = "admin";
         moduleName = "virtualsensornet";
-
+        persistenceUnitName = "production";
+        
         try {
-            server = new RabbitServer(moduleName, ip, usr, pwd);
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnitName);
+            factory = JpaDaoFactory.newInstance(emf);
 
-            factory = JpaDaoFactory.newInstance(ip, usr, pwd, moduleName);
+            NotifyController nc = new NotifyController(factory);
+            VirtualSensorLinkController vslc = new VirtualSensorLinkController(factory);
+            DataTypeController dtc = new DataTypeController(factory);
+            ConverterController cc = new ConverterController(factory);
 
-            NotifyController nCtrl = new NotifyController(factory);
-            VirtualSensorLinkController lCtrl = new VirtualSensorLinkController(factory);
-            DataTypeController dtCtrl = new DataTypeController(factory);
-            ConverterController cCtrl = new ConverterController(factory);
+            SchedulerController schedulerController = new SchedulerController(factory);
+            schedulerBootstrap = new SchedulerBootstrap(factory.getSchedulerDao(), schedulerController);
 
-            nCtrl.setNext(lCtrl);
-            lCtrl.setNext(dtCtrl);
-            dtCtrl.setNext(cCtrl);
-            
-            insertDataType(dtCtrl);
-            insertConverter(cCtrl);
-            insertLink(lCtrl);
+            omcpClient = new OmcpClientBuilder().host(ip).user(usr, pwd).source(moduleName).build();
+            announcementBootstrap = new AnnouncementBootstrap(omcpClient);
+            AnnouncementController announcementController = new AnnouncementController(announcementBootstrap.getAnnouncer());
 
-            server.setHandler(nCtrl);
+            schedulerController.setAnnouncerAgent(announcementController);
+            nc.setAnnouncerAgent(announcementController);
+            nc.setSchedulerAgent(schedulerBootstrap.getScheduler());
 
-            server.addReference("omcp://collector.messagegroup/#");
-            server.addReference("omcp://update.messagegroup/sensornet/#");
-            
+            omcpServer = new RabbitServer(moduleName, ip, usr, pwd);
+
+            nc.setNext(vslc);
+            vslc.setNext(dtc);
+            dtc.setNext(cc);
+
+            omcpServer.setHandler(nc);
+
+            omcpServer.addReference("omcp://collector.messagegroup/#");
+            omcpServer.addReference("omcp://update.messagegroup/sensornet/#");
+
         } catch (Exception ex) {
             close();
             throw ex;
         }
-        //server.addReference("omcp://test.ex/warning/");
     }
 
     public void start() {
-        server.start();
+        try {
+            announcementBootstrap.start();
+            schedulerBootstrap.start();
+            omcpServer.start();
+        } catch (Exception ex) {
+            close();
+            throw ex;
+        }
     }
 
     @Override
     public void close() {
         try {
-            server.close();
+            omcpServer.close();
+        } catch (Exception e) {
+        }
+        try {
+            schedulerBootstrap.close();
+        } catch (Exception e) {
+        }
+        try {
+            announcementBootstrap.close();
+        } catch (Exception e) {
+        }
+        try {
+            omcpClient.close();
         } catch (Exception e) {
         }
         try {
             factory.close();
         } catch (Exception e) {
         }
-
-    }
-
-    public void insertDataType(DataTypeController dtCtrl) {
-        DataTypeVsnTo d1, d2, d3, d4, d5;
-
-        d1 = new DataTypeVsnTo("temperature", ValueType.NUMBER, "celsius", "°C");
-
-        d2 = new DataTypeVsnTo("voltage", ValueType.NUMBER, "volt", "V");
-
-        d3 = new DataTypeVsnTo("luminosity", ValueType.NUMBER, "candela", "cd");
-
-        d4 = new DataTypeVsnTo("time", ValueType.NUMBER, "second", "s");
-
-        d5 = new DataTypeVsnTo("temperature", ValueType.NUMBER, "fahrenheit", "°F");
-
-        dtCtrl.create(d1);
-        dtCtrl.create(d2);
-        dtCtrl.create(d3);
-        dtCtrl.create(d4);
-        dtCtrl.create(d5);
-    }
-
-    public void insertConverter(ConverterController cCtrl) {
-        ConverterVsnTo c1, c2;
-
-        c1 = new ConverterVsnTo("CelsiusToFahrenheit", "value = value * 9 / 5 + 32;", 5);
-
-        c2 = new ConverterVsnTo("MunutesToSeconds", "value = value*60", 4);
-
-        cCtrl.create(c1);
-        cCtrl.create(c2);
-    }
-
-    public void insertLink(VirtualSensorLinkController lCtrl) {
-        LinkVsnTo l1;//, l2;
-
-        l1 = new LinkVsnTo("1", "labpos", "labtempo");
-        l1.createField("temperature", 1);
-        l1.createField("temperature", 1, 1);        
-        l1.createField("luminosity", 3);        
-        l1.createField("battery", 2);
-        
-//        l2 = new LinkVsnTo("1", "labpos", "labtempo");
-//        l2.createField("temperature", 1);
-//        l2.createField("temperature", 1, 1);        
-//        l2.createField("luminosity", 3);        
-//        l2.createField("battery", 2);
-        
-        Serializer se = new Serializer();
-        
-        System.out.println(se.toJson(l1));
-//        System.out.println(se.toJson(l2));
-        
-        lCtrl.create(l1);
-//        lCtrl.create(l2);
-
     }
 }

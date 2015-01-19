@@ -15,17 +15,18 @@
  */
 package br.uff.labtempo.osiris.to.virtualsensornet;
 
+import br.uff.labtempo.osiris.to.virtualsensornet.interfaces.ILinkVsnTo;
 import br.uff.labtempo.osiris.to.common.data.FieldTo;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public class LinkVsnTo {
+public class LinkVsnTo implements ILinkVsnTo {
 
     private long id;
     private final String sensorId;
@@ -36,40 +37,72 @@ public class LinkVsnTo {
     //helper attributes
     private transient List<? extends FieldTo> helperFieldToList;
 
-    public LinkVsnTo(String sensorId, String collectorId, String networkId) {
+    public LinkVsnTo(long id, String sensorId, String collectorId, String networkId) {
+        this.id = id;
         this.sensorId = sensorId;
         this.collectorId = collectorId;
         this.networkId = networkId;
+
+        this.fields = new ArrayList<>();
     }
 
+    public LinkVsnTo(String sensorId, String collectorId, String networkId) {
+        this(0, sensorId, collectorId, networkId);
+    }
+
+    @Override
     public void createField(String name, long dataTypeId, long converterId) {
-        if (fields == null) {
-            fields = new ArrayList<>();
-        }
         InternalFieldTo fieldTo = new InternalFieldTo(name, dataTypeId, converterId);
-        fields.add(fieldTo.toMap());
+        createField(fieldTo);
     }
 
+    @Override
+    public void createField(long id, String name, long dataTypeId, long converterId) {
+        InternalFieldTo fieldTo = new InternalFieldTo(id, name, dataTypeId, converterId);
+        createField(fieldTo);
+    }
+
+    @Override
+    public void createField(long id, String name, long dataTypeId, long converterId, boolean initialized) {
+        InternalFieldTo fieldTo = new InternalFieldTo(id, name, dataTypeId, converterId, initialized);
+        createField(fieldTo);
+    }
+
+    @Override
     public void createField(String name, long dataTypeId) {
         createField(name, dataTypeId, 0);
     }
 
+    @Override
+    public void createField(long id, String name, long dataTypeId) {
+        createField(id, name, dataTypeId, 0);
+    }
+
+    private void createField(InternalFieldTo fieldTo) {
+        fields.add(fieldTo.toMap());
+    }
+
+    @Override
     public long getId() {
         return id;
     }
 
+    @Override
     public String getSensorId() {
         return sensorId;
     }
 
+    @Override
     public String getCollectorId() {
         return collectorId;
     }
 
+    @Override
     public String getNetworkId() {
         return networkId;
     }
 
+    @Override
     public List<? extends FieldTo> getFields() {
         if (helperFieldToList != null) {
             return helperFieldToList;
@@ -82,7 +115,41 @@ public class LinkVsnTo {
         return fieldTos;
     }
 
-    private class InternalFieldTo extends FieldTo{
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 29 * hash + Objects.hashCode(this.sensorId);
+        hash = 29 * hash + Objects.hashCode(this.collectorId);
+        hash = 29 * hash + Objects.hashCode(this.networkId);
+        hash = 29 * hash + Objects.hashCode(this.fields);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final LinkVsnTo other = (LinkVsnTo) obj;
+        if (!Objects.equals(this.sensorId, other.sensorId)) {
+            return false;
+        }
+        if (!Objects.equals(this.collectorId, other.collectorId)) {
+            return false;
+        }
+        if (!Objects.equals(this.networkId, other.networkId)) {
+            return false;
+        }
+        if (!Objects.equals(this.getFields(), other.getFields())) {
+            return false;
+        }
+        return true;
+    }
+
+    private class InternalFieldTo extends FieldTo {
 
         InternalFieldTo(Map<String, String> map) {
             super(map);
@@ -90,6 +157,14 @@ public class LinkVsnTo {
 
         InternalFieldTo(String name, long dataTypeId, long converterId) {
             super(name, dataTypeId, converterId);
+        }
+
+        InternalFieldTo(long id, String name, long dataTypeId, long converterId) {
+            super(id, name, dataTypeId, converterId);
+        }
+
+        InternalFieldTo(long id, String name, long dataTypeId, long converterId, boolean initialized) {
+            super(id, name, dataTypeId, converterId, initialized);
         }
 
         @Override

@@ -23,7 +23,7 @@ import br.uff.labtempo.omcp.server.rabbitmq.RabbitServer;
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public class Server implements AutoCloseable{
+public class Server implements AutoCloseable {
 
     private final String pwd;
     private final String usr;
@@ -36,19 +36,19 @@ public class Server implements AutoCloseable{
         usr = "admin";
         pwd = "admin";
         server = new RabbitServer("teste", ip, usr, pwd);
-        
+
         Controller root = new RootController();
         Controller sensor = new VirtualSensorController();
-        
-        root.setNext(sensor);        
+
+        root.setNext(sensor);
         server.setHandler(root);
-        
-        server.addReference("omcp://test.ex/*/sample");
-        server.addReference("omcp://test.ex/warning/");
-        
+
+        server.addReference("omcp://collector.messagegroup/#");
+        server.addReference("omcp://update.messagegroup/sensornet/#");
+
     }
-    
-    public void start(){
+
+    public void start() {
         server.start();
     }
 

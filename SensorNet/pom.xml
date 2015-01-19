@@ -43,6 +43,32 @@
                     <target>1.7</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.bsc.maven</groupId>
+                <artifactId>maven-processor-plugin</artifactId>
+                <version>2.2.4</version>
+                <executions>
+                    <execution>
+                        <id>process</id>
+                        <goals>
+                            <goal>process</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <processors>
+                                <processor>org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor</processor>
+                            </processors>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>        
+                        <groupId>org.hibernate</groupId>
+                        <artifactId>hibernate-jpamodelgen</artifactId>
+                        <version>4.3.4.Final</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
         </plugins>
     </build>
     <properties>
@@ -77,12 +103,17 @@
             <artifactId>hibernate-entitymanager</artifactId>
             <version>4.3.6.Final</version>
         </dependency>
-        <dependency>
+        <!--        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-jpamodelgen</artifactId>
+            <version>4.3.7.Final</version>
+        </dependency>-->
+        <!--        <dependency>
             <groupId>org.pojomatic</groupId>
             <artifactId>pojomatic</artifactId>
             <version>2.0.1</version>
             <type>jar</type>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>

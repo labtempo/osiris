@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -32,18 +33,26 @@ import java.util.Objects;
 public abstract class SensorToBase extends ToBaseInfo {
 
     private long timestamp;
+    private String timestampUnit;
+    private long timeOfCollectionInMillis;
     private Map<String, Integer> consumables;
     private List<Map<String, String>> values;
 
     //helper attributes
+    private transient TimeUnit helperTimestampUnit;
     private transient List<? extends ValueTo> helperValueToList;
     private transient List<? extends ConsumableTo> helperConsumableToList;
+    
 
-    protected SensorToBase(String id, State state, long timestamp) {
+    protected SensorToBase(String id, State state, long timestamp, TimeUnit timestampUnit,long timeOfCollectionInMillis) {
         super(id, state);
         this.timestamp = timestamp;
+        this.timestampUnit = timestampUnit.toString();
+        this.timeOfCollectionInMillis = timeOfCollectionInMillis;
         this.values = new ArrayList<>();
         this.consumables = new HashMap<>();
+
+        this.helperTimestampUnit = timestampUnit;
     }
 
     protected void addValue(String name, String value, String unit, String symbol) {
@@ -87,6 +96,17 @@ public abstract class SensorToBase extends ToBaseInfo {
         return timestamp;
     }
 
+    public TimeUnit getTimestampUnit() {
+        if (helperTimestampUnit == null) {
+            helperTimestampUnit = Enum.valueOf(TimeUnit.class, timestampUnit);
+        }
+        return helperTimestampUnit;
+    }
+
+    public long getTimeOfCollectionInMillis() {
+        return timeOfCollectionInMillis;
+    }
+
     public List<? extends ValueTo> getValuesTo() {
         if (helperValueToList != null) {
             return helperValueToList;
@@ -117,10 +137,11 @@ public abstract class SensorToBase extends ToBaseInfo {
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 83 * hash + (int) (this.timestamp ^ (this.timestamp >>> 32));
-        hash = 83 * hash + Objects.hashCode(this.consumables);
-        hash = 83 * hash + Objects.hashCode(this.values);
+        int hash = 7;
+        hash = 53 * hash + (int) (this.timestamp ^ (this.timestamp >>> 32));
+        hash = 53 * hash + Objects.hashCode(this.timestampUnit);
+        hash = 53 * hash + Objects.hashCode(this.consumables);
+        hash = 53 * hash + Objects.hashCode(this.values);
         return hash;
     }
 
@@ -133,10 +154,10 @@ public abstract class SensorToBase extends ToBaseInfo {
             return false;
         }
         final SensorToBase other = (SensorToBase) obj;
-        if (!super.equals(other)) {
+        if (this.timestamp != other.timestamp) {
             return false;
         }
-        if (this.timestamp != other.timestamp) {
+        if (!Objects.equals(this.timestampUnit, other.timestampUnit)) {
             return false;
         }
         if (!Objects.equals(this.consumables, other.consumables)) {

@@ -17,6 +17,7 @@ package br.uff.labtempo.omcp.server;
 
 import br.uff.labtempo.omcp.common.Request;
 import br.uff.labtempo.omcp.common.Response;
+import br.uff.labtempo.omcp.common.exceptions.BadRequestException;
 import br.uff.labtempo.omcp.common.exceptions.InternalServerErrorException;
 import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
 import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
@@ -30,5 +31,5 @@ public interface RequestHandler {
 
     void setContext(Context context);
 
-    Response handler(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException;
+    Response handler(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException;
 }

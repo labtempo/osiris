@@ -20,6 +20,7 @@ package br.uff.labtempo.osiris.virtualsensornet.persistence;
  * @author Felipe Santos <fralph at ic.uff.br>
  */
 public interface DaoFactory {
+    VirtualSensorDao getVirtualSensorDao();
 
     LinkDao getLinkDao();
 
@@ -27,5 +28,5 @@ public interface DaoFactory {
 
     DataTypeDao getDataTypeDao();    
     
-    AnnouncerDao getAnnouncerDao();
+    SchedulerDao getSchedulerDao();
 }

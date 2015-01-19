@@ -17,6 +17,7 @@ package br.uff.labtempo.osiris.sensornet.thirdparty.scheduler;
 
 import br.uff.labtempo.osiris.sensornet.model.jpa.Sensor;
 import br.uff.labtempo.osiris.sensornet.persistence.SchedulerDao;
+import br.uff.labtempo.osiris.thirdparty.scheduler.Scheduler;
 import br.uff.labtempo.osiris.thirdparty.scheduler.core.SchedulingManager;
 
 /**
@@ -25,15 +26,15 @@ import br.uff.labtempo.osiris.thirdparty.scheduler.core.SchedulingManager;
  */
 public class SchedulerController implements SchedulerDao {
 
-    private final SchedulingManager<Sensor> manager;
+    private final Scheduler<Sensor> scheduler;
 
-    SchedulerController(SchedulingManager<Sensor> manager) {
-        this.manager = manager;
+    SchedulerController(Scheduler<Sensor> scheduler) {
+        this.scheduler = scheduler;
     }
 
     @Override
     public void schedule(Sensor sensor) {
         SchedulerItemSensor item = new SchedulerItemSensor(sensor);
-        manager.schedule(item);
+        scheduler.schedule(item);
     }
 }

@@ -22,6 +22,13 @@ import java.util.List;
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public interface LinkDao extends Dao<VirtualSensorLink>{
-    public List<VirtualSensorLink> getAll(String networkId, String collectorId, String sensorId);
+public interface LinkDao extends Dao<VirtualSensorLink> {
+
+    public VirtualSensorLink get(long id);
+
+    public VirtualSensorLink get(VirtualSensorLink sensorLink);
+
+    public List<VirtualSensorLink> getAll();
+
+    public List<VirtualSensorLink> getAllByReferences(String networkId, String collectorId, String sensorId);
 }

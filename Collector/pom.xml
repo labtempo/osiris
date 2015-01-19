@@ -35,9 +35,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>br.uff.labtempo</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>Osiris</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 </project>

@@ -15,13 +15,15 @@
  */
 package br.uff.labtempo.osiris.thirdparty.scheduler.core;
 
+import br.uff.labtempo.osiris.thirdparty.scheduler.Scheduler;
 import br.uff.labtempo.osiris.thirdparty.scheduler.SchedulerItem;
 import br.uff.labtempo.osiris.thirdparty.scheduler.SchedulingStorage;
 import br.uff.labtempo.osiris.thirdparty.scheduler.Scheduling;
 import br.uff.labtempo.osiris.thirdparty.scheduler.SchedulingCallback;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Timer;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,63 +34,42 @@ import java.util.logging.Logger;
  */
 public class SchedulingManager<T> implements Scheduling<T>, TaskCallback {
 
+    private final BlockingQueue<SchedulerItem<T>> queue;
     private final SchedulingStorage<T> storage;
     private final SchedulingCallback callback;
-    private long intervalInMillis;
-    private int countToSwapInterval;
-    private Timer timer;
+    private SchedulerConsumer<T> scheduler;
+    private SchedulerTimeAlarm alarm;
+    private final TimeControl timeControl;
 
-    public SchedulingManager(SchedulingStorage<T> storage, SchedulingCallback callback) {
+    public SchedulingManager(SchedulingStorage<T> storage, SchedulingCallback callback, long intervalDuration, TimeUnit timeUnit) {
+        this.queue = new LinkedBlockingQueue<>();
         this.storage = storage;
         this.callback = callback;
-        this.timer = new Timer("Initial Timer");
-        this.intervalInMillis = TimeUnit.MILLISECONDS.convert(10, TimeUnit.MINUTES);
+        long intervalInMillis = TimeUnit.MILLISECONDS.convert(intervalDuration, TimeUnit.MINUTES);
+
+        this.timeControl = new TimeControl(intervalInMillis);
     }
 
     @Override
     public void initialize() {
+        if (alarm == null) {
+            alarm = new SchedulerTimeAlarm(timeControl.getIntervalInMillis(), this);
+            scheduler = new SchedulerConsumer(queue, this);
+            scheduler.start();
+            alarm.start();
+        }
         callback();
-        createScheduling();
     }
 
     @Override
     public void close() throws Exception {
-        timer.cancel();
-        timer.purge();
+        scheduler.close();
+        alarm.close();
     }
 
     @Override
-    public void schedule(SchedulerItem<T> item) {
-        SchedulerItem<T> storedItem = storage.getItemByObject(item.getObject());
-        if (storedItem != null) {
-            storedItem.updateTimeToNextUpdate(item.getTimeToNextUpdate());
-            storage.update(storedItem);
-        } else {
-            storage.save(item);
-        }
-
-        long newInterval = item.getIntervalInMillis();
-
-        //interval updating
-        if (newInterval != intervalInMillis) {
-            if (++countToSwapInterval > 10) {
-                intervalInMillis = newInterval;
-                changeSchedulingInterval();
-                countToSwapInterval = 0;
-            }
-        } else {
-            countToSwapInterval = 0;
-        }
-    }
-
-    private void changeSchedulingInterval() {
-        timer.cancel();
-        timer = new Timer("Timer at " + intervalInMillis);
-        createScheduling();
-    }
-
-    private void createScheduling() {
-        timer.schedule(new Task(this), intervalInMillis, intervalInMillis);
+    public Scheduler<T> getScheduler() {
+        return new SchedulerProducer<T>(queue);
     }
 
     @Override
@@ -105,6 +86,22 @@ public class SchedulingManager<T> implements Scheduling<T>, TaskCallback {
             callback.callback(items);
         } catch (Exception ex) {
             Logger.getLogger(SchedulingManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    void schedule(SchedulerItem<T> item) {
+        SchedulerItem<T> storedItem = storage.getItemByObject(item.getObject());
+        if (storedItem != null) {
+            storedItem.updateTimeToNextUpdate(item.getTimeToNextUpdate());
+            storage.update(storedItem);
+        } else {
+            storage.save(item);
+        }
+
+        long newInterval = item.getIntervalInMillis();
+
+        if (timeControl.addInterval(newInterval)) {
+            alarm.setIntervalInMillis(timeControl.getIntervalInMillis());
         }
     }
 }

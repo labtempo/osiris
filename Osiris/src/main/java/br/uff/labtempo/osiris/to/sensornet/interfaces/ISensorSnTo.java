@@ -23,6 +23,7 @@ import br.uff.labtempo.osiris.to.common.definitions.ValueType;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -33,6 +34,10 @@ public interface ISensorSnTo {
     String getId();
 
     long getTimestamp();
+    
+    TimeUnit getTimestampUnit();
+    
+    long getTimeOfCollectionInMillis();
 
     State getState();
 

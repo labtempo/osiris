@@ -31,7 +31,7 @@ public class Collector implements AutoCloseable{
     }
     
     public void populate(OmcpClient client) throws Exception {
-        DataBuilder db = null;
+        DataBuilder db;
 
         db = new DataBuilder("labtempo", "labpos");
         for (int i = 0; i < 2; i++) {            

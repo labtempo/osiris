@@ -32,7 +32,7 @@ public class RabbitUtilTest {
     String RESOURCE = "/sensornet/warning";
     String OMCP = "omcp://" + HOST + RESOURCE;
     String hostResult = "osiris.ex.alerts";
-    String routingKeyResult = "warning.sensornet";
+    String routingKeyResult = "sensornet.warning";
 
     /**
      * Test of getHostAddress method, of class RabbitUtil.
@@ -90,7 +90,7 @@ public class RabbitUtilTest {
         System.out.println("getRoutingKey");
         URI uri = new URI("omcp://collector.ex.osiris/coletor1/amostra");
         String result = RabbitUtil.getRoutingKey(uri);
-        assertEquals("amostra.coletor1", result);
+        assertEquals("coletor1.amostra", result);
     }
 
     /**

@@ -27,7 +27,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class AnnouncementManager implements Announcement {
 
     private final BlockingQueue<AnnouncementItem> queue;
-    private AnnouncementConsumer consumer;
+    private AnnoucementConsumer consumer;
     private final OmcpClient client;
 
     public AnnouncementManager(OmcpClient client) {
@@ -37,11 +37,11 @@ public class AnnouncementManager implements Announcement {
 
     @Override
     public void initialize() {        
-        consumer = new AnnouncementConsumer(queue, client);
+        consumer = new AnnoucementConsumer(queue, client);
         createThreadConsumer(consumer);
     }
 
-    private void createThreadConsumer(AnnouncementConsumer consumer) {
+    private void createThreadConsumer(AnnoucementConsumer consumer) {
         Thread threadConsumer = new Thread(consumer, "Announcer consumer");
         threadConsumer.setDaemon(true);
         threadConsumer.start();

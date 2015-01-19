@@ -27,32 +27,38 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public class SensorCoWrapper {
+public class SensorCoToWrapper {
 
     private final String id;
     private final String networkId;
     private final String collectorId;
-    private final long timestamp;
+    private final long timestampInMillis;
 
     private List<Field> fields;
     private Set<String> fieldNames;
-    
 
-    public SensorCoWrapper(SampleCoTo sample) {
+    private final long interval;
+    private final TimeUnit intervalTimeUnit;
+
+    public SensorCoToWrapper(SampleCoTo sample) {
         SensorCoTo sensor = sample.getSensor();
         CollectorCoTo collector = sample.getCollector();
         NetworkCoTo network = sample.getNetwork();
 
-        this.id = sensor.getId();
-        this.collectorId = collector.getId();
-        this.networkId = network.getId();
+        this.id = sensor.getId().trim();
+        this.collectorId = collector.getId().trim();
+        this.networkId = network.getId().trim();
+
+        this.timestampInMillis = TimeUnit.MILLISECONDS.convert(sensor.getTimestamp(), sensor.getTimestampUnit());
         
-        this.timestamp = sensor.getTimestamp();
+        this.interval = collector.getInterval();
+        this.intervalTimeUnit = collector.getTimeUnit();
 
         defineFields(sensor);
     }
@@ -69,8 +75,16 @@ public class SensorCoWrapper {
         return collectorId;
     }
 
-    public long getTimestamp() {
-        return timestamp;
+    public long getTimestampInMillis() {
+        return timestampInMillis;
+    }
+  
+    public long getInterval() {
+        return interval;
+    }
+
+    public TimeUnit getIntervalTimeUnit() {
+        return intervalTimeUnit;
     }
 
     public List<Field> getFields() {
@@ -87,7 +101,7 @@ public class SensorCoWrapper {
         for (ValueTo valueTo : sensor.getValuesTo()) {
             Field field = convertSensorCoValueToField(valueTo);
             fields.add(field);
-            fieldNames.add(field.getName());
+            fieldNames.add(field.getReferenceName());
         }
     }
 
@@ -98,11 +112,11 @@ public class SensorCoWrapper {
         String unit = valueTo.getUnit();
         String symbol = valueTo.getSymbol();
 
-        DataType dataType = new DataType(type, unit, symbol);
+        DataType dataType = new DataType(name, type, unit, symbol);
 
         Field field = new Field(name, dataType);
 
-        field.addInstantaneousValue(value);
+        field.setValue(value);
 
         return field;
     }

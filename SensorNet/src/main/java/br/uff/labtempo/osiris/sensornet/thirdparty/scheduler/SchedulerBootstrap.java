@@ -20,6 +20,7 @@ import br.uff.labtempo.osiris.sensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.sensornet.persistence.SchedulerDao;
 import br.uff.labtempo.osiris.sensornet.persistence.jpa.DataManager;
 import br.uff.labtempo.osiris.thirdparty.scheduler.core.SchedulingManager;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -33,7 +34,7 @@ public class SchedulerBootstrap implements AutoCloseable {
         try {
             SchedulerStorageSensor storage = new SchedulerStorageSensor(data);
             SchedulerCallbackSensor callback = new SchedulerCallbackSensor(factory);
-            manager = new SchedulingManager<>(storage, callback);
+            manager = new SchedulingManager<>(storage, callback, 10, TimeUnit.SECONDS);
             manager.initialize();
         } catch (Exception e) {
             close();
@@ -47,7 +48,7 @@ public class SchedulerBootstrap implements AutoCloseable {
     }
 
     public SchedulerDao getScheduler() {
-        return new SchedulerController(manager);
+        return new SchedulerController(manager.getScheduler());
     }
 
 }

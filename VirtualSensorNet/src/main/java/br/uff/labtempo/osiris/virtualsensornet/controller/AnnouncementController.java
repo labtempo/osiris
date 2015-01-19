@@ -13,30 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer;
+package br.uff.labtempo.osiris.virtualsensornet.controller;
 
 import br.uff.labtempo.osiris.thirdparty.announcement.Announcer;
+import br.uff.labtempo.osiris.to.common.definitions.Path;
 import br.uff.labtempo.osiris.to.notification.Notification;
 import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorVsnTo;
-import static br.uff.labtempo.osiris.virtualsensornet.controller.ControllerPath.NOTIFICATION_MESSAGEGROUP;
-import static br.uff.labtempo.osiris.virtualsensornet.controller.ControllerPath.PROTOCOL;
-import static br.uff.labtempo.osiris.virtualsensornet.controller.ControllerPath.SEPARATOR;
-import static br.uff.labtempo.osiris.virtualsensornet.controller.ControllerPath.UPDATE_MESSAGEGROUP;
-import static br.uff.labtempo.osiris.virtualsensornet.controller.ControllerPath.VIRTUAL_SENSOR_ALL;
-import br.uff.labtempo.osiris.virtualsensornet.persistence.AnnouncerDao;
+import br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer.AnnouncerAgent;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public class AnnouncementController implements AnnouncerDao {
+public class AnnouncementController implements AnnouncerAgent {
 
     private final Announcer annoucer;
     private final String moduleName;
 
-    AnnouncementController(Announcer announcer, String moduleName) {
+    public AnnouncementController(Announcer announcer) {
         this.annoucer = announcer;
-        this.moduleName = moduleName;
+        this.moduleName = Path.NAMING_MODULE_VIRTUALSENSORNET.toString();
     }
 
     @Override
@@ -90,8 +86,8 @@ public class AnnouncementController implements AnnouncerDao {
 //                resource = VS_BLENDING_ALL.toString();
 //                break;
 //        }
-
-        String uri = getHost() + VIRTUAL_SENSOR_ALL + objTo.getId();
+        //omcp://virtualsensornet/vsensor/{vsensorid}
+        String uri = getHost() + Path.NAMING_RESOURCE_VIRTUALSENSOR + Path.SEPARATOR + objTo.getId();
         return uri;
     }
 
@@ -108,13 +104,13 @@ public class AnnouncementController implements AnnouncerDao {
         notif.setUri(uri);
         notif.setOrigin(origin);
         notif.setLevel(level);
-        
+
         notifyActivity(notif);
     }
 
     private void publishToUpdate(VirtualSensorVsnTo obj) {
         // omcp://update.messagegroup/virtualsensornet/vsensor/{vsensorid}
-        String path = getPathBase() + VIRTUAL_SENSOR_ALL + obj.getId();
+        String path = getPathBase() + Path.NAMING_RESOURCE_VIRTUALSENSOR + Path.SEPARATOR + obj.getId();
         annoucer.announce(obj, path);
     }
 
@@ -129,20 +125,40 @@ public class AnnouncementController implements AnnouncerDao {
      */
     private void notifyActivity(Notification obj) {
         // omcp://notification.messagegroup/{level}
-        String path = PROTOCOL.toString() + NOTIFICATION_MESSAGEGROUP + SEPARATOR + obj.getLevel();
+        String path = Path.MESSAGEGROUP_NOTIFICATION.toString() + obj.getLevel();
         annoucer.announce(obj, path);
     }
 
     private String getPathBase() {
         // omcp://update.messagegroup/virtualsensornet/
-        String path = PROTOCOL.toString() + UPDATE_MESSAGEGROUP + SEPARATOR + moduleName;
+        String path = Path.MESSAGEGROUP_UPDATE.toString() + Path.NAMING_RESOURCE_VIRTUALSENSOR + Path.SEPARATOR;
         return path;
     }
 
     private String getHost() {
         // omcp://virtualsensornet/
-        String path = PROTOCOL.toString() + moduleName ;
+        String path = Path.MODULE_VIRTUALSENSORNET.toString();
         return path;
+    }
+
+    private enum AnnouncementView {
+
+        VIRTUAL_SENSOR("VirtualSensor"),
+        ITEM_REACTIVATED(" reactivate!"),
+        ITEM_DISABLED(" disabled!"),
+        ITEM_NEW(" discovered!"),
+        ITEM_MALFUNCTION(" is working incorrect or partially!");
+
+        private AnnouncementView(String content) {
+            this.content = content;
+        }
+
+        private final String content;
+
+        @Override
+        public String toString() {
+            return content;
+        }
     }
 }
 

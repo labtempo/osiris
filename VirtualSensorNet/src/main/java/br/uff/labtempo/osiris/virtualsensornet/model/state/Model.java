@@ -31,34 +31,34 @@ import javax.persistence.TemporalType;
 public abstract class Model implements Serializable {
 
     @Enumerated(EnumType.STRING)
-    protected ModelState state;
+    protected ModelState modelState;
 
     @Temporal(TemporalType.TIMESTAMP)
     Calendar lastModified;
 
     public Model() {
-        this.state = ModelState.NEW;
+        this.modelState = ModelState.NEW;
         updateDate();
     }
 
     public void deactivate() {
-        state.deactivate(this);
+        modelState.deactivate(this);
     }
 
     public void reactivate() {
-        state.reactivate(this);
+        modelState.reactivate(this);
     }
 
     protected final void update() {
-        if (state == ModelState.INACTIVE) {
-            state.reactivate(this);
+        if (modelState == ModelState.INACTIVE) {
+            modelState.reactivate(this);
         } else {
-            state.update(this);
+            modelState.update(this);
         }
     }
 
     public void malfunction() {
-        state.malfunction(this);
+        modelState.malfunction(this);
     }
 
     public Calendar getLastModifiedDate() {
@@ -66,7 +66,7 @@ public abstract class Model implements Serializable {
     }
 
     public ModelState getModelState() {
-        return state;
+        return modelState;
     }
 
     void updateDate() {

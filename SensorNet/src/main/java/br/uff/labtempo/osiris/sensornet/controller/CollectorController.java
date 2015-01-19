@@ -60,7 +60,7 @@ public class CollectorController extends Controller {
                 throw new NotImplementedException("Action not implemented");
             }
             List<CollectorSnTo> collectors = getAll(networkId);
-            return builder(collectors, contentType);
+            return builderOk(collectors, contentType);
         }
 
         if (match(request.getResource(), UNIQUE)) {
@@ -72,7 +72,7 @@ public class CollectorController extends Controller {
                 throw new NotImplementedException("Action not implemented");
             }
             CollectorSnTo collector = getById(networkId, collectorId);
-            return builder(collector, contentType);
+            return builderOk(collector, contentType);
         }
         return null;
     }

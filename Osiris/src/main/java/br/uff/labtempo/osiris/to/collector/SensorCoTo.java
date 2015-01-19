@@ -21,9 +21,9 @@ import br.uff.labtempo.osiris.to.common.data.ConsumableRuleTo;
 import br.uff.labtempo.osiris.to.common.definitions.LogicalOperator;
 import br.uff.labtempo.osiris.to.common.definitions.State;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -36,33 +36,33 @@ public class SensorCoTo extends SensorToBase implements ISensorCoTo {
     //helper attributes
     private transient List<ConsumableRuleTo> helperConsumableRuleToList;
 
-    public SensorCoTo(String id, State state, long timestamp) {
-        super(id, state, timestamp);
+    public SensorCoTo(String id, State state, long timestamp, TimeUnit timestampUnit) {
+        super(id, state, timestamp, timestampUnit, System.currentTimeMillis());
         this.consumableRules = new ArrayList<>();
     }
 
-    public SensorCoTo(String id, long timestamp) {
-        this(id, State.NEW, timestamp);
+    public SensorCoTo(String id, long timestamp, TimeUnit timestampUnit) {
+        this(id, State.NEW, timestamp, timestampUnit);
     }
 
-    public SensorCoTo(long id, State state, long timestamp) {
-        this(String.valueOf(id), state, timestamp);
+    public SensorCoTo(long id, State state, long timestamp, TimeUnit timestampUnit) {
+        this(String.valueOf(id), state, timestamp, timestampUnit);
     }
 
-    public SensorCoTo(long id, long timestamp) {
-        this(String.valueOf(id), timestamp);
+    public SensorCoTo(long id, long timestamp, TimeUnit timestampUnit) {
+        this(String.valueOf(id), timestamp, timestampUnit);
     }
 
     public SensorCoTo(String id) {
-        this(id, Calendar.getInstance().getTimeInMillis());
+        this(id, System.currentTimeMillis(), TimeUnit.MILLISECONDS);
     }
 
     public SensorCoTo(long id, State state) {
-        this(String.valueOf(id), state, Calendar.getInstance().getTimeInMillis());
+        this(String.valueOf(id), state, System.currentTimeMillis(), TimeUnit.MILLISECONDS);
     }
 
     public SensorCoTo(long id) {
-        this(String.valueOf(id), Calendar.getInstance().getTimeInMillis());
+        this(String.valueOf(id), System.currentTimeMillis(), TimeUnit.MILLISECONDS);
     }
 
     @Override

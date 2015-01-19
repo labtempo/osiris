@@ -17,9 +17,8 @@ package br.uff.labtempo.osiris.virtualsensornet.persistence.jpa;
 
 import java.util.List;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -32,19 +31,16 @@ import javax.persistence.criteria.Root;
  */
 public class DataManager implements AutoCloseable {
 
-    private EntityManagerFactory EMF;
     private EntityManager EM;
 
-    public DataManager() throws Exception {
-        EMF = Persistence.createEntityManagerFactory("VirtualSensorNet");
-        EM = EMF.createEntityManager();
+    public DataManager(EntityManager EM) {
+        this.EM = EM;
     }
 
     @Override
     public void close() throws Exception {
-        if (EMF.isOpen()) {
+        if (EM.isOpen()) {
             EM.close();
-            EMF.close();
         }
     }
 
@@ -78,7 +74,7 @@ public class DataManager implements AutoCloseable {
     }
 
     public <T> List<T> getNull(Class<T> entityType, String field) {
-        CriteriaBuilder cb = EMF.getCriteriaBuilder();
+        CriteriaBuilder cb = EM.getCriteriaBuilder();
         CriteriaQuery<T> c = cb.createQuery(entityType);
         Root<T> item = c.from(entityType);
         c.select(item);
@@ -92,7 +88,7 @@ public class DataManager implements AutoCloseable {
     }
 
     public <T> List<T> getNotNull(Class<T> entityType, String field) {
-        CriteriaBuilder cb = EMF.getCriteriaBuilder();
+        CriteriaBuilder cb = EM.getCriteriaBuilder();
 
         CriteriaQuery<T> c = cb.createQuery(entityType);
         Root<T> item = c.from(entityType);
@@ -106,7 +102,7 @@ public class DataManager implements AutoCloseable {
     }
 
     public CriteriaBuilder getCriteriaBuilder() {
-        return EMF.getCriteriaBuilder();
+        return EM.getCriteriaBuilder();
     }
 
     public <T> List<T> getQuery(CriteriaQuery<T> query) {
@@ -121,7 +117,22 @@ public class DataManager implements AutoCloseable {
         if (list == null || list.isEmpty()) {
             return null;
         }
-        return (T)list.get(0);
+        return (T) list.get(0);
         //return (T) tquery.getSingleResult();
     }
+
+    public Query getQquery(String sql, Class klass) {
+        return EM.createNativeQuery(sql, klass);
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            EM.close();
+        } catch (Exception e) {
+        } finally {
+            super.finalize();
+        }
+    }
+
 }

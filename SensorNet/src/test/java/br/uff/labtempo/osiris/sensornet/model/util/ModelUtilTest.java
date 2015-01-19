@@ -23,6 +23,8 @@ import br.uff.labtempo.osiris.sensornet.model.state.ModelState;
 import br.uff.labtempo.osiris.to.sensornet.CollectorSnTo;
 import br.uff.labtempo.osiris.to.sensornet.NetworkSnTo;
 import br.uff.labtempo.osiris.to.sensornet.SensorSnTo;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -59,23 +61,30 @@ public class ModelUtilTest {
         NetworkSnTo neto = util.toTransferObject(ne);
         SensorSnTo seto = util.toTransferObject(se);
 
-        assertEquals(co.getModelState(), ModelState.NEW);
-        assertEquals(ne.getModelState(), ModelState.NEW);
-        assertEquals(se.getModelState(), ModelState.NEW);
+        assertEquals(ModelState.NEW, co.getModelState());
+        assertEquals(ModelState.NEW, ne.getModelState());
+        assertEquals(ModelState.NEW, se.getModelState());
 
-        assertEquals(coto.getState(), ModelState.NEW.getState());
-        assertEquals(neto.getState(), ModelState.NEW.getState());
-        assertEquals(seto.getState(), ModelState.NEW.getState());
+        assertEquals(ModelState.NEW.getState(), coto.getState());
+        assertEquals(ModelState.NEW.getState(), neto.getState());
+        assertEquals(ModelState.NEW.getState(), seto.getState());
 
         builder = new ToBuilder();
+        
+        //this sleep is necessary because the TO object is catching same time of the first object, so it is breaking the test!
+        try {
+            Thread.sleep(1);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ModelUtilTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
         co.update(builder.getCollector());
         ne.update(builder.getNetwork());
         se.update(builder.getSensor());
 
-        assertEquals(co.getModelState(), ModelState.UPDATED);
-        assertEquals(ne.getModelState(), ModelState.UPDATED);
-        assertEquals(se.getModelState(), ModelState.UPDATED);
+        assertEquals(ModelState.UPDATED, co.getModelState());
+        assertEquals(ModelState.UPDATED, ne.getModelState());
+        assertEquals(ModelState.UPDATED, se.getModelState());
     }
 
     @Test
@@ -95,30 +104,30 @@ public class ModelUtilTest {
         assertEquals(co.getNetwork().getId(), cto.getNetworkId());
         assertEquals(co.getSensors().length, cto.getTotalSensors());
         assertEquals(co.getId(), cto.getId());
-        assertEquals(co.getModelState().getState(), cto.getState());        
-        assertEquals(co.getLastModifiedDate(), cto.getLastModified()); 
+        assertEquals(co.getModelState().getState(), cto.getState());
+        assertEquals(co.getLastModifiedDate(), cto.getLastModified());
 
         assertEquals(ne.getInfo(), nto.getInfo());
         assertEquals(ne.getCollectors().length, nto.getTotalCollectors());
         assertEquals(ne.getSensors().length, nto.getTotalSensors());
         assertEquals(ne.getId(), nto.getId());
-        assertEquals(ne.getModelState().getState(), nto.getState());        
-        assertEquals(ne.getLastModifiedDate(), nto.getLastModified()); 
+        assertEquals(ne.getModelState().getState(), nto.getState());
+        assertEquals(ne.getLastModifiedDate(), nto.getLastModified());
 
         assertEquals(se.getInfo(), sto.getInfo());
         assertEquals(se.getCollector().getId(), sto.getCollectorId());
         assertEquals(se.getNetwork().getId(), sto.getNetworkId());
         assertEquals(se.getId(), sto.getId());
         assertEquals(se.getModelState().getState(), sto.getState());
-        assertEquals(se.getLastModifiedDate(), sto.getLastModified());        
+        assertEquals(se.getLastModifiedDate(), sto.getLastModified());
         assertEquals(se.getTimestamp(), sto.getTimestamp());
-        
+
         //consumables
         for (Consumable consumable : se.getConsumables()) {
             assertTrue(sto.getConsumables().containsKey(consumable.getName()));
-            assertEquals((Integer)consumable.getValue(), sto.getConsumables().get(consumable.getName()));
+            assertEquals((Integer) consumable.getValue(), sto.getConsumables().get(consumable.getName()));
         }
-        
+
     }
 
 }

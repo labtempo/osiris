@@ -16,41 +16,54 @@
 package br.uff.labtempo.osiris.virtualsensornet.model;
 
 import br.uff.labtempo.osiris.to.common.definitions.ValueType;
+import br.uff.labtempo.osiris.to.virtualsensornet.DataTypeVsnTo;
 import java.io.Serializable;
+import java.util.Objects;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import org.hibernate.annotations.Where;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
 @Entity
+@Where(clause = "isDeleted = 'false'")
 public class DataType implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @Column(nullable = false)
     private String displayName;
-    
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ValueType type;
+
+    @Column(nullable = false)
     private String unit;
+
+    @Column(nullable = false)
     private String symbol;
 
-    public DataType() {
+    private boolean isDeleted;
+
+    protected DataType() {
     }
 
-    public DataType(ValueType type, String unit, String symbol) {
+    public DataType(String displayName, ValueType type, String unit, String symbol) {
         this.type = type;
         this.unit = unit;
         this.symbol = symbol;
-
-        if (type == null || unit == null || symbol == null) {
+        this.displayName = displayName;
+        if (displayName == null || type == null || unit == null || symbol == null) {
             throw new RuntimeException("Arguments cannot be null!");
         }
     }
@@ -75,39 +88,66 @@ public class DataType implements Serializable {
         return id;
     }
 
+    public boolean isIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setLogicallyDeleted() {
+        isDeleted = true;
+    }
+
+    public void setLogicallyDeleted(boolean deleted) {
+        isDeleted = deleted;
+    }
+
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
+    public void setType(ValueType type) {
+        this.type = type;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 97 * hash + Objects.hashCode(this.type);
+        hash = 97 * hash + Objects.hashCode(this.unit);
+        return hash;
+    }
+
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
         if (obj == null) {
             return false;
         }
         if (getClass() != obj.getClass()) {
             return false;
         }
-
-        DataType other = (DataType) obj;
-
-        if (!type.equals(other.type)) {
+        final DataType other = (DataType) obj;
+        if (this.type != other.type) {
             return false;
         }
-        if (!unit.equals(other.unit)) {
+        if (!Objects.equals(this.unit, other.unit)) {
             return false;
-     }
-//        if (!symbol.equals(other.symbol)) {
-//            return false;
-//        }
+        }
         return true;
     }
 
-    @Override
-    public int hashCode() {
-        return displayName.hashCode();
+   
+
+    public DataTypeVsnTo getTransferObject(long usedBy) {
+        DataTypeVsnTo to = new DataTypeVsnTo(id, displayName, type, unit, symbol);
+        to.setUsedBy(usedBy);
+        return to;
     }
 
 }

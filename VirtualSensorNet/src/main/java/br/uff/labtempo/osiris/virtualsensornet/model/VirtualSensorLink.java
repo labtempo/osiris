@@ -15,9 +15,11 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.model;
 
+import br.uff.labtempo.osiris.to.virtualsensornet.LinkVsnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorType;
-import br.uff.labtempo.osiris.virtualsensornet.model.util.SensorCoWrapper;
+import br.uff.labtempo.osiris.virtualsensornet.model.util.SensorCoToWrapper;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import javax.persistence.Entity;
 
 /**
@@ -43,15 +45,15 @@ public class VirtualSensorLink extends VirtualSensor {
     }
 
     public VirtualSensorLink(String networkId, String collectorId, String sensorId, List<Field> fields) {
-        super(VirtualSensorType.LINK, fields);
+        super(VirtualSensorType.LINK, fields, 0, TimeUnit.MILLISECONDS);
         this.networkId = networkId;
         this.collectorId = collectorId;
         this.sensorId = sensorId;
     }
 
     @Override
-    public void addField(Field field) {
-        super.addField(field);
+    public boolean addField(Field field) {
+        return super.addField(field);
     }
 
     @Override
@@ -64,19 +66,23 @@ public class VirtualSensorLink extends VirtualSensor {
         super.deactivate();
     }
 
-    public void update(SensorCoWrapper sensorWrapper) {
+    public boolean updateVirtualSensorDataFromCollectorData(SensorCoToWrapper sensorWrapper) {
         boolean isUpdated = false;
         if (isSource(sensorWrapper)) {
             List<Field> sensorCoFields = sensorWrapper.getFields();
-            for (Field sensorCoField : sensorCoFields) {
-                isUpdated = updateFields(sensorCoField.getName(), sensorCoField.getValue(), sensorCoField.getDefaultDataType());
+            if (updateInterval(sensorWrapper.getInterval(), sensorWrapper.getIntervalTimeUnit())) {
+                isUpdated = true;
+            }
+            if (addNewValues(sensorCoFields, sensorWrapper.getTimestampInMillis())) {
+                isUpdated = true;
             }
         }
+        return isUpdated;
+    }
 
-        if (isUpdated) {
-            setTimestamp(sensorWrapper.getTimestamp());
-            update();
-        }
+    @Override
+    public synchronized boolean upgradeFields(List<Field> newFields) {        
+        return super.upgradeFields(newFields);
     }
 
     public String getNetworkId() {
@@ -91,7 +97,22 @@ public class VirtualSensorLink extends VirtualSensor {
         return sensorId;
     }
 
-    public boolean isSource(SensorCoWrapper sensor) {
+    public void setNetworkId(String networkId) {
+        this.networkId = networkId;
+        update();
+    }
+
+    public void setCollectorId(String collectorId) {
+        this.collectorId = collectorId;
+        update();
+    }
+
+    public void setSensorId(String sensorId) {
+        this.sensorId = sensorId;
+        update();
+    }
+
+    public boolean isSource(SensorCoToWrapper sensor) {
         if (!sensorId.equalsIgnoreCase(sensor.getSensorId())) {
             return false;
         }
@@ -105,11 +126,20 @@ public class VirtualSensorLink extends VirtualSensor {
         List<Field> superFields = getFields();
 
         for (Field superField : superFields) {
-            if (!sensor.hasField(superField.getName())) {
+            if (!sensor.hasField(superField.getReferenceName())) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    public LinkVsnTo getLinkTransferObject() {        
+        LinkVsnTo linkVsnTo = new LinkVsnTo(getId(), sensorId, collectorId, networkId);
+        List<Field> fields = getFields();
+        for (Field field : fields) {
+            linkVsnTo.createField(field.getId(), field.getReferenceName(), field.getDataTypeId(), field.getConverterId(), field.isStored());
+        }
+        return linkVsnTo;
     }
 }

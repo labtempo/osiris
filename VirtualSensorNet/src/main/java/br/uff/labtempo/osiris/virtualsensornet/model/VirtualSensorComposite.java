@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -37,8 +38,8 @@ public class VirtualSensorComposite extends VirtualSensor {
 
     private Map<VirtualSensor, List<String>> sources;
 
-    public VirtualSensorComposite(List<Field> fields) {
-        super(VirtualSensorType.COMPOSITE, fields);
+    public VirtualSensorComposite(List<Field> fields,long interval, TimeUnit intervalTimeUnit) {
+        super(VirtualSensorType.COMPOSITE, fields,interval,intervalTimeUnit);
         this.sources = new HashMap<>();
     }
 
@@ -47,7 +48,7 @@ public class VirtualSensorComposite extends VirtualSensor {
 
         for (String fieldName : fieldNames) {
             for (Field field : vsensor.getFields()) {
-                if (field.getName().equals(fieldName)) {
+                if (field.getReferenceName().equals(fieldName)) {
                     addField(field);
                     break;
                 }

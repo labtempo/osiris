@@ -27,6 +27,7 @@ import br.uff.labtempo.osiris.to.common.definitions.ValueType;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -41,8 +42,8 @@ public class SensorSnTo extends SensorToBase implements ISensorSnTo {
     //helper attributes
     private transient Calendar helperLastModified;
 
-    public SensorSnTo(String id, State state, long captureTimestamp, Calendar lastModifiedDate, String networkId, String collectorId) {
-        super(id, state, captureTimestamp);
+    public SensorSnTo(String id, State state, long captureTimestamp, TimeUnit captureTimestampUnit,long timeOfCollectionInMillis, Calendar lastModifiedDate, String networkId, String collectorId) {
+        super(id, state, captureTimestamp, captureTimestampUnit, timeOfCollectionInMillis);
         this.lastModified = lastModifiedDate.getTimeInMillis();
         this.networkId = networkId;
         this.collectorId = collectorId;

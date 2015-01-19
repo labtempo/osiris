@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Felipe Santos <fralph at ic.uff.br>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,27 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package br.uff.labtempo.osiris.thirdparty.scheduler.core;
+package br.uff.labtempo.osiris.to.virtualsensornet.interfaces;
 
-import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import br.uff.labtempo.osiris.to.common.definitions.ValueType;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-class Task extends TimerTask {
+public interface IDataTypeVsnTo {
 
-    private TaskCallback callback;
+    long getId();
 
-    public Task(TaskCallback callback) {
-        this.callback = callback;
-    }
+    String getDisplayName();
 
-    @Override
-    public void run() {
-        callback.callback();
-    }
+    ValueType getType();
 
+    String getUnit();
+
+    String getSymbol();
+    
+    long getUsedBy();
 }

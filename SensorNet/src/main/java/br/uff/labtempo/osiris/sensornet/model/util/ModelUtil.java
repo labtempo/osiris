@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 public class ModelUtil {
 
     public SensorSnTo toTransferObject(Sensor sensor) {
-        SensorSnTo sensorSnTo = new SensorSnTo(sensor.getId(), sensor.getModelState().getState(), sensor.getTimestamp(), sensor.getLastModifiedDate(), sensor.getNetwork().getId(), sensor.getCollector().getId());
+        SensorSnTo sensorSnTo = new SensorSnTo(sensor.getId(), sensor.getModelState().getState(), sensor.getTimestamp(), sensor.getTimestampUnit(), sensor.getTimeOfCollectionInMillis(), sensor.getLastModifiedDate(), sensor.getNetwork().getId(), sensor.getCollector().getId());
 
         for (Consumable consumable : sensor.getConsumables()) {
             sensorSnTo.addConsumable(consumable.getName(), consumable.getValue());
@@ -63,11 +63,13 @@ public class ModelUtil {
     public Sensor fromTransferObject(SensorCoTo sensorTo) {
         String id = sensorTo.getId();
         long timestamp = sensorTo.getTimestamp();
+        TimeUnit timestampUnit = sensorTo.getTimestampUnit();
+        long timeCollectionInMillis = sensorTo.getTimeOfCollectionInMillis();
         List<Value> values = creatValueListFromMapList(sensorTo.getValuesTo());
         List<Consumable> consumables = createConsumable(sensorTo.getConsumablesTo(), sensorTo.getConsumableRulesTo());
         Map<String, String> info = sensorTo.getInfo();
 
-        return new Sensor(id, timestamp, values, consumables, info);
+        return new Sensor(id, timestamp, timestampUnit, timeCollectionInMillis, values, consumables, info);
     }
 
     public boolean updateFromTransferObject(Sensor object, SensorCoTo to) {
@@ -83,6 +85,8 @@ public class ModelUtil {
             if (to.getValuesTo() != null) {
                 object.setValues(creatValueListFromMapList(to.getValuesTo()));
                 object.setTimestamp(to.getTimestamp());
+                object.setTimestampUnit(to.getTimestampUnit());
+                object.setTimeOfCollectionInMillis(to.getTimeOfCollectionInMillis());
                 isUpdated = true;
             }
             //update consumables
@@ -194,7 +198,7 @@ public class ModelUtil {
 
         current = object.getConsumables();
         newer = createConsumable(to.getConsumablesTo(), to.getConsumableRulesTo());
-
+        //TODO: revisar este algoritmo
         add = new ArrayList<>(newer);
         add.removeAll(current);
 

@@ -15,12 +15,16 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.persistence;
 
-import br.uff.labtempo.osiris.virtualsensornet.model.Converter;
+import br.uff.labtempo.osiris.virtualsensornet.model.DataConverter;
+import java.util.List;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public interface ConverterDao extends Dao<Converter>{
-    public Converter get(long id);
+public interface ConverterDao extends Dao<DataConverter>{
+    public DataConverter getById(long id);    
+    public List<DataConverter> getAll();
+    public List<DataConverter> getAllDeleted();
+    public long countUseInField(DataConverter converter);
 }

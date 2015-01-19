@@ -17,6 +17,7 @@ package br.uff.labtempo.osiris.virtualsensornet.model;
 
 import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorType;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -34,7 +35,7 @@ public class VirtualSensorBlending extends VirtualSensor {
     private List<VirtualSensor> sources;
     private Function function;
 
-    public VirtualSensorBlending(List<Field> fields) {
-        super(VirtualSensorType.BLENDING, fields);
+    public VirtualSensorBlending(List<Field> fields, long interval, TimeUnit intervalTimeUnit) {
+        super(VirtualSensorType.BLENDING, fields,interval,intervalTimeUnit);
     }
 }

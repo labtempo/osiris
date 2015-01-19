@@ -15,12 +15,14 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.persistence.jpa;
 
-import br.uff.labtempo.osiris.virtualsensornet.persistence.AnnouncerDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.ConverterDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DataTypeDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.LinkDao;
-import br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer.AnnouncementBootstrap;
+import br.uff.labtempo.osiris.virtualsensornet.persistence.SchedulerDao;
+import br.uff.labtempo.osiris.virtualsensornet.persistence.VirtualSensorDao;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 
 /**
  *
@@ -30,22 +32,22 @@ public class JpaDaoFactory implements DaoFactory, AutoCloseable {
 
     private static JpaDaoFactory instance;
 
-    private DataManager data;
-    private AnnouncementBootstrap announcementConfig;
+    private EntityManagerFactory emf;
 
-    private JpaDaoFactory(String ip, String usr, String pwd, String moduleName) throws Exception {
+    public static final ThreadLocal<EntityManager> LOCAL = new ThreadLocal();
+
+    private JpaDaoFactory(EntityManagerFactory emf) throws Exception {
         try {
-            announcementConfig = new AnnouncementBootstrap(ip, usr, pwd, moduleName);
-            data = new DataManager();
+            this.emf = emf;
         } catch (Exception ex) {
             close();
             throw ex;
         }
     }
 
-    public static JpaDaoFactory newInstance(String ip, String usr, String pwd, String moduleName) throws Exception {
+    public static JpaDaoFactory newInstance(EntityManagerFactory emf) throws Exception {
         if (instance == null) {
-            instance = new JpaDaoFactory(ip, usr, pwd, moduleName);
+            instance = new JpaDaoFactory(emf);
         }
         return instance;
     }
@@ -60,33 +62,56 @@ public class JpaDaoFactory implements DaoFactory, AutoCloseable {
     @Override
     public void close() throws Exception {
         try {
-            announcementConfig.close();
-        } catch (Exception e) {
-        }
-        try {
-            data.close();
+            emf.close();
         } catch (Exception e) {
         }
     }
 
     @Override
     public LinkDao getLinkDao() {
-        return new LinkJpa(data);
+        return new LinkJpa(getDataManager());
     }
 
     @Override
     public ConverterDao getConverterDao() {
-        return new ConverterJpa(data);
+        return new ConverterJpa(getDataManager());
     }
 
     @Override
     public DataTypeDao getDataTypeDao() {
-        return new DataTypeJpa(data);
+        return new DataTypeJpa(getDataManager());
     }
 
     @Override
-    public AnnouncerDao getAnnouncerDao() {
-        return announcementConfig.getAnnouncer();
+    public SchedulerDao getSchedulerDao() {
+        return new SchedulerJpa(getDataManager());
+    }
+
+    @Override
+    public VirtualSensorDao getVirtualSensorDao() {
+        return new VirtualSensorJpa(getDataManager());
+    }
+
+    private DataManager getDataManager() {
+        DataManager dataManager = new DataManager(getEntityManager());
+        return dataManager;
+    }
+
+    private EntityManager getEntityManager() {
+//        EntityManager em = LOCAL.get();
+//        if (em == null) {
+//            em = emf.createEntityManager();
+//            LOCAL.set(em);
+//        }
+        return emf.createEntityManager();
+    }
+
+    public void flush() {
+        EntityManager em = LOCAL.get();
+        if (em != null) {
+            em.close();
+        }
+        LOCAL.remove();
     }
 
 }

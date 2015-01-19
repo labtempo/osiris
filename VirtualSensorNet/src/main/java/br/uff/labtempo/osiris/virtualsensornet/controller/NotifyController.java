@@ -24,13 +24,16 @@ import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
 import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
 import br.uff.labtempo.omcp.common.utils.ResponseBuilder;
 import br.uff.labtempo.osiris.omcp.Controller;
+import br.uff.labtempo.osiris.thirdparty.scheduler.Scheduler;
 import br.uff.labtempo.osiris.to.collector.SampleCoTo;
+import br.uff.labtempo.osiris.to.common.definitions.Path;
 import br.uff.labtempo.osiris.to.sensornet.SensorSnTo;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensorLink;
 import br.uff.labtempo.osiris.virtualsensornet.model.state.ModelState;
+import br.uff.labtempo.osiris.virtualsensornet.model.util.AnnouncerWrapper;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
-import br.uff.labtempo.osiris.virtualsensornet.model.util.SensorCoWrapper;
-import br.uff.labtempo.osiris.virtualsensornet.persistence.AnnouncerDao;
+import br.uff.labtempo.osiris.virtualsensornet.model.util.SensorCoToWrapper;
+import br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer.AnnouncerAgent;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.LinkDao;
 import java.util.List;
 
@@ -40,26 +43,34 @@ import java.util.List;
  */
 public class NotifyController extends Controller {
 
-    private final String UNIQUE_SENSOR = ControllerPath.MODULE_SENSORNET.toString() + ControllerPath.SENSOR_BY_ID;
+    private final String UNIQUE_SENSOR = Path.SEPARATOR.toString() + Path.NAMING_MODULE_SENSORNET + Path.RESOURCE_SENSORNET_SENSOR_BY_ID;
     private final DaoFactory factory;
+    private AnnouncerAgent announcer;
+    private Scheduler scheduler;
+
+    public NotifyController(DaoFactory factory, AnnouncerAgent announcer) {
+        this.factory = factory;
+        this.announcer = new AnnouncerWrapper(announcer);
+    }
 
     public NotifyController(DaoFactory factory) {
         this.factory = factory;
+        this.announcer = new AnnouncerWrapper(null);
     }
 
     @Override
     public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
 
         if (request.getMethod() == RequestMethod.NOTIFY) {
-            if (request.getModule().contains(ControllerPath.COLLECTOR_MESSAGEGROUP.toString())) {
+            if (request.getModule().contains(Path.NAMING_MESSAGEGROUP_COLLECTOR.toString())) {
                 SampleCoTo sample = request.getContent(SampleCoTo.class);
-                analyzeCollector(sample);
+                updateValues(sample);
             }
 
-            if (request.getModule().contains(ControllerPath.UPDATE_MESSAGEGROUP.toString())) {
+            if (request.getModule().contains(Path.NAMING_MESSAGEGROUP_UPDATE.toString())) {
                 if (match(request.getResource(), UNIQUE_SENSOR)) {
                     SensorSnTo sensor = request.getContent(SensorSnTo.class);
-                    analyzeSensorNet(sensor);
+                    updateModelStatus(sensor);
                 }
             }
             return new ResponseBuilder().buildNull();
@@ -67,12 +78,12 @@ public class NotifyController extends Controller {
         return null;
     }
 
-    private void analyzeCollector(SampleCoTo sample) {
-        SensorCoWrapper wrapper = new SensorCoWrapper(sample);
+    public synchronized void updateValues(SampleCoTo sample) {
+        SensorCoToWrapper wrapper = new SensorCoToWrapper(sample);
         updateLink(wrapper);
     }
 
-    private void analyzeSensorNet(SensorSnTo sensor) {
+    public synchronized void updateModelStatus(SensorSnTo sensor) {
         switch (sensor.getState()) {
             case INACTIVE:
                 changeLinkModelState(sensor, ModelState.INACTIVE);
@@ -85,52 +96,57 @@ public class NotifyController extends Controller {
 
     private void changeLinkModelState(SensorSnTo sensor, ModelState modelState) {
         LinkDao lDao = factory.getLinkDao();
-        AnnouncerDao announcerDao = factory.getAnnouncerDao();
 
         String sensorId = sensor.getId();
         String networkId = sensor.getNetworkId();
         String collectorId = sensor.getCollectorId();
 
-        List<VirtualSensorLink> links = lDao.getAll(networkId, collectorId, sensorId);
+        List<VirtualSensorLink> links = lDao.getAllByReferences(networkId, collectorId, sensorId);
 
         for (VirtualSensorLink link : links) {
             if (link != null) {
                 if (ModelState.INACTIVE.equals(modelState)) {
                     link.deactivate();
                     lDao.update(link);
-                    announcerDao.notifyDeactivation(link.getTransferObject());
-                    announcerDao.broadcastIt(link.getTransferObject());
+                    announcer.notifyDeactivation(link.getTransferObject());
+                    announcer.broadcastIt(link.getTransferObject());
                 }
                 if (ModelState.MALFUNCTION.equals(modelState)) {
                     link.malfunction();
                     lDao.update(link);
-                    announcerDao.notifyDeactivation(link.getTransferObject());
-                    announcerDao.broadcastIt(link.getTransferObject());
+                    announcer.notifyDeactivation(link.getTransferObject());
+                    announcer.broadcastIt(link.getTransferObject());
                 }
             }
         }
     }
 
-    private void updateLink(SensorCoWrapper wrapper) {
+    private void updateLink(SensorCoToWrapper wrapper) {
         LinkDao lDao = factory.getLinkDao();
-        AnnouncerDao announcerDao = factory.getAnnouncerDao();
 
         String sensorId = wrapper.getSensorId();
         String networkId = wrapper.getNetworkId();
         String collectorId = wrapper.getCollectorId();
 
-        List<VirtualSensorLink> links = lDao.getAll(networkId, collectorId, sensorId);
+        List<VirtualSensorLink> links = lDao.getAllByReferences(networkId, collectorId, sensorId);
 
         for (VirtualSensorLink link : links) {
             if (link != null) {
-                link.update(wrapper);
-                lDao.update(link);
+                link.updateVirtualSensorDataFromCollectorData(wrapper);
+                lDao.save(link);
                 if (ModelState.REACTIVATED.equals(link.getModelState())) {
-                    announcerDao.notifyReactivation(link.getTransferObject());
+                    announcer.notifyReactivation(link.getTransferObject());
                 }
-                announcerDao.broadcastIt(link.getTransferObject());
+                announcer.broadcastIt(link.getTransferObject());
             }
         }
     }
 
+    public void setAnnouncerAgent(AnnouncerAgent announcer) {
+        this.announcer = announcer;
+    }
+
+    public void setSchedulerAgent(Scheduler scheduler) {
+        this.scheduler = scheduler;
+    }
 }

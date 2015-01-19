@@ -40,6 +40,13 @@ public class ResponseBuilder {
         this.contentLength = content.length();
     }
 
+    public ResponseBuilder ok() {
+        content = "";
+        this.setContent(content);
+        this.contentType = new Serializer().getTextContentType();
+        return this;
+    }
+
     public ResponseBuilder ok(String content) {
         if (content == null) {
             content = "";
@@ -72,7 +79,7 @@ public class ResponseBuilder {
     }
 
     public ResponseBuilder ok(Object object, String contentType) {
-        
+
         if (object == null) {
             object = "";
         }

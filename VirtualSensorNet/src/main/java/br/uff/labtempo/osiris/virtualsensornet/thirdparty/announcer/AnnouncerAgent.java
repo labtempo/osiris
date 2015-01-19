@@ -15,27 +15,21 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer;
 
+import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorVsnTo;
+
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public enum AnnouncementView {
+public interface AnnouncerAgent {
 
-    VIRTUAL_SENSOR("VirtualSensor"),
-    ITEM_REACTIVATED(" reactivate!"),
-    ITEM_DISABLED(" disabled!"),
-    ITEM_NEW(" discovered!"),
-    ITEM_MALFUNCTION(" is working incorrect or partially!");
+    void broadcastIt(VirtualSensorVsnTo objTo);
 
-    private AnnouncementView(String content) {
-        this.content = content;
-    }
+    void notifyDeactivation(VirtualSensorVsnTo objTo);
 
-    private final String content;
+    void notifyMalfunction(VirtualSensorVsnTo objTo);
 
-    @Override
-    public String toString() {
-        return content;
-    }
+    void notifyNew(VirtualSensorVsnTo objTo);
 
+    void notifyReactivation(VirtualSensorVsnTo objTo);
 }

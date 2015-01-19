@@ -98,7 +98,9 @@ public class RabbitUtil {
 
         List<String> items = new ArrayList<>();
         items.addAll(Arrays.<String>asList(routingKey.split("/")));
-        Collections.reverse(items);
+        
+        //reverse routing keys
+        //Collections.reverse(items);
         
         StringBuilder sb = new StringBuilder();
         sb.append(items.remove(0));

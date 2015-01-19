@@ -164,8 +164,8 @@ public enum ModelState {
 
     public abstract State getState();
 
-    protected void change(Model model, ModelState state) {
-        model.state = state;
+    protected void change(Model model, ModelState modelState) {
+        model.modelState = modelState;
         model.updateDate();
     }
 }

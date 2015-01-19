@@ -17,6 +17,7 @@ package br.uff.labtempo.osiris.omcp;
 
 import br.uff.labtempo.omcp.common.Request;
 import br.uff.labtempo.omcp.common.Response;
+import br.uff.labtempo.omcp.common.exceptions.BadRequestException;
 import br.uff.labtempo.omcp.common.exceptions.InternalServerErrorException;
 import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
 import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
@@ -36,7 +37,7 @@ public class ControllerTest {
     }
 
     @Test
-    public void testUrl() throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
+    public void testUrl() throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException {
         Controller c = new Controller() {
 
             @Override
@@ -63,7 +64,7 @@ public class ControllerTest {
     }
 
     @Test
-    public void testUrlWithParams() throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
+    public void testUrlWithParams() throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException {
         Controller c = new Controller() {
 
             @Override
@@ -93,7 +94,7 @@ public class ControllerTest {
     }
 
     @Test
-    public void testUrlWithOneParam() throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
+    public void testUrlWithOneParam() throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException {
         Controller c = new Controller() {
 
             @Override
@@ -122,7 +123,7 @@ public class ControllerTest {
     }
     
     @Test
-    public void testAmbiguousInput() throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
+    public void testAmbiguousInput() throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException {
         Controller c = new Controller() {
 
             @Override

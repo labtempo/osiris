@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Felipe Santos <fralph at ic.uff.br>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,23 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package br.uff.labtempo.osiris.virtualsensornet.persistence;
-
-import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorVsnTo;
+package br.uff.labtempo.osiris.to.databuilders;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public interface AnnouncerDao {
-
-    void broadcastIt(VirtualSensorVsnTo objTo);
-
-    void notifyDeactivation(VirtualSensorVsnTo objTo);
-
-    void notifyMalfunction(VirtualSensorVsnTo objTo);
-
-    void notifyNew(VirtualSensorVsnTo objTo);
-
-    void notifyReactivation(VirtualSensorVsnTo objTo);
+public class CollectorDataBuilder {
+    
 }

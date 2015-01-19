@@ -17,6 +17,7 @@ package br.uff.labtempo.osiris.omcp;
 
 import br.uff.labtempo.omcp.common.Request;
 import br.uff.labtempo.omcp.common.Response;
+import br.uff.labtempo.omcp.common.exceptions.BadRequestException;
 import br.uff.labtempo.omcp.common.exceptions.InternalServerErrorException;
 import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
 import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
@@ -54,10 +55,10 @@ public abstract class Controller implements RequestHandler {
         return context;
     }
 
-    public abstract Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException;
+    public abstract Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException;
 
     @Override
-    public Response handler(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
+    public Response handler(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException {
         Response response = process(request);
         if (response == null) {
             return goToNext(request);
@@ -65,7 +66,7 @@ public abstract class Controller implements RequestHandler {
         return response;
     }
 
-    protected Response goToNext(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
+    protected Response goToNext(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException {
         if (nextController != null) {
             return nextController.handler(request);
         }
@@ -159,7 +160,7 @@ public abstract class Controller implements RequestHandler {
         return null;
     }
 
-    protected Response builder(Object obj, String contentType) {
+    protected Response builderOk(Object obj, String contentType) {
         Response response;
         if (contentType == null) {
             response = new ResponseBuilder().ok(obj, ResponseBuilder.ContentType.JSON).build();

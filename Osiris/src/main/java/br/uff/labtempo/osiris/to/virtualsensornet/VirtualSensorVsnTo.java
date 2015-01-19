@@ -15,6 +15,7 @@
  */
 package br.uff.labtempo.osiris.to.virtualsensornet;
 
+import br.uff.labtempo.osiris.to.virtualsensornet.interfaces.IVirtualSensorVsnTo;
 import br.uff.labtempo.osiris.to.common.data.ValueTo;
 import br.uff.labtempo.osiris.to.common.definitions.State;
 import br.uff.labtempo.osiris.to.common.definitions.ValueType;
@@ -27,14 +28,14 @@ import java.util.Map;
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public class VirtualSensorVsnTo {
+public class VirtualSensorVsnTo implements IVirtualSensorVsnTo {
 
     private long id;
 
     private String state;
 
-    private long timestamp;
-    
+    private long timestampInMillis;
+
     private long lastModified;
 
     private List<Map<String, String>> values;
@@ -47,10 +48,10 @@ public class VirtualSensorVsnTo {
     private transient VirtualSensorType helperVirtualSensorType;
     private transient List<? extends ValueTo> helperValueToList;
 
-    public VirtualSensorVsnTo(long id, State state, long captureTimestamp, Calendar lastModified, VirtualSensorType sensorType) {
+    public VirtualSensorVsnTo(long id, State state, long captureTimestampInMillis, Calendar lastModified, VirtualSensorType sensorType) {
         this.id = id;
         this.state = state.toString();
-        this.timestamp = captureTimestamp;
+        this.timestampInMillis = captureTimestampInMillis;
         this.lastModified = lastModified.getTimeInMillis();
         this.sensorType = sensorType.toString();
         this.values = new ArrayList<>();
@@ -60,10 +61,12 @@ public class VirtualSensorVsnTo {
         this.helperVirtualSensorType = sensorType;
     }
 
+    @Override
     public long getId() {
         return id;
     }
 
+    @Override
     public State getState() {
         if (helperState == null) {
             helperState = Enum.valueOf(State.class, state);
@@ -71,10 +74,12 @@ public class VirtualSensorVsnTo {
         return helperState;
     }
 
-    public long getTimestamp() {
-        return timestamp;
+    @Override
+    public long getTimestampInMillis() {
+        return timestampInMillis;
     }
 
+    @Override
     public Calendar getLastModified() {
         if (helperLastModified == null) {
             helperLastModified = Calendar.getInstance();
@@ -83,6 +88,7 @@ public class VirtualSensorVsnTo {
         return helperLastModified;
     }
 
+    @Override
     public VirtualSensorType getSensorType() {
         if (helperVirtualSensorType == null) {
             helperVirtualSensorType = Enum.valueOf(VirtualSensorType.class, sensorType);
@@ -95,6 +101,7 @@ public class VirtualSensorVsnTo {
         values.add(valueTo.toMap());
     }
 
+    @Override
     public List<? extends ValueTo> getValuesTo() {
         if (helperValueToList != null) {
             return helperValueToList;
