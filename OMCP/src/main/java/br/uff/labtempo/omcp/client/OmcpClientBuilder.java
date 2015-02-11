@@ -16,7 +16,7 @@
 package br.uff.labtempo.omcp.client;
 
 import br.uff.labtempo.omcp.client.rabbitmq.RabbitClient;
-import br.uff.labtempo.omcp.common.exceptions.ConnectionException;
+import br.uff.labtempo.omcp.common.exceptions.client.ConnectionException;
 
 /**
  *

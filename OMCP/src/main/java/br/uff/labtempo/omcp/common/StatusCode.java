@@ -34,6 +34,19 @@ public enum StatusCode {
     /* Success */
     /**
      * Code to a succeed request<br>Value 200
+     *//*
+     * Inspired from HTTP Status Code:
+     * 
+     * 1xx: Informational - Request received, continuing process 
+     * 2xx: Success - The action was successfully received, understood, and accepted
+     * 3xx: Redirection - Further action must be taken in order to complete the request
+     * 4xx: Client Error - The request contains bad syntax or cannot be fulfilled
+     * 5xx: Server Error - The server failed to fulfill an apparently valid request
+     *
+     */
+    /* Success */
+    /**
+     * Code to a succeed request<br>Value 200
      */
     OK(200),
     /**
@@ -63,7 +76,7 @@ public enum StatusCode {
     REQUEST_TIMEOUT(408),
     /*Server errors*/
     /**
-     * Code to a server internal error<br>Value 500
+     * Code to a server internal isError<br>Value 500
      */
     INTERNAL_SERVER_ERROR(500),
     /**
@@ -71,14 +84,14 @@ public enum StatusCode {
      */
     NOT_IMPLEMENTED(501);
 
-    private boolean error;
+    private boolean isError;
     private final int code;
 
     private StatusCode(int code) {
         this.code = code;
 
         if (this.code >= 400) {
-            this.error = true;
+            this.isError = true;
         }
     }
 
@@ -87,7 +100,7 @@ public enum StatusCode {
     }
 
     public boolean isError() {
-        return error;
+        return isError;
     }
 
     @Override

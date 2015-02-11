@@ -24,21 +24,24 @@ import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
 import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
 import br.uff.labtempo.omcp.common.utils.ResponseBuilder;
 import br.uff.labtempo.osiris.omcp.Controller;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Collector;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Sensor;
+import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistence;
+import br.uff.labtempo.osiris.utils.requestpool.RequestHandler;
+import br.uff.labtempo.osiris.utils.requestpool.RequestPool;
+import br.uff.labtempo.osiris.sensornet.model.Collector;
+import br.uff.labtempo.osiris.sensornet.model.Network;
+import br.uff.labtempo.osiris.sensornet.model.Sensor;
 import br.uff.labtempo.osiris.sensornet.model.state.ModelState;
+import br.uff.labtempo.osiris.sensornet.model.util.AnnouncerWrapper;
 import br.uff.labtempo.osiris.sensornet.model.util.ConsumableInfo;
-import br.uff.labtempo.osiris.sensornet.persistence.AnnouncerDao;
-import br.uff.labtempo.osiris.sensornet.persistence.CollectorDao;
+import br.uff.labtempo.osiris.sensornet.model.util.SchedulerAgentWrapper;
 import br.uff.labtempo.osiris.sensornet.persistence.DaoFactory;
-import br.uff.labtempo.osiris.sensornet.persistence.NetworkDao;
-import br.uff.labtempo.osiris.sensornet.persistence.SchedulerDao;
-import br.uff.labtempo.osiris.sensornet.persistence.SensorDao;
+import br.uff.labtempo.osiris.sensornet.thirdparty.announcer.AnnouncerAgent;
+import br.uff.labtempo.osiris.sensornet.thirdparty.scheduler.SchedulerAgent;
 import br.uff.labtempo.osiris.to.collector.CollectorCoTo;
 import br.uff.labtempo.osiris.to.collector.NetworkCoTo;
 import br.uff.labtempo.osiris.to.collector.SampleCoTo;
 import br.uff.labtempo.osiris.to.collector.SensorCoTo;
+import br.uff.labtempo.osiris.to.common.definitions.Path;
 import br.uff.labtempo.osiris.to.sensornet.CollectorSnTo;
 import br.uff.labtempo.osiris.to.sensornet.NetworkSnTo;
 import br.uff.labtempo.osiris.to.sensornet.SensorSnTo;
@@ -49,27 +52,53 @@ import java.util.List;
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public class NotifyController extends Controller {
+public class NotifyController extends Controller implements RequestHandler {
 
-    private final DaoFactory factory;
+    private final BatchPersistence persistence;
+    private AnnouncerAgent announcer;
+    private SchedulerAgent scheduler;
+    private RequestPool requestPool;
+
+    public NotifyController(DaoFactory factory, AnnouncerAgent announcer, SchedulerAgent scheduler, RequestPool requestPool) {
+        this.persistence = factory.getBatchPersistence();
+        this.announcer = new AnnouncerWrapper(announcer);
+        this.scheduler = new SchedulerAgentWrapper(scheduler);
+        this.requestPool = requestPool;
+        if (requestPool != null) {
+            requestPool.setHandler(this);
+        }
+    }
+
+    public NotifyController(DaoFactory factory, RequestPool requestPool) {
+        this(factory, null, null, requestPool);
+    }
 
     public NotifyController(DaoFactory factory) {
-        this.factory = factory;
+        this(factory, null, null, null);
     }
 
     @Override
     public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
         if (request.getMethod() == RequestMethod.NOTIFY) {
-            if (request.getModule().contains(ControllerPath.COLLECTOR_MESSAGEGROUP.toString())) {
-                SampleCoTo sample = request.getContent(SampleCoTo.class);
-                analyze(sample);
+            if (request.getModule().contains(Path.NAMING_MESSAGEGROUP_COLLECTOR.toString())) {
+                if (requestPool != null) {
+                    requestPool.add(request);
+                } else {
+                    handle(request);
+                }
             }
             return new ResponseBuilder().buildNull();
         }
         return null;
     }
 
-    private void analyze(SampleCoTo sample) {
+    @Override
+    public void handle(Request request) {
+        SampleCoTo sample = request.getContent(SampleCoTo.class);
+        analyzeSample(sample);
+    }
+
+    public void analyzeSample(SampleCoTo sample) {
         NetworkCoTo networkTo = sample.getNetwork();
         CollectorCoTo collectorTo = sample.getCollector();
         SensorCoTo sensorTo = sample.getSensor();
@@ -95,10 +124,84 @@ public class NotifyController extends Controller {
 
     }
 
-    private Sensor operate(SensorCoTo sensorTo, final Network network, final Collector collector, List<Command> commands) {
-        SensorDao sdao = factory.getSensorDao();
+    private Network operate(NetworkCoTo networkTo, List<Command> commands) {
         boolean isModified;
-        Sensor sensor = sdao.get(network.getId(), collector.getId(), sensorTo.getId());
+        Network network = persistence.get(Network.class, networkTo.getId());
+        if (network != null) {
+            isModified = network.update(networkTo);
+            if (network.getModelState().equals(ModelState.INACTIVE)) {
+                isModified = true;
+            }
+        } else {
+            network = Network.build(networkTo);
+            isModified = true;
+        }
+
+        if (isModified) {
+            final Network networkCopy = network;
+            Command command = new Command() {
+                @Override
+                public void execute() {
+                    AnnouncerAgent announcer = getAnnouncerAgent();
+                    NetworkSnTo to = networkCopy.getTransferObject();
+                    switch (networkCopy.getModelState()) {
+                        case NEW:
+                            announcer.notifyNew(to);
+                            break;
+                        case REACTIVATED:
+                            announcer.notifyReactivation(to);
+                            break;
+                    }
+                    announcer.broadcastIt(to);
+                }
+            };
+            commands.add(command);
+        }
+        return network;
+    }
+
+    private Collector operate(CollectorCoTo collectorTo, Network network, List<Command> commands) {
+        //TODO: resolver problama do DAO inconsistente - contornar o problema, um loop é usado
+        boolean isModified;
+        Collector collector = network.getCollectorsByName(collectorTo.getId());
+        if (collector != null) {
+            isModified = collector.update(collectorTo);
+            if (collector.getModelState().equals(ModelState.INACTIVE)) {
+                isModified = true;
+            }
+        } else {
+            collector = Collector.build(collectorTo);
+            network.addCollector(collector);
+            isModified = true;
+        }
+
+        if (isModified) {
+            final Collector collectorCopy = collector;
+            Command command = new Command() {
+                @Override
+                public void execute() {
+                    AnnouncerAgent announcer = getAnnouncerAgent();
+                    CollectorSnTo to = collectorCopy.getTransferObject();
+                    switch (collectorCopy.getModelState()) {
+                        case NEW:
+                            announcer.notifyNew(to);
+                            break;
+                        case REACTIVATED:
+                            announcer.notifyReactivation(to);
+                            break;
+                    }
+                    announcer.broadcastIt(to);
+                }
+            };
+            commands.add(command);
+        }
+        return collector;
+    }
+
+    private Sensor operate(SensorCoTo sensorTo, final Network network, final Collector collector, List<Command> commands) {
+        boolean isModified;
+        //TODO: resolver problama do DAO inconsistente - contornar o problema, um loop é usado
+        Sensor sensor = collector.getSensorsByName(sensorTo.getId());
 
         if (sensor != null) {
             isModified = sensor.update(sensorTo);
@@ -126,7 +229,7 @@ public class NotifyController extends Controller {
             Command command = new Command() {
                 @Override
                 public void execute() {
-                    AnnouncerDao announcer = getAnnouncerDao();
+                    AnnouncerAgent announcer = getAnnouncerAgent();
                     SensorSnTo to = sensorCopy.getTransferObject();
 
                     switch (sensorCopy.getModelState()) {
@@ -144,7 +247,6 @@ public class NotifyController extends Controller {
                     }
 
                     announcer.broadcastIt(to);
-
                 }
             };
             commands.add(command);
@@ -152,88 +254,12 @@ public class NotifyController extends Controller {
         return sensor;
     }
 
-    private Collector operate(CollectorCoTo collectorTo, Network network, List<Command> commands) {
-        CollectorDao cdao = factory.getCollectorDao();
-        boolean isModified;
-        Collector collector = cdao.get(network.getId(), collectorTo.getId());
-        if (collector != null) {
-            isModified = collector.update(collectorTo);
-            if (collector.getModelState().equals(ModelState.INACTIVE)) {
-                isModified = true;
-            }
-        } else {
-            collector = Collector.build(collectorTo);
-            network.addCollector(collector);
-            isModified = true;
-        }
-
-        if (isModified) {
-            final Collector collectorCopy = collector;
-            Command command = new Command() {
-                @Override
-                public void execute() {
-                    AnnouncerDao announcer = getAnnouncerDao();
-                    CollectorSnTo to = collectorCopy.getTransferObject();
-                    switch (collectorCopy.getModelState()) {
-                        case NEW:
-                            announcer.notifyNew(to);
-                            break;
-                        case REACTIVATED:
-                            announcer.notifyReactivation(to);
-                            break;
-                    }
-                    announcer.broadcastIt(to);
-                }
-            };
-            commands.add(command);
-        }
-        return collector;
-    }
-
-    private Network operate(NetworkCoTo networkTo, List<Command> commands) {
-        NetworkDao ndao = factory.getNetworkDao();
-        boolean isModified;
-        Network network = ndao.get(networkTo.getId());
-        if (network != null) {
-            isModified = network.update(networkTo);
-            if (network.getModelState().equals(ModelState.INACTIVE)) {
-                isModified = true;
-            }
-        } else {
-            network = Network.build(networkTo);
-            isModified = true;
-        }
-
-        if (isModified) {
-            final Network networkCopy = network;
-            Command command = new Command() {
-                @Override
-                public void execute() {
-                    AnnouncerDao announcer = getAnnouncerDao();
-                    NetworkSnTo to = networkCopy.getTransferObject();
-                    switch (networkCopy.getModelState()) {
-                        case NEW:
-                            announcer.notifyNew(to);
-                            break;
-                        case REACTIVATED:
-                            announcer.notifyReactivation(to);
-                            break;
-                    }
-                    announcer.broadcastIt(to);
-                }
-            };
-            commands.add(command);
-        }
-        return network;
-    }
-
     private void persist(Network network) {
-        NetworkDao ndao = factory.getNetworkDao();
-        ndao.save(network);
-    }
-
-    private AnnouncerDao getAnnouncerDao() {
-        return factory.getAnnouncerDao();
+        try {
+            persistence.save(network);
+        } catch (Exception ex) {
+            persistence.update(network);
+        }
     }
 
     private void executeCommands(List<Command> commands) {
@@ -242,13 +268,24 @@ public class NotifyController extends Controller {
         }
     }
 
-    private void schedule(Sensor sensor) {
-        SchedulerDao sdao = factory.getSchedulerDao();
-        sdao.schedule(sensor);
-    }
-
     private interface Command {
 
         void execute();
+    }
+
+    private AnnouncerAgent getAnnouncerAgent() {
+        return announcer;
+    }
+
+    private void schedule(Sensor sensor) {
+        scheduler.schedule(sensor);
+    }
+
+    public void setAnnouncerAgent(AnnouncerAgent announcer) {
+        this.announcer = announcer;
+    }
+
+    public void setSchedulerAgent(SchedulerAgent scheduler) {
+        this.scheduler = scheduler;
     }
 }

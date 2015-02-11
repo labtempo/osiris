@@ -15,10 +15,9 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.persistence.jpa;
 
-import br.uff.labtempo.osiris.thirdparty.scheduler.SchedulerItem;
+import br.uff.labtempo.osiris.utils.scheduling.SchedulerItem;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.SchedulerDao;
-import br.uff.labtempo.osiris.virtualsensornet.persistence.jpa.DataManager;
 import br.uff.labtempo.osiris.virtualsensornet.thirdparty.scheduler.ModelSchedulerItem;
 import br.uff.labtempo.osiris.virtualsensornet.thirdparty.scheduler.ModelSchedulerItem_;
 import java.util.ArrayList;
@@ -41,12 +40,12 @@ public class SchedulerJpa implements SchedulerDao {
     }
 
     @Override
-    public SchedulerItem<VirtualSensor> getItemByObject(VirtualSensor o) {
-        return data.get(ModelSchedulerItem.class, o.getId());
+    public SchedulerItem getItemByObjectId(long objectId) {
+        return data.get(ModelSchedulerItem.class, objectId);
     }
 
     @Override
-    public List<? extends SchedulerItem<VirtualSensor>> getAllByTimeLimit(long timeLimitInMillis) {
+    public List<? extends SchedulerItem> getAllByTimeLimit(long timeLimitInMillis) {
         CriteriaBuilder cb = data.getCriteriaBuilder();
         CriteriaQuery<ModelSchedulerItem> criteriaQuery = cb.createQuery(ModelSchedulerItem.class);
         Root<ModelSchedulerItem> root = criteriaQuery.from(ModelSchedulerItem.class);
@@ -62,17 +61,17 @@ public class SchedulerJpa implements SchedulerDao {
     }
 
     @Override
-    public void save(SchedulerItem<VirtualSensor> o) {
+    public void save(SchedulerItem o) {
         data.save(o);
     }
 
     @Override
-    public void update(SchedulerItem<VirtualSensor> o) {
+    public void update(SchedulerItem o) {
         data.update(o);
     }
 
     @Override
-    public void delete(SchedulerItem<VirtualSensor> o) {
+    public void delete(SchedulerItem o) {
         data.delete(o);
     }
 

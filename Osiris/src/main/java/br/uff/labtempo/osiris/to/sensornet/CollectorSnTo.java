@@ -28,19 +28,20 @@ import java.util.concurrent.TimeUnit;
  */
 public class CollectorSnTo extends CollectorToBase implements ICollectorSnTo {
 
+
     private final long lastModified;
     private final String networkId;
     private final int totalSensors;
-    
+
     //helper attributes
     private transient Calendar helperLastModified;
 
-    public CollectorSnTo(String id, State state, long interval, TimeUnit timeUnit, Calendar lastModifiedDate, String networkId, int totalSensors) {
+    public CollectorSnTo( String id, State state, long interval, TimeUnit timeUnit, Calendar lastModifiedDate, String networkId, int totalSensors) {
         super(id, state, interval, timeUnit);
         this.lastModified = lastModifiedDate.getTimeInMillis();
         this.networkId = networkId;
         this.totalSensors = totalSensors;
-        
+
         this.helperLastModified = lastModifiedDate;
     }
 
@@ -77,5 +78,4 @@ public class CollectorSnTo extends CollectorToBase implements ICollectorSnTo {
     public Map<String, String> getInfo() {
         return super.getInfo();
     }
-
 }

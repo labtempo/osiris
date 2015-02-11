@@ -25,6 +25,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.transaction.Transactional;
 
 /**
  *
@@ -38,6 +39,7 @@ public class VirtualSensorJpa implements VirtualSensorDao {
         this.data = data;
     }
 
+    @Transactional
     @Override
     public VirtualSensor get(VirtualSensor o) {
         return get(o.getId());
@@ -72,7 +74,7 @@ public class VirtualSensorJpa implements VirtualSensorDao {
         List<VirtualSensor> virtualSensors = data.getQuery(criteriaQuery);
         return virtualSensors;
     }
-
+    
     @Override
     public void save(VirtualSensor o) {
         data.save(o);

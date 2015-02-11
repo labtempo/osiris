@@ -18,8 +18,10 @@ package br.uff.labtempo.osiris.to.virtualsensornet.interfaces;
 import br.uff.labtempo.osiris.to.common.data.ValueTo;
 import br.uff.labtempo.osiris.to.common.definitions.State;
 import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorType;
+import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -29,7 +31,19 @@ public interface IVirtualSensorVsnTo {
 
     long getId();
 
-    long getTimestampInMillis();
+    long getCreationTimestampInMillis();
+
+    long getAcquisitionTimestampInMillis();
+
+    long getStorageTimestampInMillis();
+
+    BigInteger getCreationTimestampInNano();
+
+    int getCreationPrecisionInNano();
+
+    long getCreationInterval();
+
+    TimeUnit getCreationIntervalTimeUnit();
 
     State getState();
 

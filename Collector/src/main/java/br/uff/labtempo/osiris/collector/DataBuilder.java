@@ -32,12 +32,12 @@ public class DataBuilder {
     private long index = 1;
     private final String networkId;
     private final String collectorId;
-    private final int value;
+    private float value;
 
     DataBuilder(String networkId, String collectorId) {
         Random gerador = new Random();
 
-        this.value = gerador.nextInt(3);
+        this.value = gerador.nextFloat();
         this.networkId = networkId;
         this.collectorId = collectorId;
         
@@ -58,10 +58,10 @@ public class DataBuilder {
         sensorTo.addValue("luminosity", 200.0 + value, "candela", "cd");
         sensorTo.addValue("battery", 50 + value, "volt", "V");
 
-        sensorTo.addConsumable("battery", 25 + value);
+        sensorTo.addConsumable("battery", (int)(25 + value));
         sensorTo.addConsumableRule("low battery", "battery", LogicalOperator.GREATER_THAN, 30, "Battery has low charge, you need change it!");
 
-        sensorTo.addConsumable("fuel", 50 + value);
+        sensorTo.addConsumable("fuel", (int)(50 + value));
         sensorTo.addConsumableRule("low fuel", "fuel", LogicalOperator.GREATER_THAN, 70, "Low fuel message!");
 
         return sensorTo;
@@ -77,7 +77,7 @@ public class DataBuilder {
     }
 
     CollectorCoTo getCollector() {
-        CollectorCoTo collectorCoTo = new CollectorCoTo(collectorId, 2, TimeUnit.MINUTES);
+        CollectorCoTo collectorCoTo = new CollectorCoTo(collectorId, 10, TimeUnit.SECONDS);
         collectorCoTo.addInfo("descricao", "sala do laboratorio");
         collectorCoTo.addInfo("numero", "2");
         collectorCoTo.addInfo("Topologia", "estrela");

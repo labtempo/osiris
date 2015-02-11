@@ -15,12 +15,12 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.persistence;
 
-import br.uff.labtempo.osiris.thirdparty.scheduler.SchedulingStorage;
+import br.uff.labtempo.osiris.utils.scheduling.SchedulingStorage;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public interface SchedulerDao extends SchedulingStorage<VirtualSensor>{
+public interface SchedulerDao extends SchedulingStorage{
 }

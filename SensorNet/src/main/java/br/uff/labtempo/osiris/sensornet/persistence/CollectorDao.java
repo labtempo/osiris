@@ -15,7 +15,7 @@
  */
 package br.uff.labtempo.osiris.sensornet.persistence;
 
-import br.uff.labtempo.osiris.sensornet.model.jpa.Collector;
+import br.uff.labtempo.osiris.sensornet.model.Collector;
 import java.util.List;
 
 /**
@@ -24,11 +24,13 @@ import java.util.List;
  */
 public interface CollectorDao extends Dao<Collector> {
 
-    public Collector get(Collector o);
+    Collector getByUniqueId(long uniqueId);
 
-    public Collector get(String networkId, String collectorId);
+    Collector get(Collector o);
 
-    public List<Collector> getAll(String networkId);
+    Collector get(String networkId, String collectorId);
 
-    public List<Collector> getAllInactive(String networkId);
+    List<Collector> getAll(String networkId);
+
+    List<Collector> getAllInactive(String networkId);
 }

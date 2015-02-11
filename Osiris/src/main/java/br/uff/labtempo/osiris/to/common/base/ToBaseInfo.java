@@ -51,7 +51,7 @@ public abstract class ToBaseInfo {
 
     public State getState() {
         if (helperState == null) {
-            helperState = Enum.valueOf(State.class, state);
+            helperState = Enum.valueOf(State.class, state.toUpperCase());
         }
         return helperState;
     }

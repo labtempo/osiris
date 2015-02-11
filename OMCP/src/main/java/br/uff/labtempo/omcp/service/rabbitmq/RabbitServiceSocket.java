@@ -16,7 +16,7 @@
 package br.uff.labtempo.omcp.service.rabbitmq;
 
 import br.uff.labtempo.omcp.server.rabbitmq.*;
-import br.uff.labtempo.omcp.common.exceptions.ConnectionException;
+import br.uff.labtempo.omcp.common.exceptions.client.ConnectionException;
 import br.uff.labtempo.omcp.common.utils.RabbitUtil;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.ConsumerCancelledException;

@@ -36,15 +36,13 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.runners.MethodSorters;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+//@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class VirtualSensorLinkTest {
 
     private static Bootstrap bootstrap;
@@ -229,11 +227,10 @@ public class VirtualSensorLinkTest {
         int expectedFieldListSize = 2;
         Assert.assertEquals(expectedFieldListSize, list.size());
     }
-
     @Test
     public void TestUpdateLink_AddRemoveField_Valid_ShouldPass() throws NotFoundException, MethodNotAllowedException, BadRequestException, InternalServerErrorException {
         LinkVsnTo to = new LinkVsnTo("sensor", "collector", "network");
-       to.createField("temperature", dt2, cc1);
+        to.createField("temperature", dt2, cc1);
         to.createField("temperature", dt1);
         to.createField("luminosity", dt1);
 
@@ -257,10 +254,10 @@ public class VirtualSensorLinkTest {
         }
 
         to1.createField(expectedFieldName, expectedFieldDataTypeId, expectedFieldConversorId);
-        
+
         FieldTo ft1 = lvt.getFields().get(0);
         FieldTo ft2 = lvt.getFields().get(1);
-        
+
         controller.update(id, to1);
 
         LinkVsnTo vsnTo = controller.get(id);
@@ -274,7 +271,6 @@ public class VirtualSensorLinkTest {
         int expectedFieldListSize = 2;
         Assert.assertEquals(expectedFieldListSize, list.size());
 
-              
         FieldTo field1 = null;
         for (FieldTo ft : list) {
             if (ft.getId() != ft1.getId()) {
@@ -448,8 +444,8 @@ public class VirtualSensorLinkTest {
         controller.update(id, to1);
     }
 
-    @Test
-    public void TestUpdateLink_RemoveFields_WithValues_Valid_ShouldPass() throws NotFoundException, MethodNotAllowedException, InternalServerErrorException, BadRequestException {
+    @Test(expected = BadRequestException.class)
+    public void TestUpdateLink_RemoveFields_WithValues_Invalid_ShouldThrowException() throws NotFoundException, MethodNotAllowedException, InternalServerErrorException, BadRequestException {
         LinkVsnTo to = new LinkVsnTo("1", "collector", "network");
         to.createField("temperature", dt2, cc1);
         to.createField("temperature", dt1);
@@ -469,15 +465,15 @@ public class VirtualSensorLinkTest {
         to1.createField(ft2.getId(), ft2.getName(), ft2.getDataTypeId(), ft2.getConverterId());
 
         boolean updated = controller.update(id, to1);
-        Assert.assertEquals(true, updated);
+//        Assert.assertEquals(true, updated);
 
-        LinkVsnTo lvt1 = controller.get(id);
-
-        int expectedListSize = 1;
-        Assert.assertEquals(expectedListSize, lvt1.getFields().size());
-
-        FieldTo to2 = lvt1.getFields().get(0);
-        Assert.assertEquals(true, to2.isInitialized());
+//        LinkVsnTo lvt1 = controller.get(id);
+//
+//        int expectedListSize = 1;
+//        Assert.assertEquals(expectedListSize, lvt1.getFields().size());
+//
+//        FieldTo to2 = lvt1.getFields().get(0);
+//        Assert.assertEquals(true, to2.isInitialized());
     }
 
     @Test
@@ -552,8 +548,8 @@ public class VirtualSensorLinkTest {
         Assert.assertEquals(true, ft2.isInitialized());
     }
     
-    @Test
-    public void TestUpdateLink_RemoveLogicallyField_WithValue_Valid_ShouldPass() throws NotFoundException, MethodNotAllowedException, InternalServerErrorException, BadRequestException {
+    @Test(expected = BadRequestException.class)
+    public void TestUpdateLink_RemoveLogicallyField_WithValue_Invalid_ShouldThrowException() throws NotFoundException, MethodNotAllowedException, InternalServerErrorException, BadRequestException {
         LinkVsnTo to = new LinkVsnTo("1", "collector", "network");
         to.createField("temperature", dt2,cc1);
         to.createField("temperature", dt1);
@@ -576,11 +572,11 @@ public class VirtualSensorLinkTest {
         to1.createField(ft1.getId(), ft1.getName(), ft1.getDataTypeId(), cc1);
 
         boolean updated = controller.update(id, to1);
-        Assert.assertEquals(true, updated);
-
-        LinkVsnTo lvt1 = controller.get(id);
-        int expectedListSize = 1;
-        Assert.assertEquals(expectedListSize, lvt1.getFields().size());
+//        Assert.assertEquals(true, updated);
+//
+//        LinkVsnTo lvt1 = controller.get(id);
+//        int expectedListSize = 1;
+//        Assert.assertEquals(expectedListSize, lvt1.getFields().size());
     
     }
 

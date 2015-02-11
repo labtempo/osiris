@@ -15,10 +15,10 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.controller;
 
-import br.uff.labtempo.osiris.thirdparty.announcement.Announcer;
 import br.uff.labtempo.osiris.to.common.definitions.Path;
 import br.uff.labtempo.osiris.to.notification.Notification;
 import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorVsnTo;
+import br.uff.labtempo.osiris.utils.announcement.Announcer;
 import br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer.AnnouncerAgent;
 
 /**
@@ -73,19 +73,6 @@ public class AnnouncementController implements AnnouncerAgent {
     }
 
     private String resolveUri(VirtualSensorVsnTo objTo) {
-//        String resource = null;
-//
-//        switch (objTo.getSensorType()) {
-//            case LINK:
-//                resource = VS_LINK_ALL.toString();
-//                break;
-//            case COMPOSITE:
-//                resource = VS_COMPOSITE_ALL.toString();
-//                break;
-//            case BLENDING:
-//                resource = VS_BLENDING_ALL.toString();
-//                break;
-//        }
         //omcp://virtualsensornet/vsensor/{vsensorid}
         String uri = getHost() + Path.NAMING_RESOURCE_VIRTUALSENSOR + Path.SEPARATOR + objTo.getId();
         return uri;
@@ -114,15 +101,6 @@ public class AnnouncementController implements AnnouncerAgent {
         annoucer.announce(obj, path);
     }
 
-    /**
-     * sensor-collector-network down
-     *
-     * network malfunction
-     *
-     * sensor-collector-network new
-     *
-     * consumable
-     */
     private void notifyActivity(Notification obj) {
         // omcp://notification.messagegroup/{level}
         String path = Path.MESSAGEGROUP_NOTIFICATION.toString() + obj.getLevel();
@@ -131,7 +109,7 @@ public class AnnouncementController implements AnnouncerAgent {
 
     private String getPathBase() {
         // omcp://update.messagegroup/virtualsensornet/
-        String path = Path.MESSAGEGROUP_UPDATE.toString() + Path.NAMING_RESOURCE_VIRTUALSENSOR + Path.SEPARATOR;
+        String path = Path.MESSAGEGROUP_UPDATE.toString() + Path.NAMING_MODULE_VIRTUALSENSORNET + Path.SEPARATOR;
         return path;
     }
 
@@ -161,35 +139,3 @@ public class AnnouncementController implements AnnouncerAgent {
         }
     }
 }
-
-//aplicativo para publicar anuncios
-/*
- * TMON
- * 
- * New measure(updated)
- * 
- * Alert
- *      1 Anomaly (virtual sensor app)   
- *      2 Forecast (virtual sensor app)    
- *      3 Low Battery(consumable)
- *      4 Mote Down(no signal)
- *      5 WSN Down(no signal from all collectors)
- *      6 Battery Replaced(reactivated)
- *      7 Mote Boot(new node found)
- *      8 *Mote Desynchronized(not implemented yet)
- * 
- * Maintenance(not support)
- * 
- * New Forecast(virtual sensor updated)
- * 
- */
-/**
- * object uri in sensonet
- *
- * omcp://update.messagegroup/sensornet/networks/{networkid}
- * omcp://update.messagegroup/sensornet/networks/{networkid}/collector/{collctorid}
- * omcp://update.messagegroup/sensornet/networks/{networkid}/collector/{collctorid}/sensors/{sensorid}
- *
- * omcp://update.messagegroup/virtualsensornet/vsensors/{vsensorid}
- *
- */

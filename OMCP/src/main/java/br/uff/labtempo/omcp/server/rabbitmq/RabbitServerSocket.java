@@ -15,8 +15,8 @@
  */
 package br.uff.labtempo.omcp.server.rabbitmq;
 
-import br.uff.labtempo.omcp.common.exceptions.ConnectionException;
-import br.uff.labtempo.omcp.common.exceptions.UnreachableModuleException;
+import br.uff.labtempo.omcp.common.exceptions.client.ConnectionException;
+import br.uff.labtempo.omcp.common.exceptions.client.UnreachableModuleException;
 import br.uff.labtempo.omcp.common.utils.RabbitComm;
 import br.uff.labtempo.omcp.common.utils.RabbitUtil;
 import com.rabbitmq.client.AMQP;

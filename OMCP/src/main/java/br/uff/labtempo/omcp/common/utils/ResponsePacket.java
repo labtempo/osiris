@@ -18,7 +18,7 @@ package br.uff.labtempo.omcp.common.utils;
 import br.uff.labtempo.omcp.common.Response;
 import br.uff.labtempo.omcp.common.StatusCode;
 import static br.uff.labtempo.omcp.common.StatusCode.*;
-import br.uff.labtempo.omcp.common.exceptions.BadResponseException;
+import br.uff.labtempo.omcp.common.exceptions.client.BadResponseException;
 import static br.uff.labtempo.omcp.common.utils.Headers.*;
 import java.text.ParseException;
 import java.util.Arrays;

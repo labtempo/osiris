@@ -28,9 +28,9 @@ public interface ICollectorCoTo {
 
     String getId();
 
-    long getInterval();
+    long getCaptureInterval();
 
-    TimeUnit getTimeUnit();
+    TimeUnit getCaptureIntervalTimeUnit();
 
     void addInfo(Map<String, String> infos);
 

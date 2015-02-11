@@ -15,14 +15,16 @@
  */
 package br.uff.labtempo.osiris.sensornet.persistence.jpa;
 
-import br.uff.labtempo.osiris.sensornet.persistence.AnnouncerDao;
 import br.uff.labtempo.osiris.sensornet.persistence.CollectorDao;
 import br.uff.labtempo.osiris.sensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.sensornet.persistence.NetworkDao;
 import br.uff.labtempo.osiris.sensornet.persistence.SchedulerDao;
 import br.uff.labtempo.osiris.sensornet.persistence.SensorDao;
-import br.uff.labtempo.osiris.sensornet.thirdparty.announcer.AnnouncementBootstrap;
-import br.uff.labtempo.osiris.sensornet.thirdparty.scheduler.SchedulerBootstrap;
+import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistence;
+import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistenceAutoCommitted;
+import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistenceCommitBySecond;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 
 /**
  *
@@ -31,25 +33,25 @@ import br.uff.labtempo.osiris.sensornet.thirdparty.scheduler.SchedulerBootstrap;
 public class JpaDaoFactory implements DaoFactory, AutoCloseable {
 
     private static JpaDaoFactory instance;
+    //@PersistenceContext
+    private EntityManagerFactory emf;
+    private BatchPersistence batchPersistence;
+    private ThreadLocal<EntityManager> threadLocal = new ThreadLocal<>();
 
-    private DataManager data;
-    private AnnouncementBootstrap announcementConfig;
-    private SchedulerBootstrap schedulingConfig;
-
-    private JpaDaoFactory(String ip, String usr, String pwd, String moduleName) throws Exception {
+    private JpaDaoFactory(EntityManagerFactory emf) throws Exception {
         try {
-            announcementConfig = new AnnouncementBootstrap(ip, usr, pwd, moduleName);
-            data = new DataManager();
-            schedulingConfig = new SchedulerBootstrap(data, this);           
+            this.emf = emf;
+            this.batchPersistence = new BatchPersistenceAutoCommitted(emf.createEntityManager());
         } catch (Exception ex) {
             close();
             throw ex;
         }
     }
 
-    public static JpaDaoFactory newInstance(String ip, String usr, String pwd, String moduleName) throws Exception {
+    public static JpaDaoFactory newInstance(EntityManagerFactory emf) throws Exception {
         if (instance == null) {
-            instance = new JpaDaoFactory(ip, usr, pwd, moduleName);
+            instance = new JpaDaoFactory(emf);
+
         }
         return instance;
     }
@@ -62,45 +64,65 @@ public class JpaDaoFactory implements DaoFactory, AutoCloseable {
     }
 
     @Override
+    public void close() throws Exception {
+        try {
+            batchPersistence.close();
+        } catch (Exception e) {
+        }
+        try {
+            emf.close();
+        } catch (Exception e) {
+        }
+    }
+
+    @Override
     public SensorDao getSensorDao() {
-        return new SensorJpa(data);
+        return new SensorJpa(getDataManager());
     }
 
     @Override
     public CollectorDao getCollectorDao() {
-        return new CollectorJpa(data);
+        return new CollectorJpa(getDataManager());
     }
 
     @Override
     public NetworkDao getNetworkDao() {
-        return new NetworkJpa(data);
-    }
-
-    @Override
-    public void close() throws Exception {
-        try {
-
-            schedulingConfig.close();
-        } catch (Exception e) {
-        }
-        try {
-            announcementConfig.close();
-        } catch (Exception e) {
-        }
-        try {
-            data.close();
-        } catch (Exception e) {
-        }
-    }
-
-    @Override
-    public AnnouncerDao getAnnouncerDao() {
-        return announcementConfig.getAnnouncer();
+        return new NetworkJpa(getDataManager());
     }
 
     @Override
     public SchedulerDao getSchedulerDao() {
-        return schedulingConfig.getScheduler();
+        return new SchedulerJpa(batchPersistence);
     }
 
+    @Override
+    public BatchPersistence getBatchPersistence() {
+        return batchPersistence;
+    }
+    
+    @Override
+    public void clear() {
+        EntityManager em = threadLocal.get();
+        if (em != null) {
+            em.close();
+            threadLocal.set(null);
+        }
+    }
+
+    private DataManager getDataManager() {
+        return new DataManager(this);
+    }
+
+    public EntityManager getEntityManager() {
+        EntityManager em = threadLocal.get();
+        if (em == null) {
+            em = getNewEntityManager();
+            threadLocal.set(em);
+        }
+        return em;
+    }
+
+    private EntityManager getNewEntityManager() {
+        return emf.createEntityManager();
+    }    
 }

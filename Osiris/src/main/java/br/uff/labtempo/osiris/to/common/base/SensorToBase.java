@@ -19,40 +19,37 @@ import br.uff.labtempo.osiris.to.common.data.ConsumableTo;
 import br.uff.labtempo.osiris.to.common.definitions.State;
 import br.uff.labtempo.osiris.to.common.data.ValueTo;
 import br.uff.labtempo.osiris.to.common.definitions.ValueType;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public abstract class SensorToBase extends ToBaseInfo {
+public abstract class SensorToBase extends ToBaseInfo implements ISensorToBase {
 
-    private long timestamp;
-    private String timestampUnit;
-    private long timeOfCollectionInMillis;
+    private long captureTimestampInMillis;
+    private long acquisitionTimestampInMillis;
+    private int capturePrecisionInNano;
+
     private Map<String, Integer> consumables;
     private List<Map<String, String>> values;
 
     //helper attributes
-    private transient TimeUnit helperTimestampUnit;
     private transient List<? extends ValueTo> helperValueToList;
     private transient List<? extends ConsumableTo> helperConsumableToList;
-    
 
-    protected SensorToBase(String id, State state, long timestamp, TimeUnit timestampUnit,long timeOfCollectionInMillis) {
+    protected SensorToBase(String id, State state, long captureTimestampInMillis, int capturePrecisionInNano, long acquisitionTimestampInMillis) {
         super(id, state);
-        this.timestamp = timestamp;
-        this.timestampUnit = timestampUnit.toString();
-        this.timeOfCollectionInMillis = timeOfCollectionInMillis;
+        this.captureTimestampInMillis = captureTimestampInMillis;
+        this.capturePrecisionInNano = capturePrecisionInNano;
+        this.acquisitionTimestampInMillis = acquisitionTimestampInMillis;
         this.values = new ArrayList<>();
         this.consumables = new HashMap<>();
-
-        this.helperTimestampUnit = timestampUnit;
     }
 
     protected void addValue(String name, String value, String unit, String symbol) {
@@ -92,21 +89,31 @@ public abstract class SensorToBase extends ToBaseInfo {
         return values;
     }
 
-    public long getTimestamp() {
-        return timestamp;
+    @Override
+    public long getCaptureTimestampInMillis() {
+        return captureTimestampInMillis;
     }
 
-    public TimeUnit getTimestampUnit() {
-        if (helperTimestampUnit == null) {
-            helperTimestampUnit = Enum.valueOf(TimeUnit.class, timestampUnit);
-        }
-        return helperTimestampUnit;
+    @Override
+    public long getAcquisitionTimestampInMillis() {
+        return acquisitionTimestampInMillis;
     }
 
-    public long getTimeOfCollectionInMillis() {
-        return timeOfCollectionInMillis;
+    @Override
+    public BigInteger getCaptureTimestampInNano() {
+        BigInteger millis = BigInteger.valueOf(captureTimestampInMillis);
+        BigInteger multiplier = BigInteger.valueOf(1000000L);
+        BigInteger nano = BigInteger.valueOf(capturePrecisionInNano);
+        BigInteger creationTimestampInNano = millis.multiply(multiplier).add(nano);
+        return creationTimestampInNano;
     }
 
+    @Override
+    public int getCapturePrecisionInNano() {
+        return capturePrecisionInNano;
+    }
+
+    @Override
     public List<? extends ValueTo> getValuesTo() {
         if (helperValueToList != null) {
             return helperValueToList;
@@ -120,6 +127,7 @@ public abstract class SensorToBase extends ToBaseInfo {
         return valuesTo;
     }
 
+    @Override
     public List<? extends ConsumableTo> getConsumablesTo() {
         if (helperConsumableToList != null) {
             return helperConsumableToList;
@@ -138,10 +146,6 @@ public abstract class SensorToBase extends ToBaseInfo {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 53 * hash + (int) (this.timestamp ^ (this.timestamp >>> 32));
-        hash = 53 * hash + Objects.hashCode(this.timestampUnit);
-        hash = 53 * hash + Objects.hashCode(this.consumables);
-        hash = 53 * hash + Objects.hashCode(this.values);
         return hash;
     }
 
@@ -154,10 +158,13 @@ public abstract class SensorToBase extends ToBaseInfo {
             return false;
         }
         final SensorToBase other = (SensorToBase) obj;
-        if (this.timestamp != other.timestamp) {
+        if (this.captureTimestampInMillis != other.captureTimestampInMillis) {
             return false;
         }
-        if (!Objects.equals(this.timestampUnit, other.timestampUnit)) {
+        if (this.acquisitionTimestampInMillis != other.acquisitionTimestampInMillis) {
+            return false;
+        }
+        if (this.capturePrecisionInNano != other.capturePrecisionInNano) {
             return false;
         }
         if (!Objects.equals(this.consumables, other.consumables)) {

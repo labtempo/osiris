@@ -37,7 +37,7 @@ public class Bootstrap implements AutoCloseable {
     private final VirtualSensorController virtualSensorController;
 
     public Bootstrap() throws Exception {
-        String persistenceUnitName = "test";
+        String persistenceUnitName = "hsqldb";
 
         this.factory = PersistenceProvider.getInstance(persistenceUnitName);
 

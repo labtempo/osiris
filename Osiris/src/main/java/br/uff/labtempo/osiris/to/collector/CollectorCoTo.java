@@ -27,8 +27,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class CollectorCoTo extends CollectorToBase implements ICollectorCoTo {
 
-    public CollectorCoTo(String id, long interval, TimeUnit timeUnit) {
-        super(id, State.NEW, interval, timeUnit);
+    public CollectorCoTo(String id, long captureInterval, TimeUnit captureIntervalTimeUnit) {
+        super(id, State.NEW, captureInterval, captureIntervalTimeUnit);
     }
 
     @Override

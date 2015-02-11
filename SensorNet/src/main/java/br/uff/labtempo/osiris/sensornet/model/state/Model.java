@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import javax.persistence.ElementCollection;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -87,6 +88,32 @@ public abstract class Model implements Serializable {
 
     void updateDate() {
         lastModified = Calendar.getInstance();
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 61 * hash + Objects.hashCode(this.modelState);
+        hash = 61 * hash + Objects.hashCode(this.lastModified);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Model other = (Model) obj;
+        if (this.modelState != other.modelState) {
+            return false;
+        }
+        if (!Objects.equals(this.lastModified, other.lastModified)) {
+            return false;
+        }
+        return true;
     }
 
 }

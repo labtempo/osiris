@@ -16,10 +16,9 @@
 package br.uff.labtempo.osiris.sensornet.thirdparty.announcer;
 
 import br.uff.labtempo.omcp.client.OmcpClient;
-import br.uff.labtempo.omcp.client.OmcpClientBuilder;
-import br.uff.labtempo.osiris.sensornet.persistence.AnnouncerDao;
-import br.uff.labtempo.osiris.thirdparty.announcement.Announcement;
-import br.uff.labtempo.osiris.thirdparty.announcement.core.AnnouncementManager;
+import br.uff.labtempo.osiris.utils.announcement.Announcement;
+import br.uff.labtempo.osiris.utils.announcement.Announcer;
+import br.uff.labtempo.osiris.utils.announcement.core.AnnouncementManager;
 
 /**
  *
@@ -28,12 +27,12 @@ import br.uff.labtempo.osiris.thirdparty.announcement.core.AnnouncementManager;
 public class AnnouncementBootstrap implements AutoCloseable {
 
     private final Announcement manager;
-    private final String moduleName;
 
-    public AnnouncementBootstrap(String ip, String usr, String pwd, String moduleName) {
-        this.moduleName = moduleName;
-        OmcpClient client = new OmcpClientBuilder().host(ip).user(usr, pwd).source(moduleName).build();
+    public AnnouncementBootstrap(OmcpClient client) {
         this.manager = new AnnouncementManager(client);
+    }
+
+    public void start() {
         this.manager.initialize();
     }
 
@@ -41,9 +40,9 @@ public class AnnouncementBootstrap implements AutoCloseable {
     public void close() throws Exception {
         manager.close();
     }
-    
-    public AnnouncerDao getAnnouncer(){
-        AnnouncementController sensornetAnnounce = new AnnouncementController(manager.getAnnouncer(), moduleName);
-        return sensornetAnnounce;
+
+    public Announcer getAnnouncer() {
+        return manager.getAnnouncer();
     }
+
 }

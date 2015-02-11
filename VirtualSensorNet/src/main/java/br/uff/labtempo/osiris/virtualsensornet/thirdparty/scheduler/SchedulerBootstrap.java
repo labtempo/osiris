@@ -15,11 +15,11 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.thirdparty.scheduler;
 
-import br.uff.labtempo.osiris.thirdparty.scheduler.Scheduler;
-import br.uff.labtempo.osiris.thirdparty.scheduler.SchedulingCallback;
-import br.uff.labtempo.osiris.thirdparty.scheduler.SchedulingStorage;
+import br.uff.labtempo.osiris.utils.scheduling.Scheduler;
+import br.uff.labtempo.osiris.utils.scheduling.SchedulingCallback;
+import br.uff.labtempo.osiris.utils.scheduling.SchedulingStorage;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
-import br.uff.labtempo.osiris.thirdparty.scheduler.core.SchedulingManager;
+import br.uff.labtempo.osiris.utils.scheduling.core.SchedulingManager;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -28,10 +28,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class SchedulerBootstrap implements AutoCloseable {
 
-    private SchedulingManager<VirtualSensor> manager;
+    private SchedulingManager manager;
 
-    public SchedulerBootstrap(SchedulingStorage<VirtualSensor> schedulerDao, SchedulingCallback<VirtualSensor> callback) throws Exception {
-        manager = new SchedulingManager<>(schedulerDao, callback, 10, TimeUnit.SECONDS);
+    public SchedulerBootstrap(SchedulingStorage schedulerDao, SchedulingCallback callback) throws Exception {
+        manager = new SchedulingManager(schedulerDao, callback, 10, TimeUnit.SECONDS);
     }
 
     public void start() {
@@ -51,7 +51,7 @@ public class SchedulerBootstrap implements AutoCloseable {
         manager.close();
     }
 
-    public Scheduler<VirtualSensor> getScheduler() {
+    public Scheduler getScheduler() {
         return  manager.getScheduler();
     }
 

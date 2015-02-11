@@ -15,8 +15,8 @@
  */
 package br.uff.labtempo.osiris.sensornet.model.util;
 
-import br.uff.labtempo.osiris.sensornet.model.jpa.Consumable;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Rule;
+import br.uff.labtempo.osiris.sensornet.model.Consumable;
+import br.uff.labtempo.osiris.sensornet.model.Rule;
 import java.util.ArrayList;
 import java.util.List;
 

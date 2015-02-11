@@ -15,12 +15,10 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer;
 
-import br.uff.labtempo.osiris.virtualsensornet.controller.AnnouncementController;
 import br.uff.labtempo.omcp.client.OmcpClient;
-import br.uff.labtempo.omcp.client.OmcpClientBuilder;
-import br.uff.labtempo.osiris.thirdparty.announcement.Announcement;
-import br.uff.labtempo.osiris.thirdparty.announcement.Announcer;
-import br.uff.labtempo.osiris.thirdparty.announcement.core.AnnouncementManager;
+import br.uff.labtempo.osiris.utils.announcement.Announcement;
+import br.uff.labtempo.osiris.utils.announcement.Announcer;
+import br.uff.labtempo.osiris.utils.announcement.core.AnnouncementManager;
 
 /**
  *

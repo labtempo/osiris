@@ -15,7 +15,7 @@
  */
 package br.uff.labtempo.osiris.sensornet.persistence;
 
-import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
+import br.uff.labtempo.osiris.sensornet.model.Network;
 import java.util.List;
 
 /**

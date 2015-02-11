@@ -16,16 +16,17 @@
 package br.uff.labtempo.osiris.sensornet.controller;
 
 import br.uff.labtempo.omcp.common.Request;
-import br.uff.labtempo.omcp.common.RequestMethod;
 import br.uff.labtempo.omcp.common.Response;
 import br.uff.labtempo.omcp.common.exceptions.InternalServerErrorException;
 import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
 import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
 import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
+import br.uff.labtempo.omcp.common.utils.ResponseBuilder;
 import br.uff.labtempo.osiris.omcp.Controller;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
+import br.uff.labtempo.osiris.sensornet.model.Network;
 import br.uff.labtempo.osiris.sensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.sensornet.persistence.NetworkDao;
+import br.uff.labtempo.osiris.to.common.definitions.Path;
 import br.uff.labtempo.osiris.to.sensornet.NetworkSnTo;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,43 +38,67 @@ import java.util.Map;
  */
 public class NetworkController extends Controller {
 
-    private final String ALL = ControllerPath.NETWORK_ALL.toString();
-    private final String UNIQUE = ControllerPath.NETWORK_BY_ID.toString();
+    private final String ALL = Path.RESOURCE_SENSORNET_NETWORK_All.toString();
+    private final String UNIQUE = Path.RESOURCE_SENSORNET_NETWORK_BY_ID.toString();
 
     private final DaoFactory factory;
 
     public NetworkController(DaoFactory factory) {
         this.factory = factory;
     }
-    
+
     @Override
     public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
-        String contentType = request.getContentType();
-        String networkId ;
+        try {
+            return routing(request);
+        } finally {
+            factory.clear();
+        }
+    }
+
+    public Response routing(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
+    String contentType = request.getContentType();
+        String networkId;
 
         if (match(request.getResource(), ALL)) {
-
-            if (request.getMethod() != RequestMethod.GET) {
-                throw new NotImplementedException("Action not implemented");
+            switch (request.getMethod()) {
+                case GET:
+                    List<NetworkSnTo> to = getAll();
+                    Response response = new ResponseBuilder().ok(to, contentType).build();
+                    return response;
+                case POST:
+                    create();
+                default:
+                    throw new MethodNotAllowedException("Action not allowed for this resource!");
             }
-            return builderOk(getAll(), contentType);
-        }
-
-        if (match(request.getResource(), UNIQUE)) {
+        } else if (match(request.getResource(), UNIQUE)) {
             Map<String, String> map = extract(request.getResource(), UNIQUE);
-            networkId = map.get(ControllerPath.NETWORK_KEY.toString());
-
-            if (request.getMethod() != RequestMethod.GET) {
-                throw new NotImplementedException("Action not implemented");
+            networkId = map.get(Path.ID1.toString());
+            switch (request.getMethod()) {
+                case GET:
+                    NetworkSnTo to = getById(networkId);
+                    Response response = new ResponseBuilder().ok(to, contentType).build();
+                    return response;
+                case PUT:
+                    update();
+                case DELETE:
+                    delete(networkId);
+                    response = new ResponseBuilder().ok().build();
+                    return response;
+                default:
+                    throw new MethodNotAllowedException("Action not allowed for this resource!");
             }
-            return builderOk(getById(networkId), contentType);
         }
         return null;
     }
 
-    private List<NetworkSnTo> getAll() throws NotFoundException {
-        NetworkDao ndao = factory.getNetworkDao();
-
+    public List<NetworkSnTo> getAll() throws NotFoundException, InternalServerErrorException {
+        NetworkDao ndao;
+        try {
+            ndao = factory.getNetworkDao();
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Data query error!");
+        }
         List<Network> nwlist = ndao.getAll();
 
         List<NetworkSnTo> networks = new ArrayList<>();
@@ -85,10 +110,14 @@ public class NetworkController extends Controller {
         return networks;
     }
 
-    private NetworkSnTo getById(String networkId) throws NotFoundException {
-        NetworkDao ndao = factory.getNetworkDao();
-
-        Network nw = ndao.get(networkId);
+    public NetworkSnTo getById(String networkUniqueName) throws NotFoundException, InternalServerErrorException {
+        NetworkDao ndao;
+        try {
+            ndao = factory.getNetworkDao();
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Data query error!");
+        }
+        Network nw = ndao.get(networkUniqueName);
 
         if (nw == null) {
             throw new NotFoundException("Network not exists");
@@ -96,6 +125,31 @@ public class NetworkController extends Controller {
 
         return nw.getTransferObject();
     }
-    
-    
+
+    public boolean delete(String name) throws NotFoundException, InternalServerErrorException {
+        NetworkDao ndao;
+        try {
+            ndao = factory.getNetworkDao();
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Data query error!");
+        }
+        Network network = ndao.get(name);
+        if (network == null) {
+            throw new NotFoundException("Network not found!");
+        }
+        try {
+            ndao.delete(network);
+            return true;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Network couldn't removed!");
+        }
+    }
+
+    public long create() throws MethodNotAllowedException {
+        throw new MethodNotAllowedException("A Network cannot be created directly!");
+    }
+
+    public boolean update() throws MethodNotAllowedException {
+        throw new MethodNotAllowedException("A Network is a read-only resource!");
+    }
 }

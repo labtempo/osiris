@@ -15,12 +15,12 @@
  */
 package br.uff.labtempo.osiris.sensornet.persistence.jpa;
 
-import br.uff.labtempo.osiris.sensornet.model.jpa.Collector;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Collector_;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Network_;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Sensor;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Sensor_;
+import br.uff.labtempo.osiris.sensornet.model.Collector;
+import br.uff.labtempo.osiris.sensornet.model.Collector_;
+import br.uff.labtempo.osiris.sensornet.model.Network;
+import br.uff.labtempo.osiris.sensornet.model.Network_;
+import br.uff.labtempo.osiris.sensornet.model.Sensor;
+import br.uff.labtempo.osiris.sensornet.model.Sensor_;
 import br.uff.labtempo.osiris.sensornet.model.state.ModelState;
 import br.uff.labtempo.osiris.sensornet.persistence.SensorDao;
 import java.util.ArrayList;
@@ -44,8 +44,13 @@ public class SensorJpa implements SensorDao {
     }
 
     @Override
+    public Sensor getByUniqueId(long uniqueId) {
+        return data.get(Sensor.class, uniqueId);
+    }
+
+    @Override
     public Sensor get(Sensor o) {
-        return data.get(Sensor.class,o.getSid());
+        return data.get(Sensor.class, o.getPersistenceId());
     }
 
     @Override
@@ -69,10 +74,10 @@ public class SensorJpa implements SensorDao {
     public List<Sensor> getAll(String networkId) {
         CriteriaBuilder cb = data.getCriteriaBuilder();
         CriteriaQuery<Sensor> criteriaQuery = cb.createQuery(Sensor.class);
-        
+
         Root<Sensor> root = criteriaQuery.from(Sensor.class);
         Join<Sensor, Network> netroot = root.join(Sensor_.network);
-        
+
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.equal(netroot.<String>get(Network_.id), networkId));
         criteriaQuery.where(predicates.toArray(new Predicate[]{}));
@@ -123,7 +128,7 @@ public class SensorJpa implements SensorDao {
         Root<Sensor> root = criteriaQuery.from(Sensor.class);
         Join<Sensor, Network> netroot = root.join(Sensor_.network);
         List<Predicate> predicates = new ArrayList<>();
-        predicates.add(cb.equal(netroot.<String>get(Network_.id), networkId));            
+        predicates.add(cb.equal(netroot.<String>get(Network_.id), networkId));
         predicates.add(cb.equal(root.<ModelState>get(Sensor_.modelState), ModelState.INACTIVE));
         criteriaQuery.where(predicates.toArray(new Predicate[]{}));
 
@@ -142,13 +147,14 @@ public class SensorJpa implements SensorDao {
         Join<Sensor, Collector> colroot = root.join(Sensor_.collector);
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.equal(netroot.<String>get(Network_.id), networkId));
-        predicates.add(cb.equal(colroot.<String>get(Collector_.id), collectorId));        
+        predicates.add(cb.equal(colroot.<String>get(Collector_.id), collectorId));
         predicates.add(cb.equal(root.<ModelState>get(Sensor_.modelState), ModelState.INACTIVE));
         criteriaQuery.where(predicates.toArray(new Predicate[]{}));
 
         criteriaQuery.select(root);
         List<Sensor> sensors = data.getQuery(criteriaQuery);
 
-        return sensors;}
+        return sensors;
+    }
 
 }

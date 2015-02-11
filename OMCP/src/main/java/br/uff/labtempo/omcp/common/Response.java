@@ -97,7 +97,9 @@ public class Response {
 
     public String getLocation() {
         if (host != null) {
-            return host + location;
+            String location = host + this.location;
+            location = location.replace("//", "/").replace(":/", "://");
+            return location;
         }
         return this.location;
     }

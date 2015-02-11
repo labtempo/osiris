@@ -27,6 +27,8 @@ import java.util.Map;
  */
 public interface ICollectorSnTo {
 
+    
+    
     String getId();
 
     State getState();

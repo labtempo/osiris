@@ -15,10 +15,10 @@
  */
 package br.uff.labtempo.osiris.sensornet.model.util;
 
-import br.uff.labtempo.osiris.sensornet.model.jpa.Collector;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Consumable;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Sensor;
+import br.uff.labtempo.osiris.sensornet.model.Collector;
+import br.uff.labtempo.osiris.sensornet.model.Consumable;
+import br.uff.labtempo.osiris.sensornet.model.Network;
+import br.uff.labtempo.osiris.sensornet.model.Sensor;
 import br.uff.labtempo.osiris.sensornet.model.state.ModelState;
 import br.uff.labtempo.osiris.to.sensornet.CollectorSnTo;
 import br.uff.labtempo.osiris.to.sensornet.NetworkSnTo;
@@ -120,7 +120,7 @@ public class ModelUtilTest {
         assertEquals(se.getId(), sto.getId());
         assertEquals(se.getModelState().getState(), sto.getState());
         assertEquals(se.getLastModifiedDate(), sto.getLastModified());
-        assertEquals(se.getTimestamp(), sto.getTimestamp());
+        assertEquals(se.getCaptureTimestampInMillis(), sto.getCaptureTimestampInMillis());
 
         //consumables
         for (Consumable consumable : se.getConsumables()) {

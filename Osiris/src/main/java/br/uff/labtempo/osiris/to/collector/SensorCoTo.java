@@ -23,7 +23,6 @@ import br.uff.labtempo.osiris.to.common.definitions.State;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -36,33 +35,33 @@ public class SensorCoTo extends SensorToBase implements ISensorCoTo {
     //helper attributes
     private transient List<ConsumableRuleTo> helperConsumableRuleToList;
 
-    public SensorCoTo(String id, State state, long timestamp, TimeUnit timestampUnit) {
-        super(id, state, timestamp, timestampUnit, System.currentTimeMillis());
+    public SensorCoTo(String id, State state, long captureTimestampInMillis, int capturePrecisionInNano, long acquisitionTimestampInMillis) {
+        super(id, state, captureTimestampInMillis, capturePrecisionInNano, acquisitionTimestampInMillis);
         this.consumableRules = new ArrayList<>();
     }
 
-    public SensorCoTo(String id, long timestamp, TimeUnit timestampUnit) {
-        this(id, State.NEW, timestamp, timestampUnit);
+    public SensorCoTo(String id, long captureTimestampInMillis, int capturePrecisionInNano) {
+        this(id, State.NEW, captureTimestampInMillis, capturePrecisionInNano, System.currentTimeMillis());
     }
 
-    public SensorCoTo(long id, State state, long timestamp, TimeUnit timestampUnit) {
-        this(String.valueOf(id), state, timestamp, timestampUnit);
+    public SensorCoTo(String id, State state, long captureTimestampInMillis, int capturePrecisionInNano) {
+        this(String.valueOf(id), state, captureTimestampInMillis, capturePrecisionInNano, System.currentTimeMillis());
     }
 
-    public SensorCoTo(long id, long timestamp, TimeUnit timestampUnit) {
-        this(String.valueOf(id), timestamp, timestampUnit);
+    public SensorCoTo(long id, long captureTimestampInMillis) {
+        this(String.valueOf(id), captureTimestampInMillis, 0);
     }
 
     public SensorCoTo(String id) {
-        this(id, System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+        this(id, System.currentTimeMillis(), 0);
     }
 
     public SensorCoTo(long id, State state) {
-        this(String.valueOf(id), state, System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+        this(String.valueOf(id), state, System.currentTimeMillis(),0);
     }
 
     public SensorCoTo(long id) {
-        this(String.valueOf(id), System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+        this(String.valueOf(id));
     }
 
     @Override
@@ -123,7 +122,7 @@ public class SensorCoTo extends SensorToBase implements ISensorCoTo {
     public List<Map<String, String>> getValues() {
         return super.getValues();
     }
-
+    
     @Override
     public Map<String, String> getInfo() {
         return super.getInfo();

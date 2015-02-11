@@ -15,31 +15,23 @@
  */
 package br.uff.labtempo.osiris.to.sensornet.interfaces;
 
+import br.uff.labtempo.osiris.to.common.base.ISensorToBase;
 import br.uff.labtempo.osiris.to.common.data.ConsumableTo;
 import br.uff.labtempo.osiris.to.common.data.InfoTo;
-import br.uff.labtempo.osiris.to.common.definitions.State;
 import br.uff.labtempo.osiris.to.common.data.ValueTo;
 import br.uff.labtempo.osiris.to.common.definitions.ValueType;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public interface ISensorSnTo {
+public interface ISensorSnTo extends ISensorToBase {
 
-    String getId();
-
-    long getTimestamp();
-    
-    TimeUnit getTimestampUnit();
-    
-    long getTimeOfCollectionInMillis();
-
-    State getState();
+   
+    long getStorageTimestampInMillis();
 
     Calendar getLastModified();
 
@@ -54,12 +46,6 @@ public interface ISensorSnTo {
     void addInfo(Map<String, String> infos);
 
     void addInfo(String infoKeyName, String infoDescription);
-
-    List<? extends ValueTo> getValuesTo();
-
-    List<? extends ConsumableTo> getConsumablesTo();
-
-    List<? extends InfoTo> getInfoTo();
 
     Map<String, String> getInfo();
 

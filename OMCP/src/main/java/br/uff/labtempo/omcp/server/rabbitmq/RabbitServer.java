@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 public class RabbitServer implements OmcpServer, RabbitListener {
 
     private final String DOMAIN = "osiris.";
-    private final String PROTOCOL_VERSION = "OMCP/0.1";    
+    private final String PROTOCOL_VERSION = "OMCP/0.1";
     private final String MODULE_NAME;
     private final String MODULE_DESCRIPTION;
     private final String HOST;
@@ -49,7 +49,7 @@ public class RabbitServer implements OmcpServer, RabbitListener {
     public RabbitServer(String moduleName, String host, String user, String password) {
         this.MODULE_NAME = moduleName;
         this.MODULE_DESCRIPTION = moduleName + "-java/0.1";
-        this.HOST = "omcp://" + moduleName;
+        this.HOST = "omcp://" + moduleName + "/";
         this.socket = new RabbitServerSocket(DOMAIN + moduleName, host, user, password);
         this.socket.setListener(this);
         this.running = true;
@@ -89,7 +89,7 @@ public class RabbitServer implements OmcpServer, RabbitListener {
             response = new ResponseBuilder().error(ex).build();
         } catch (NotImplementedException ex) {
             response = new ResponseBuilder().error(ex).build();
-        }catch(Exception ex){
+        } catch (Exception ex) {
             response = new ResponseBuilder().error(new InternalServerErrorException(ex)).build();
             Logger.getLogger(RabbitServer.class.getName()).log(Level.SEVERE, null, ex);
         }

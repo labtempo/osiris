@@ -19,9 +19,7 @@ import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorType;
 import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorVsnTo;
 import br.uff.labtempo.osiris.virtualsensornet.model.state.Model;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -35,7 +33,6 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
-import org.hibernate.annotations.Where;
 
 /**
  *
@@ -53,15 +50,17 @@ public abstract class VirtualSensor extends Model {
     private VirtualSensorType virtualSensorType;
 
     @OneToMany(mappedBy = "virtualSensor", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    @Where(clause = "isDeleted = 'false'")
     private List<Field> fields;
 
-    private long timestampInMillis;
+    private long creationTimestampInMillis;
+    private int creationPrecisionInNano;
+    private long acquisitionTimestampInMillis;
+    private long storageTimestampInMillis;
 
-    private long interval;
+    private long creationInterval;
 
     @Enumerated(EnumType.STRING)
-    private TimeUnit intervalTimeUnit;
+    private TimeUnit creationIntervalTimeUnit;
 
     @OneToMany(mappedBy = "virtualSensor", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @OrderBy("timestamp DESC")
@@ -70,11 +69,11 @@ public abstract class VirtualSensor extends Model {
     protected VirtualSensor() {
     }
 
-    public VirtualSensor(VirtualSensorType type, List<Field> fields, long interval, TimeUnit intervalTimeUnit) {
+    public VirtualSensor(VirtualSensorType type, List<Field> fields, long creationInterval, TimeUnit creationIntervalTimeUnit) {
         this.virtualSensorType = type;
         this.fields = fields;
-        this.interval = interval;
-        this.intervalTimeUnit = intervalTimeUnit;
+        this.creationInterval = creationInterval;
+        this.creationIntervalTimeUnit = creationIntervalTimeUnit;
         for (Field field : fields) {
             field.setVirtualSensor(this);
         }
@@ -84,37 +83,49 @@ public abstract class VirtualSensor extends Model {
         return id;
     }
 
-    public long getTimestampInMillis() {
-        return timestampInMillis;
+    public long getCreationTimestampInMillis() {
+        return creationTimestampInMillis;
+    }
+
+    public int getCreationPrecisionInNano() {
+        return creationPrecisionInNano;
+    }
+
+    public long getStorageTimestampInMillis() {
+        return storageTimestampInMillis;
+    }
+
+    public long getAcquisitionTimestampInMillis() {
+        return acquisitionTimestampInMillis;
     }
 
     public VirtualSensorType getVirtualSensorType() {
         return virtualSensorType;
     }
 
-    public long getInterval() {
-        return interval;
+    public long getCreationInterval() {
+        return creationInterval;
     }
 
-    public TimeUnit getIntervalTimeUnit() {
-        return intervalTimeUnit;
+    public TimeUnit getCreationIntervalTimeUnit() {
+        return creationIntervalTimeUnit;
     }
 
     public List<Field> getFields() {
         return getConcurrentFields();
     }
 
-    protected boolean updateInterval(long interval, TimeUnit intervalTimeUnit) {
-        if (this.interval != interval || !this.intervalTimeUnit.equals(intervalTimeUnit)) {
-            this.interval = interval;
-            this.intervalTimeUnit = intervalTimeUnit;
+    protected boolean updateInterval(long creationInterval, TimeUnit creationIntervalTimeUnit) {
+        if (this.creationInterval != creationInterval || !this.creationIntervalTimeUnit.equals(creationIntervalTimeUnit)) {
+            this.creationInterval = creationInterval;
+            this.creationIntervalTimeUnit = creationIntervalTimeUnit;
             update();
             return true;
         }
         return false;
     }
 
-    protected boolean addNewValues(List<Field> fs, long captureTimeInMillis) {
+    protected boolean addNewValues(List<Field> fs, long creationTimestampInMillis, int creationPrecisionInNano, long acquisitionTimestampInMillis) {
         boolean isUpdated = false;
         synchronized (fields) {
             for (Field field : getConcurrentFields()) {
@@ -128,8 +139,10 @@ public abstract class VirtualSensor extends Model {
         }
 
         if (isUpdated) {
-            this.timestampInMillis = captureTimeInMillis;
-            createRevision(getConcurrentFields(), timestampInMillis);
+            this.creationTimestampInMillis = creationTimestampInMillis;
+            this.creationPrecisionInNano = creationPrecisionInNano;
+            this.acquisitionTimestampInMillis = acquisitionTimestampInMillis;
+            this.storageTimestampInMillis = getStorageTimestamp();
             update();
         }
 
@@ -206,14 +219,13 @@ public abstract class VirtualSensor extends Model {
                 //remove fields
                 for (Field currF : oldSet) {
                     if (currF.isStored()) {
-                        currF.setLogicallyDeleted();
+                        throw new RuntimeException("You cannot delete a Field with already stored value!");
                     } else {
                         currF.setVirtualSensor(null);
                         toRemove.add(currF);
                     }
                 }
 
-                toAdd.addAll(intersectionOld);
                 toAdd.addAll(newFields);
                 //insert updated fields
                 fields.removeAll(toRemove);
@@ -226,12 +238,13 @@ public abstract class VirtualSensor extends Model {
         }
     }
 
-    private void createRevision(List<Field> fields, long timestamp) {
+    private long getStorageTimestamp() {
         if (revisions == null) {
             revisions = new ArrayList<>();
         }
-        Revision revision = new Revision(this, fields, timestamp);
+        Revision revision = new Revision(this);
         revisions.add(revision);
+        return revision.getStorageTimestampInMillis();
     }
 
     private Field getField(Field field) {
@@ -250,7 +263,7 @@ public abstract class VirtualSensor extends Model {
     }
 
     public synchronized VirtualSensorVsnTo getTransferObject() {
-        VirtualSensorVsnTo sensorVsnTo = new VirtualSensorVsnTo(id, getModelState().getState(), timestampInMillis, getLastModifiedDate(), virtualSensorType);
+        VirtualSensorVsnTo sensorVsnTo = new VirtualSensorVsnTo(id, getModelState().getState(), creationTimestampInMillis, creationPrecisionInNano, creationInterval, creationIntervalTimeUnit, acquisitionTimestampInMillis, storageTimestampInMillis, getLastModifiedDate(), virtualSensorType);
 
         for (Field field : getConcurrentFields()) {
             sensorVsnTo.addValue(field.getReferenceName(), field.getValueType(), field.getValue(), field.getUnit(), field.getSymbol());

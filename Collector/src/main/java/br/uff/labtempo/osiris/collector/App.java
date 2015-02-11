@@ -15,15 +15,26 @@
  */
 package br.uff.labtempo.osiris.collector;
 
+import br.uff.labtempo.omcp.common.utils.DateUtil;
+import java.util.Calendar;
+
 /**
  * Hello world!
  *
  */
-public class App 
-{
-    public static void main( String[] args ) throws Exception
-    {
-        Collector collector = new Collector();
-        collector.execute();
+public class App {
+
+    public static void main(String[] args) throws Exception {
+        DateUtil util = new DateUtil();
+
+        for (int i = 0; i < 2; i++) {
+            Collector collector = new Collector();
+            collector.execute();
+            //Thread.sleep(100);
+        }
+        Calendar calendar = Calendar.getInstance();
+        String date = util.generate(calendar);
+        System.out.println(date);
+        
     }
 }

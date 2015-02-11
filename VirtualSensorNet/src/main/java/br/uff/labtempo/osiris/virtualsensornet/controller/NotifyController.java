@@ -24,7 +24,7 @@ import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
 import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
 import br.uff.labtempo.omcp.common.utils.ResponseBuilder;
 import br.uff.labtempo.osiris.omcp.Controller;
-import br.uff.labtempo.osiris.thirdparty.scheduler.Scheduler;
+import br.uff.labtempo.osiris.utils.scheduling.Scheduler;
 import br.uff.labtempo.osiris.to.collector.SampleCoTo;
 import br.uff.labtempo.osiris.to.common.definitions.Path;
 import br.uff.labtempo.osiris.to.sensornet.SensorSnTo;
@@ -54,8 +54,7 @@ public class NotifyController extends Controller {
     }
 
     public NotifyController(DaoFactory factory) {
-        this.factory = factory;
-        this.announcer = new AnnouncerWrapper(null);
+        this(factory,null);
     }
 
     @Override

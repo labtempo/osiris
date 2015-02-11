@@ -15,9 +15,8 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.controller;
 
-import br.uff.labtempo.osiris.thirdparty.scheduler.SchedulerItem;
-import br.uff.labtempo.osiris.thirdparty.scheduler.SchedulingCallback;
-import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
+import br.uff.labtempo.osiris.utils.scheduling.SchedulerItem;
+import br.uff.labtempo.osiris.utils.scheduling.SchedulingCallback;
 import br.uff.labtempo.osiris.virtualsensornet.model.util.AnnouncerWrapper;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer.AnnouncerAgent;
@@ -27,7 +26,7 @@ import java.util.List;
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public class SchedulerController implements SchedulingCallback<VirtualSensor> {
+public class SchedulerController implements SchedulingCallback {
 
     private final DaoFactory factory;
     private AnnouncerAgent announcer;
@@ -43,17 +42,16 @@ public class SchedulerController implements SchedulingCallback<VirtualSensor> {
     }
 
     @Override
-    public void callback(List<? extends SchedulerItem<VirtualSensor>> items) {
+    public void callback(List<? extends SchedulerItem> items) {
         if (items != null && items.size() > 0) {
-            for (SchedulerItem<VirtualSensor> item : items) {
-                VirtualSensor sensor = item.getObject();
-                checkSensor(sensor);
+            for (SchedulerItem item : items) {
+                long sensorId = item.getObjectId();
+                checkSensor(sensorId);
             }
         }
     }
 
-    private void checkSensor(VirtualSensor sensor) {
-
+    private void checkSensor(long sensorId) {
         //check collector and network to deactivation
         /*SensorDao sensorDao = factory.getSensorDao();
          NetworkDao networkDao = factory.getNetworkDao();

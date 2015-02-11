@@ -19,10 +19,12 @@ import br.uff.labtempo.osiris.to.virtualsensornet.interfaces.IVirtualSensorVsnTo
 import br.uff.labtempo.osiris.to.common.data.ValueTo;
 import br.uff.labtempo.osiris.to.common.definitions.State;
 import br.uff.labtempo.osiris.to.common.definitions.ValueType;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -34,8 +36,12 @@ public class VirtualSensorVsnTo implements IVirtualSensorVsnTo {
 
     private String state;
 
-    private long timestampInMillis;
-
+    private long creationTimestampInMillis;
+    private int creationPrecisionInNano;
+    private long acquisitionTimestampInMillis;
+    private long storageTimestampInMillis;
+    private long creationInterval;
+    private String creationIntervalTimeUnit;
     private long lastModified;
 
     private List<Map<String, String>> values;
@@ -45,18 +51,26 @@ public class VirtualSensorVsnTo implements IVirtualSensorVsnTo {
     //helper attributes
     private transient State helperState;
     private transient Calendar helperLastModified;
+    private transient TimeUnit helperCreationIntervalTimeUnit;
     private transient VirtualSensorType helperVirtualSensorType;
     private transient List<? extends ValueTo> helperValueToList;
 
-    public VirtualSensorVsnTo(long id, State state, long captureTimestampInMillis, Calendar lastModified, VirtualSensorType sensorType) {
+    public VirtualSensorVsnTo(long id, State state, long creationTimestampInMillis, int creationPrecisionInNano, long creationInterval, TimeUnit creationIntervalTimeUnit, long acquisitionTimestampInMillis, long storageTimestampInMillis, Calendar lastModified, VirtualSensorType sensorType
+    ) {
         this.id = id;
         this.state = state.toString();
-        this.timestampInMillis = captureTimestampInMillis;
+        this.creationTimestampInMillis = creationTimestampInMillis;
+        this.creationPrecisionInNano = creationPrecisionInNano;
+        this.creationInterval = creationInterval;
+        this.creationIntervalTimeUnit = creationIntervalTimeUnit.toString();
+        this.acquisitionTimestampInMillis = acquisitionTimestampInMillis;
+        this.storageTimestampInMillis = storageTimestampInMillis;
         this.lastModified = lastModified.getTimeInMillis();
         this.sensorType = sensorType.toString();
         this.values = new ArrayList<>();
 
         this.helperState = state;
+        this.helperCreationIntervalTimeUnit = creationIntervalTimeUnit;
         this.helperLastModified = lastModified;
         this.helperVirtualSensorType = sensorType;
     }
@@ -69,14 +83,51 @@ public class VirtualSensorVsnTo implements IVirtualSensorVsnTo {
     @Override
     public State getState() {
         if (helperState == null) {
-            helperState = Enum.valueOf(State.class, state);
+            helperState = Enum.valueOf(State.class, state.toUpperCase());
         }
         return helperState;
     }
 
     @Override
-    public long getTimestampInMillis() {
-        return timestampInMillis;
+    public long getCreationTimestampInMillis() {
+        return creationTimestampInMillis;
+    }
+
+    @Override
+    public long getAcquisitionTimestampInMillis() {
+        return acquisitionTimestampInMillis;
+    }
+
+    @Override
+    public long getStorageTimestampInMillis() {
+        return storageTimestampInMillis;
+    }
+
+    @Override
+    public BigInteger getCreationTimestampInNano() {
+        BigInteger millis = BigInteger.valueOf(creationTimestampInMillis);
+        BigInteger multiplier = BigInteger.valueOf(1000000L);
+        BigInteger nano = BigInteger.valueOf(creationPrecisionInNano);
+        BigInteger creationTimestampInNano = millis.multiply(multiplier).add(nano);
+        return creationTimestampInNano;
+    }
+
+    @Override
+    public long getCreationInterval() {
+        return this.creationInterval;
+    }
+
+    @Override
+    public TimeUnit getCreationIntervalTimeUnit() {
+        if (helperCreationIntervalTimeUnit == null) {
+            helperCreationIntervalTimeUnit = Enum.valueOf(TimeUnit.class, creationIntervalTimeUnit.toUpperCase());
+        }
+        return helperCreationIntervalTimeUnit;
+    }
+
+    @Override
+    public int getCreationPrecisionInNano() {
+        return creationPrecisionInNano;
     }
 
     @Override
@@ -91,7 +142,7 @@ public class VirtualSensorVsnTo implements IVirtualSensorVsnTo {
     @Override
     public VirtualSensorType getSensorType() {
         if (helperVirtualSensorType == null) {
-            helperVirtualSensorType = Enum.valueOf(VirtualSensorType.class, sensorType);
+            helperVirtualSensorType = Enum.valueOf(VirtualSensorType.class, sensorType.toUpperCase());
         }
         return helperVirtualSensorType;
     }

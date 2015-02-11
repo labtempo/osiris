@@ -36,7 +36,7 @@ public interface INetworkSnTo {
     int getTotalCollectors();
 
     int getTotalSensors();
-    
+
     void addInfo(Map<String, String> infos);
 
     void addInfo(String infoKeyName, String infoDescription);
@@ -44,7 +44,5 @@ public interface INetworkSnTo {
     List<? extends InfoTo> getInfoTo();
 
     Map<String, String> getInfo();
-    
-    
 
 }

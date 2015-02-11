@@ -22,29 +22,21 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public class DataManager implements AutoCloseable {
+public class DataManager {
 
-    private EntityManager EM;
+    private final JpaDaoFactory factory;
 
-    public DataManager(EntityManager EM) {
-        this.EM = EM;
+    public DataManager(JpaDaoFactory factory) {
+        this.factory = factory;
     }
-
-    @Override
-    public void close() throws Exception {
-        if (EM.isOpen()) {
-            EM.close();
-        }
-    }
-
+   
     public void save(Object o) {
+        EntityManager EM = getEntityManager();
         EntityTransaction et = EM.getTransaction();
         et.begin();
         EM.persist(o);
@@ -52,66 +44,45 @@ public class DataManager implements AutoCloseable {
     }
 
     public <T> T get(Class<T> entityType, Object key) {
+        EntityManager EM = getEntityManager();
         return EM.find(entityType, key);
     }
 
     public <T> T getReference(Class<T> entityType, Object key) {
+        EntityManager EM = getEntityManager();
         return EM.getReference(entityType, key);
     }
 
     public void update(Object o) {
+        EntityManager EM = getEntityManager();
         EntityTransaction et = EM.getTransaction();
         et.begin();
         EM.merge(o);
         et.commit();
     }
-
+    
     public void delete(Object o) {
+        EntityManager EM = getEntityManager();
         EntityTransaction et = EM.getTransaction();
         et.begin();
         EM.remove(o);
         et.commit();
-    }
-
-    public <T> List<T> getNull(Class<T> entityType, String field) {
-        CriteriaBuilder cb = EM.getCriteriaBuilder();
-        CriteriaQuery<T> c = cb.createQuery(entityType);
-        Root<T> item = c.from(entityType);
-        c.select(item);
-
-        Predicate predicate = cb.isNull(item.get(field));
-        c.where(predicate);
-
-        TypedQuery<T> query = EM.createQuery(c);
-        List<T> result = query.getResultList();
-        return result;
-    }
-
-    public <T> List<T> getNotNull(Class<T> entityType, String field) {
-        CriteriaBuilder cb = EM.getCriteriaBuilder();
-
-        CriteriaQuery<T> c = cb.createQuery(entityType);
-        Root<T> item = c.from(entityType);
-        c.select(item);
-        Predicate predicate = cb.isNotNull(item.get(field));
-        c.where(predicate);
-
-        TypedQuery<T> query = EM.createQuery(c);
-        List<T> result = query.getResultList();
-        return result;
-    }
+    }   
 
     public CriteriaBuilder getCriteriaBuilder() {
+        EntityManager EM = getEntityManager();
         return EM.getCriteriaBuilder();
     }
 
     public <T> List<T> getQuery(CriteriaQuery<T> query) {
+        EntityManager EM = getEntityManager();
         TypedQuery<T> tquery = EM.createQuery(query);
         List<T> result = tquery.getResultList();
         return result;
     }
 
     public <T> T getQuerySingle(CriteriaQuery<T> query) {
+        EntityManager EM = getEntityManager();
         TypedQuery<T> tquery = EM.createQuery(query);
         List<T> list = tquery.getResultList();
         if (list == null || list.isEmpty()) {
@@ -122,17 +93,11 @@ public class DataManager implements AutoCloseable {
     }
 
     public Query getQquery(String sql, Class klass) {
+        EntityManager EM = getEntityManager();
         return EM.createNativeQuery(sql, klass);
     }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            EM.close();
-        } catch (Exception e) {
-        } finally {
-            super.finalize();
-        }
+    
+    private EntityManager getEntityManager(){
+        return factory.getEntityManager();
     }
-
 }

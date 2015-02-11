@@ -15,7 +15,7 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.thirdparty.scheduler;
 
-import br.uff.labtempo.osiris.thirdparty.scheduler.SchedulerItem;
+import br.uff.labtempo.osiris.utils.scheduling.SchedulerItem;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
 import java.io.Serializable;
 import java.util.Calendar;
@@ -34,35 +34,30 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "SCHEDULING_TABLE")
-public class ModelSchedulerItem implements Serializable, SchedulerItem<VirtualSensor> {
+public class ModelSchedulerItem implements Serializable, SchedulerItem {
 
     @Id
-    @Column(name = "object_id")
     long id;
 
-    @MapsId
-    @OneToOne
-    @JoinColumn(name = "object_id")
-    private VirtualSensor virtualSensor;
+    private long virtualSensorId;
 
     private long timeToNextUpdate;
+    private long intervalInMillis;
 
     public ModelSchedulerItem() {
     }
 
     public ModelSchedulerItem(VirtualSensor virtualSensor) {
-        this.virtualSensor = virtualSensor;
+        this.virtualSensorId = virtualSensor.getId();
 
         Calendar lastModifiedDate = virtualSensor.getLastModifiedDate();
-        long intervalInMillis = TimeUnit.MILLISECONDS.convert(virtualSensor.getInterval(), virtualSensor.getIntervalTimeUnit());
-        long nextTimeToUpdate = virtualSensor.getTimestampInMillis() + intervalInMillis;
-
-        this.timeToNextUpdate = nextTimeToUpdate;
+        this.intervalInMillis = TimeUnit.MILLISECONDS.convert(virtualSensor.getCreationInterval(), virtualSensor.getCreationIntervalTimeUnit());
+        this.timeToNextUpdate = virtualSensor.getCreationTimestampInMillis() + intervalInMillis;
     }
 
     @Override
-    public VirtualSensor getObject() {
-        return virtualSensor;
+    public long getObjectId() {
+        return virtualSensorId;
     }
 
     @Override
@@ -85,8 +80,7 @@ public class ModelSchedulerItem implements Serializable, SchedulerItem<VirtualSe
 
     @Override
     public long getIntervalInMillis() {
-        long intervalInMillis = TimeUnit.MILLISECONDS.convert(virtualSensor.getInterval(), virtualSensor.getIntervalTimeUnit());
-        return intervalInMillis / 8;
+        return intervalInMillis / 2;
     }
 
 }

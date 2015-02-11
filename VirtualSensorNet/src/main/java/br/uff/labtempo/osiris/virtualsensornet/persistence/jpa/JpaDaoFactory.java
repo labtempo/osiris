@@ -31,10 +31,8 @@ import javax.persistence.EntityManagerFactory;
 public class JpaDaoFactory implements DaoFactory, AutoCloseable {
 
     private static JpaDaoFactory instance;
-
     private EntityManagerFactory emf;
-
-    public static final ThreadLocal<EntityManager> LOCAL = new ThreadLocal();
+    private ThreadLocal<EntityManager> entityManagerThreadLocal = new ThreadLocal();
 
     private JpaDaoFactory(EntityManagerFactory emf) throws Exception {
         try {
@@ -68,6 +66,11 @@ public class JpaDaoFactory implements DaoFactory, AutoCloseable {
     }
 
     @Override
+    public VirtualSensorDao getVirtualSensorDao() {
+        return new VirtualSensorJpa(getDataManager());
+    }
+
+    @Override
     public LinkDao getLinkDao() {
         return new LinkJpa(getDataManager());
     }
@@ -87,31 +90,16 @@ public class JpaDaoFactory implements DaoFactory, AutoCloseable {
         return new SchedulerJpa(getDataManager());
     }
 
-    @Override
-    public VirtualSensorDao getVirtualSensorDao() {
-        return new VirtualSensorJpa(getDataManager());
-    }
-
     private DataManager getDataManager() {
-        DataManager dataManager = new DataManager(getEntityManager());
-        return dataManager;
+        return new DataManager(this);
     }
 
-    private EntityManager getEntityManager() {
-//        EntityManager em = LOCAL.get();
-//        if (em == null) {
-//            em = emf.createEntityManager();
-//            LOCAL.set(em);
-//        }
-        return emf.createEntityManager();
-    }
-
-    public void flush() {
-        EntityManager em = LOCAL.get();
-        if (em != null) {
-            em.close();
+    protected EntityManager getEntityManager() {
+        EntityManager em = entityManagerThreadLocal.get();
+        if (em == null) {
+            em = emf.createEntityManager();
+            entityManagerThreadLocal.set(em);
         }
-        LOCAL.remove();
+        return em;
     }
-
 }

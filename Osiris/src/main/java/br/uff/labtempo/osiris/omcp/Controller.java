@@ -49,6 +49,9 @@ public abstract class Controller implements RequestHandler {
     @Override
     public void setContext(Context context) {
         this.context = context;
+        if (nextController != null) {
+            nextController.setContext(context);
+        }
     }
 
     public Context getContext() {

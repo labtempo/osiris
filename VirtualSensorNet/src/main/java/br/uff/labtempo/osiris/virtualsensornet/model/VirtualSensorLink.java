@@ -66,22 +66,32 @@ public class VirtualSensorLink extends VirtualSensor {
         super.deactivate();
     }
 
-    public boolean updateVirtualSensorDataFromCollectorData(SensorCoToWrapper sensorWrapper) {
+    public boolean updateVirtualSensorDataFromCollectorData(SensorCoToWrapper sensorWrapper) {       
+        //Updating is not realized if sensorWrapper.getCreationTimestampInMillis() is lower or equal than super.getCreationTimestampInMillis()
+        if (getCreationTimestampInMillis() > sensorWrapper.getCaptureTimestampInMillis()) {
+            return false;
+        }
+        if (getCreationTimestampInMillis() == sensorWrapper.getCaptureTimestampInMillis()
+                && getCreationPrecisionInNano() >= sensorWrapper.getCapturePrecisionInNano()) {
+            return false;
+        }
+        if (!isSource(sensorWrapper)) {
+            return false;
+        }        
+        
         boolean isUpdated = false;
-        if (isSource(sensorWrapper)) {
-            List<Field> sensorCoFields = sensorWrapper.getFields();
-            if (updateInterval(sensorWrapper.getInterval(), sensorWrapper.getIntervalTimeUnit())) {
-                isUpdated = true;
-            }
-            if (addNewValues(sensorCoFields, sensorWrapper.getTimestampInMillis())) {
-                isUpdated = true;
-            }
+        List<Field> sensorCoFields = sensorWrapper.getFields();
+        if (updateInterval(sensorWrapper.getCaptureInterval(), sensorWrapper.getCaptureIntervalTimeUnit())) {
+            isUpdated = true;
+        }
+        if (addNewValues(sensorCoFields, sensorWrapper.getCaptureTimestampInMillis(), sensorWrapper.getCapturePrecisionInNano(), sensorWrapper.getAcquisitionTimestampInMillis())) {
+            isUpdated = true;
         }
         return isUpdated;
     }
 
     @Override
-    public synchronized boolean upgradeFields(List<Field> newFields) {        
+    public synchronized boolean upgradeFields(List<Field> newFields) {
         return super.upgradeFields(newFields);
     }
 
@@ -134,7 +144,7 @@ public class VirtualSensorLink extends VirtualSensor {
         return true;
     }
 
-    public LinkVsnTo getLinkTransferObject() {        
+    public LinkVsnTo getLinkTransferObject() {
         LinkVsnTo linkVsnTo = new LinkVsnTo(getId(), sensorId, collectorId, networkId);
         List<Field> fields = getFields();
         for (Field field : fields) {

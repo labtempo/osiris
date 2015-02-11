@@ -66,7 +66,7 @@ public class SensorNetSensorController {
         labelModel.setText("micaz");
         
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(sensor.getTimestamp());        
+        calendar.setTimeInMillis(sensor.getAcquisitionTimestampInMillis());        
         labelDate.setText(generate(calendar));
         
         

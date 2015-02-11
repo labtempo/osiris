@@ -15,7 +15,7 @@
  */
 package br.uff.labtempo.osiris.sensornet.persistence.jpa;
 
-import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
+import br.uff.labtempo.osiris.sensornet.model.Network;
 import br.uff.labtempo.osiris.sensornet.persistence.NetworkDao;
 import java.util.List;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -36,7 +36,7 @@ public class NetworkJpa implements NetworkDao {
 
     @Override
     public Network get(Network o) {
-        return get(o.getId());
+        return data.getReference(Network.class, o);
     }
 
     @Override

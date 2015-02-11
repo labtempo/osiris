@@ -58,12 +58,12 @@ public class DataTypeController extends Controller {
                 case POST:
                     DataTypeVsnTo to = request.getContent(DataTypeVsnTo.class);
                     long id = create(to);
-                    // omcp://virtualsensornet/datatype/{id}
-                    String uri = getContext().getHost() + Path.NAMING_RESOURCE_DATATYPE + Path.SEPARATOR + String.valueOf(id);
+                    // /datatype/{id}
+                    String uri = Path.SEPARATOR.toString() +Path.NAMING_RESOURCE_DATATYPE.toString() + Path.SEPARATOR + String.valueOf(id);
                     response = new ResponseBuilder().created(uri).build();
                     return response;
                 default:
-                    throw new NotImplementedException("Action not implemented");
+                    throw new MethodNotAllowedException("Action not allowed for this resource!");
             }
         } else if (match(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_DATATYPE_BY_ID.toString())) {
             Map<String, String> map = extract(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_DATATYPE_BY_ID.toString());
@@ -86,7 +86,7 @@ public class DataTypeController extends Controller {
                     response = new ResponseBuilder().ok().build();
                     return response;
                 default:
-                    throw new NotImplementedException("Action not implemented");
+                    throw new MethodNotAllowedException("Action not allowed for this resource!");
             }
         }
         return null;
@@ -109,11 +109,11 @@ public class DataTypeController extends Controller {
     }
 
     public List<DataTypeVsnTo> getAll() throws InternalServerErrorException {
-        DataTypeDao dDao;
+        DataTypeDao dDao = null;
         try {
             dDao = factory.getDataTypeDao();
         } catch (Exception e) {
-            throw new InternalServerErrorException("Data query error!");
+            new InternalServerErrorException("Data query error!");
         }
 
         List<DataType> dataTypes = dDao.getAll();

@@ -15,8 +15,21 @@
  */
 package br.uff.labtempo.osiris.sensornet;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Properties;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
 /**
  * Hello world!
@@ -27,8 +40,9 @@ public class App {
     private static Bootstrap boot;
 
     public static void main(String[] args) throws Exception {
+        Properties properties = readConfig();
         shutdownHook();
-        boot = new Bootstrap();
+        boot = new Bootstrap(properties);
         boot.start();
     }
 
@@ -70,5 +84,52 @@ public class App {
                 System.out.println("ShutdownHook end");
             }
         });
+    }
+
+    private static Properties readConfig() throws FileNotFoundException {
+        String name = "config.properties";
+        File base;
+        try {
+            base = new File(App.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile();
+            File configFile = new File(base, name);
+            if (configFile.exists()) {
+                FileInputStream fileInput = new FileInputStream(configFile);
+                Properties properties = new Properties();
+                properties.load(fileInput);
+                fileInput.close();
+
+                return properties;
+            } else {
+                Properties properties = new Properties();
+                properties.setProperty("rabbitmq.server.ip", "192.168.0.7");
+                properties.setProperty("rabbitmq.user.name", "admin");
+                properties.setProperty("rabbitmq.user.pass", "admin");
+                properties.setProperty("postgres.server.ip", "192.168.0.7");
+                properties.setProperty("postgres.server.port", "5432");
+                properties.setProperty("postgres.user.name", "postgres");
+                properties.setProperty("postgres.user.pass", "postgres");
+                properties.setProperty("postgres.server.db", "OsirisSN");
+
+                FileOutputStream fileOut = new FileOutputStream(configFile);
+
+                Properties tmp = new Properties() {
+                    @Override
+                    public synchronized Enumeration<Object> keys() {
+                        return Collections.enumeration(new TreeSet<Object>(super.keySet()));
+                    }
+                };
+
+                tmp.putAll(properties);
+                tmp.store(fileOut, "Osiris Module Config File");
+                fileOut.close();
+
+                throw new RuntimeException("You should configure " + name + " on JAR's folder");
+            }
+        } catch (URISyntaxException ex) {
+            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        throw new RuntimeException("Erro to open file " + name + "!");
     }
 }

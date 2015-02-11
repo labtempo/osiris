@@ -26,6 +26,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.script.ScriptException;
+import org.hibernate.annotations.Where;
 
 /**
  *
@@ -48,8 +49,6 @@ public class Field implements Serializable {
 
     @ManyToOne
     private VirtualSensor virtualSensor;
-
-    private boolean isDeleted;
 
     private boolean isStored;
 
@@ -144,18 +143,6 @@ public class Field implements Serializable {
         return isStored;
     }
 
-    public boolean isIsDeleted() {
-        return isDeleted;
-    }
-
-    public void setLogicallyDeleted() {
-        isDeleted = true;
-    }
-
-    public void setLogicallyDeleted(boolean deleted) {
-        isDeleted = deleted;
-    }
-
     public void setReferenceName(String referenceName) {
         this.referenceName = referenceName;
     }
@@ -163,13 +150,13 @@ public class Field implements Serializable {
     public void setDataType(DataType dataType) {
         this.dataType = dataType;
     }
-    
+
     public void setConverter(DataConverter converter) {
-        if(converter == null){
+        if (converter == null) {
             converter = null;
             return;
         }
-        
+
         if (converter.getOutputDataType().equals(dataType)) {
             this.converter = converter;
         } else {

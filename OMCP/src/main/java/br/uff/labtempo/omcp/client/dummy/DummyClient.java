@@ -18,9 +18,9 @@ package br.uff.labtempo.omcp.client.dummy;
 import br.uff.labtempo.omcp.client.OmcpClient;
 import br.uff.labtempo.omcp.common.Request;
 import br.uff.labtempo.omcp.common.Response;
-import br.uff.labtempo.omcp.common.exceptions.BadResponseException;
-import br.uff.labtempo.omcp.common.exceptions.RequestException;
-import br.uff.labtempo.omcp.common.exceptions.UnreachableModuleException;
+import br.uff.labtempo.omcp.common.exceptions.client.BadResponseException;
+import br.uff.labtempo.omcp.common.exceptions.client.RequestException;
+import br.uff.labtempo.omcp.common.exceptions.client.UnreachableModuleException;
 import br.uff.labtempo.omcp.common.utils.RequestBuilder;
 import br.uff.labtempo.omcp.common.utils.RequestPacket;
 

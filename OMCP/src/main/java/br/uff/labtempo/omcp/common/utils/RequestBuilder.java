@@ -18,7 +18,7 @@ package br.uff.labtempo.omcp.common.utils;
 import br.uff.labtempo.omcp.common.RequestMethod;
 import static br.uff.labtempo.omcp.common.RequestMethod.*;
 import br.uff.labtempo.omcp.common.Request;
-import br.uff.labtempo.omcp.common.exceptions.RequestException;
+import br.uff.labtempo.omcp.common.exceptions.client.RequestException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Calendar;

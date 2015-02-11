@@ -20,7 +20,6 @@ import br.uff.labtempo.omcp.common.exceptions.InternalServerErrorException;
 import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
 import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
 import br.uff.labtempo.osiris.to.collector.SampleCoTo;
-import br.uff.labtempo.osiris.to.common.data.FieldTo;
 import br.uff.labtempo.osiris.to.common.data.ValueTo;
 import br.uff.labtempo.osiris.to.common.definitions.State;
 import br.uff.labtempo.osiris.to.common.definitions.ValueType;
@@ -38,6 +37,7 @@ import br.uff.labtempo.osiris.virtualsensornet.usecase.server.Bootstrap;
 import br.uff.labtempo.osiris.virtualsensornet.usecase.server.CollectorDataBuilder;
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -50,14 +50,14 @@ import org.junit.runners.MethodSorters;
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+//@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class VirtualSensorTest {
 
     private static Bootstrap bootstrap;
     private static VirtualSensorController controller;
     private static VirtualSensorLinkController linkcontroller;
     private static NotifyController notifycontroller;
-     private static long dt1;
+    private static long dt1;
     private static long dt2;
     private static long dt3;
     private static long cc1;
@@ -94,7 +94,7 @@ public class VirtualSensorTest {
 
     @Test(expected = MethodNotAllowedException.class)
     public void testCreateVirtualSensor_Invalid_ShouldThrowException() throws BadRequestException, NotFoundException, InternalServerErrorException, MethodNotAllowedException {
-        VirtualSensorVsnTo to = new VirtualSensorVsnTo(5, State.NEW, System.currentTimeMillis(), Calendar.getInstance(), VirtualSensorType.LINK);
+        VirtualSensorVsnTo to = new VirtualSensorVsnTo(5, State.NEW, System.currentTimeMillis(), 0, 0, TimeUnit.MILLISECONDS, System.currentTimeMillis(), System.currentTimeMillis(), Calendar.getInstance(), VirtualSensorType.LINK);
         controller.create(to);
     }
 
@@ -149,7 +149,7 @@ public class VirtualSensorTest {
 
         Assert.assertEquals("celsius", to2.getUnit());
         Assert.assertEquals("fahrenheit", to1.getUnit());
-        
+
         Assert.assertTrue(Double.parseDouble(to2.getValue()) > 0);
         Assert.assertTrue(Double.parseDouble(to1.getValue()) > 0);
 
@@ -168,7 +168,7 @@ public class VirtualSensorTest {
 
         long id = linkcontroller.create(to);
 
-        VirtualSensorVsnTo to1 = new VirtualSensorVsnTo(5, State.NEW, System.currentTimeMillis(), Calendar.getInstance(), VirtualSensorType.LINK);
+        VirtualSensorVsnTo to1 = new VirtualSensorVsnTo(5, State.NEW, System.currentTimeMillis(), 0, 0, TimeUnit.MILLISECONDS, System.currentTimeMillis(), System.currentTimeMillis(), Calendar.getInstance(), VirtualSensorType.LINK);
 
         controller.update(id, to1);
     }

@@ -27,23 +27,23 @@ import br.uff.labtempo.osiris.to.common.definitions.ValueType;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class SensorSnTo extends SensorToBase implements ISensorSnTo {
-
     private final long lastModified;
     private final String networkId;
     private final String collectorId;
+    private final long storageTimestampInMillis;
 
     //helper attributes
     private transient Calendar helperLastModified;
 
-    public SensorSnTo(String id, State state, long captureTimestamp, TimeUnit captureTimestampUnit,long timeOfCollectionInMillis, Calendar lastModifiedDate, String networkId, String collectorId) {
-        super(id, state, captureTimestamp, captureTimestampUnit, timeOfCollectionInMillis);
+    public SensorSnTo(String id, State state, long captureTimestampInMillis, int capturePrecisionInNano, long acquisitionTimestampInMillis, long storageTimestampInMillis, Calendar lastModifiedDate, String networkId, String collectorId) {
+        super(id, state, captureTimestampInMillis, capturePrecisionInNano, acquisitionTimestampInMillis);
+        this.storageTimestampInMillis = storageTimestampInMillis;
         this.lastModified = lastModifiedDate.getTimeInMillis();
         this.networkId = networkId;
         this.collectorId = collectorId;
@@ -59,6 +59,11 @@ public class SensorSnTo extends SensorToBase implements ISensorSnTo {
     @Override
     public String getCollectorId() {
         return collectorId;
+    }
+
+    @Override
+    public long getStorageTimestampInMillis() {
+        return storageTimestampInMillis;
     }
 
     @Override

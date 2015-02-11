@@ -18,12 +18,12 @@ package br.uff.labtempo.osiris.sensornet.model.util;
 import br.uff.labtempo.osiris.to.collector.CollectorCoTo;
 import br.uff.labtempo.osiris.to.collector.NetworkCoTo;
 import br.uff.labtempo.osiris.to.collector.SensorCoTo;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Collector;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Consumable;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Rule;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Sensor;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Value;
+import br.uff.labtempo.osiris.sensornet.model.Collector;
+import br.uff.labtempo.osiris.sensornet.model.Consumable;
+import br.uff.labtempo.osiris.sensornet.model.Network;
+import br.uff.labtempo.osiris.sensornet.model.Rule;
+import br.uff.labtempo.osiris.sensornet.model.Sensor;
+import br.uff.labtempo.osiris.sensornet.model.Field;
 import br.uff.labtempo.osiris.to.common.data.ConsumableRuleTo;
 import br.uff.labtempo.osiris.to.common.data.ConsumableTo;
 import br.uff.labtempo.osiris.to.common.definitions.LogicalOperator;
@@ -45,13 +45,13 @@ import java.util.concurrent.TimeUnit;
 public class ModelUtil {
 
     public SensorSnTo toTransferObject(Sensor sensor) {
-        SensorSnTo sensorSnTo = new SensorSnTo(sensor.getId(), sensor.getModelState().getState(), sensor.getTimestamp(), sensor.getTimestampUnit(), sensor.getTimeOfCollectionInMillis(), sensor.getLastModifiedDate(), sensor.getNetwork().getId(), sensor.getCollector().getId());
+        SensorSnTo sensorSnTo = new SensorSnTo( sensor.getId(), sensor.getModelState().getState(), sensor.getCaptureTimestampInMillis(), sensor.getCapturePrecisionInNano(), sensor.getAcquisitionTimestampInMillis(), sensor.getStorageTimestampInMillis(), sensor.getLastModifiedDate(), sensor.getNetwork().getId(), sensor.getCollector().getId());
 
         for (Consumable consumable : sensor.getConsumables()) {
             sensorSnTo.addConsumable(consumable.getName(), consumable.getValue());
         }
 
-        for (Value value : sensor.getValues()) {
+        for (Field value : sensor.getFields()) {
             sensorSnTo.addValue(value.getName(), value.getType(), value.getValue(), value.getUnit(), value.getSymbol());
         }
 
@@ -62,43 +62,63 @@ public class ModelUtil {
 
     public Sensor fromTransferObject(SensorCoTo sensorTo) {
         String id = sensorTo.getId();
-        long timestamp = sensorTo.getTimestamp();
-        TimeUnit timestampUnit = sensorTo.getTimestampUnit();
-        long timeCollectionInMillis = sensorTo.getTimeOfCollectionInMillis();
-        List<Value> values = creatValueListFromMapList(sensorTo.getValuesTo());
+        long captureTimestampInMillis = sensorTo.getCaptureTimestampInMillis();
+        int capturePrecisionInNano = sensorTo.getCapturePrecisionInNano();
+        long acquisitionTimestampInMillis = sensorTo.getAcquisitionTimestampInMillis();
+        List<Field> values = creatFieldListFromMapList(sensorTo.getValuesTo());
         List<Consumable> consumables = createConsumable(sensorTo.getConsumablesTo(), sensorTo.getConsumableRulesTo());
         Map<String, String> info = sensorTo.getInfo();
 
-        return new Sensor(id, timestamp, timestampUnit, timeCollectionInMillis, values, consumables, info);
+        return new Sensor(id, captureTimestampInMillis, capturePrecisionInNano, acquisitionTimestampInMillis, values, consumables, info);
     }
 
     public boolean updateFromTransferObject(Sensor object, SensorCoTo to) {
-        boolean isUpdated = false;
         //same id and greater capture time of sample 
-        if (object.getId().equals(to.getId()) && object.getTimestamp() < to.getTimestamp()) {
-            //update info
-            if (to.getInfo() != null && !object.getInfo().equals(to.getInfo())) {
-                object.setInfo(to.getInfo());
-                isUpdated = true;
-            }
-            //update values
-            if (to.getValuesTo() != null) {
-                object.setValues(creatValueListFromMapList(to.getValuesTo()));
-                object.setTimestamp(to.getTimestamp());
-                object.setTimestampUnit(to.getTimestampUnit());
-                object.setTimeOfCollectionInMillis(to.getTimeOfCollectionInMillis());
-                isUpdated = true;
-            }
-            //update consumables
-            if (updateSensorConsumables(object, to)) {
-                isUpdated = true;
-            }
+        if (!object.getId().equals(to.getId())) {
+            return false;
         }
+        if (object.getCaptureTimestampInMillis() > to.getCaptureTimestampInMillis()) {
+            return false;
+        }
+        if (object.getCaptureTimestampInMillis() == to.getCaptureTimestampInMillis()
+                && object.getCapturePrecisionInNano() >= to.getCapturePrecisionInNano()) {
+            return false;
+        }
+
+        boolean isUpdated = true;
+        //update info
+        if (to.getInfo() != null && !object.getInfo().equals(to.getInfo())) {
+            object.setInfo(to.getInfo());
+            isUpdated = true;
+        }
+        //update values
+        if (to.getValuesTo() != null) {
+            updateFields(object.getFields(), to.getValuesTo());
+            object.setCaptureTimestampInMillis(to.getCaptureTimestampInMillis(), to.getCapturePrecisionInNano());
+            object.setAcquisitionTimestampInMillis(to.getAcquisitionTimestampInMillis());
+            isUpdated = true;
+        }
+        //update consumables
+        if (updateSensorConsumables(object, to)) {
+            isUpdated = true;
+        }
+
         return isUpdated;
     }
 
+    private void updateFields(List<Field> fields, List<? extends ValueTo> valuesTo) {
+        for (Field field : fields) {
+            for (ValueTo valueTo : valuesTo) {
+                if (field.getName().equalsIgnoreCase(valueTo.getName())) {
+                    field.setValue(valueTo.getValue());
+                    break;
+                }
+            }
+        }
+    }
+
     public CollectorSnTo toTransferObject(Collector collector) {
-        String id = collector.getId();
+        String name = collector.getId();
         State state = collector.getModelState().getState();
         long interval = collector.getInterval();
         TimeUnit timeUnit = collector.getTimeUnit();
@@ -107,7 +127,7 @@ public class ModelUtil {
         int totalSensors = collector.getSensors().length;
         Map<String, String> info = collector.getInfo();
 
-        CollectorSnTo collectorSnTo = new CollectorSnTo(id, state, interval, timeUnit, lastModified, networkId, totalSensors);
+        CollectorSnTo collectorSnTo = new CollectorSnTo(name, state, interval, timeUnit, lastModified, networkId, totalSensors);
         collectorSnTo.addInfo(info);
 
         return collectorSnTo;
@@ -115,7 +135,7 @@ public class ModelUtil {
     }
 
     public Collector fromTransferObject(CollectorCoTo collectorTo) {
-        return new Collector(collectorTo.getId(), collectorTo.getInterval(), collectorTo.getTimeUnit(), collectorTo.getInfo());
+        return new Collector(collectorTo.getId(), collectorTo.getCaptureInterval(), collectorTo.getCaptureIntervalTimeUnit(), collectorTo.getInfo());
     }
 
     public boolean updateFromTransferObject(Collector object, CollectorCoTo to) {
@@ -125,19 +145,23 @@ public class ModelUtil {
                 object.setInfo(to.getInfo());
                 isUpdated = true;
             }
+            if (object.getInterval() != to.getCaptureInterval() || object.getTimeUnit() != to.getCaptureIntervalTimeUnit()) {
+                object.setInterval(to.getCaptureInterval(), to.getCaptureIntervalTimeUnit());
+                isUpdated = true;
+            }
         }
         return isUpdated;
     }
 
     public NetworkSnTo toTransferObject(Network network) {
-        String id = network.getId();
+        String name = network.getId();
         State state = network.getModelState().getState();
         Calendar lastModified = network.getLastModifiedDate();
         int totalCollectors = network.getCollectors().length;
         int totalSensors = network.getSensors().length;
         Map<String, String> info = network.getInfo();
 
-        NetworkSnTo networkSnTo = new NetworkSnTo(id, state, lastModified, totalCollectors, totalSensors);
+        NetworkSnTo networkSnTo = new NetworkSnTo(name, state, lastModified, totalCollectors, totalSensors);
         networkSnTo.addInfo(info);
 
         return networkSnTo;
@@ -158,16 +182,16 @@ public class ModelUtil {
         return isUpdated;
     }
 
-    private List<Value> creatValueListFromMapList(List<? extends ValueTo> valuesTo) {
-        List<Value> values = new ArrayList<>();
+    private List<Field> creatFieldListFromMapList(List<? extends ValueTo> valuesTo) {
+        List<Field> fields = new ArrayList<>();
 
         for (ValueTo valueTo : valuesTo) {
             if (valueTo != null) {
-                values.add(new Value(valueTo.getName(), valueTo.getType(), valueTo.getValue(), valueTo.getUnit(), valueTo.getSymbol()));
+                fields.add(new Field(valueTo.getName(), valueTo.getType(), valueTo.getValue(), valueTo.getUnit(), valueTo.getSymbol()));
             }
         }
 
-        return values;
+        return fields;
     }
 
     public List<Consumable> createConsumable(List<? extends ConsumableTo> consumablesTo, List<? extends ConsumableRuleTo> consumableRulesTo) {

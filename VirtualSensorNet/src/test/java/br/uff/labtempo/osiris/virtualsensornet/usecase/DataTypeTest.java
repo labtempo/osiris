@@ -40,7 +40,7 @@ import org.junit.runners.MethodSorters;
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+//@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DataTypeTest {
 
     private static Bootstrap bootstrap;
@@ -96,11 +96,12 @@ public class DataTypeTest {
 
     @Test
     public void TestCreateDataType_Valid_ShouldPass() throws BadRequestException, InternalServerErrorException {
-        List<DataTypeVsnTo> vsnTos = controller.getAll();
         DataTypeVsnTo to = new DataTypeVsnTo("test", ValueType.NUMBER, "temperature", "°C");
+        List<DataTypeVsnTo> vsnTos = controller.getAll();
         long id = controller.create(to);
-        long expectedId = vsnTos.size() + 1;
-        Assert.assertEquals(expectedId, id);
+        long expectedSize = vsnTos.size() + 1;
+        vsnTos = controller.getAll();
+        Assert.assertEquals(expectedSize, vsnTos.size());
     }
 
     @Test
@@ -127,20 +128,20 @@ public class DataTypeTest {
         long dt1 = controller.create(new DataTypeVsnTo("tempCelsius", ValueType.NUMBER, "celsius", "°C"));
         long dt2 = controller.create(new DataTypeVsnTo("tempFahrenheit", ValueType.NUMBER, "fahrenheit ", "°F"));
         long cc1 = convertercontroller.create(new ConverterVsnTo("celsiusToFahrenheit", "value = value * 9/5 + 32;", dt1, dt2));
-        
+
         LinkVsnTo to = new LinkVsnTo("sensor", "collector", "network");
         to.createField("temperature", dt2, cc1);
         to.createField("temperature", dt1);
         linkcontroller.create(to);
-        
+
         to = new LinkVsnTo("sensor", "collector", "network");
         to.createField("temperature", dt2, cc1);
         to.createField("temperature", dt1);
         linkcontroller.create(to);
-        
+
         DataTypeVsnTo to1 = controller.get(dt1);
         DataTypeVsnTo to2 = controller.get(dt2);
-        
+
         long expectedAmountTo1 = 4;
         long expectedAmountTo2 = 2;
         Assert.assertEquals(expectedAmountTo1, to1.getUsedBy());

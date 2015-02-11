@@ -66,7 +66,7 @@ public class DataTypeVsnTo implements IDataTypeVsnTo {
     @Override
     public ValueType getType() {
         if (helperValueType == null) {
-            helperValueType = Enum.valueOf(ValueType.class, type);
+            helperValueType = Enum.valueOf(ValueType.class, type.toUpperCase());
         }
         return helperValueType;
     }

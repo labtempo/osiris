@@ -56,7 +56,7 @@ public class VirtualSensorController extends Controller {
                 case POST:
                     create(null);
                 default:
-                    throw new NotImplementedException("Action not implemented");
+                    throw new MethodNotAllowedException("Action not allowed for this resource!");
             }
         } else if (match(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_VIRTUALSENSOR_BY_ID.toString())) {
             Map<String, String> map = extract(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_VIRTUALSENSOR_BY_ID.toString());
@@ -72,7 +72,7 @@ public class VirtualSensorController extends Controller {
                 case DELETE:
                     delete(0);
                 default:
-                    throw new NotImplementedException("Action not implemented");
+                    throw new MethodNotAllowedException("Action not allowed for this resource!");
             }
         }
         return null;

@@ -38,13 +38,15 @@ public class SensorCoToWrapper {
     private final String id;
     private final String networkId;
     private final String collectorId;
-    private final long timestampInMillis;
+    private final long captureTimestampInMillis;
+    private final int capturePrecisionInNano;
+    private final long acquisitionTimestampInMillis;
 
     private List<Field> fields;
     private Set<String> fieldNames;
 
-    private final long interval;
-    private final TimeUnit intervalTimeUnit;
+    private final long captureInterval;
+    private final TimeUnit captureIntervalTimeUnit;
 
     public SensorCoToWrapper(SampleCoTo sample) {
         SensorCoTo sensor = sample.getSensor();
@@ -55,10 +57,11 @@ public class SensorCoToWrapper {
         this.collectorId = collector.getId().trim();
         this.networkId = network.getId().trim();
 
-        this.timestampInMillis = TimeUnit.MILLISECONDS.convert(sensor.getTimestamp(), sensor.getTimestampUnit());
-        
-        this.interval = collector.getInterval();
-        this.intervalTimeUnit = collector.getTimeUnit();
+        this.captureTimestampInMillis = sensor.getCaptureTimestampInMillis();
+        this.capturePrecisionInNano = sensor.getCapturePrecisionInNano();
+        this.acquisitionTimestampInMillis = sensor.getAcquisitionTimestampInMillis();
+        this.captureInterval = collector.getCaptureInterval();
+        this.captureIntervalTimeUnit = collector.getCaptureIntervalTimeUnit();
 
         defineFields(sensor);
     }
@@ -75,16 +78,24 @@ public class SensorCoToWrapper {
         return collectorId;
     }
 
-    public long getTimestampInMillis() {
-        return timestampInMillis;
-    }
-  
-    public long getInterval() {
-        return interval;
+    public long getCaptureTimestampInMillis() {
+        return captureTimestampInMillis;
     }
 
-    public TimeUnit getIntervalTimeUnit() {
-        return intervalTimeUnit;
+    public int getCapturePrecisionInNano() {
+        return capturePrecisionInNano;
+    }
+
+    public long getAcquisitionTimestampInMillis() {
+        return acquisitionTimestampInMillis;
+    }    
+  
+    public long getCaptureInterval() {
+        return captureInterval;
+    }
+
+    public TimeUnit getCaptureIntervalTimeUnit() {
+        return captureIntervalTimeUnit;
     }
 
     public List<Field> getFields() {

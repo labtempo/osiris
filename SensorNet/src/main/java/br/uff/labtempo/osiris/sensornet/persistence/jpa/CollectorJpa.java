@@ -15,10 +15,10 @@
  */
 package br.uff.labtempo.osiris.sensornet.persistence.jpa;
 
-import br.uff.labtempo.osiris.sensornet.model.jpa.Collector;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Collector_;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Network;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Network_;
+import br.uff.labtempo.osiris.sensornet.model.Collector;
+import br.uff.labtempo.osiris.sensornet.model.Collector_;
+import br.uff.labtempo.osiris.sensornet.model.Network;
+import br.uff.labtempo.osiris.sensornet.model.Network_;
 import br.uff.labtempo.osiris.sensornet.model.state.ModelState;
 import br.uff.labtempo.osiris.sensornet.persistence.CollectorDao;
 import java.util.ArrayList;
@@ -42,24 +42,28 @@ public class CollectorJpa implements CollectorDao {
     }
 
     @Override
+    public Collector getByUniqueId(long uniqueId) {
+        return data.get(Collector.class, uniqueId);
+    }
+
+    @Override
     public Collector get(Collector o) {
-        Collector collector = get(o.getNetwork().getId(), o.getId());
-        return collector;
+        return data.getReference(Collector.class, o);
     }
 
     @Override
     public Collector get(String networkId, String collectorId) {
         CriteriaBuilder cb = data.getCriteriaBuilder();
-        CriteriaQuery<Collector> criteriaQuery = cb.createQuery(Collector.class);        
-        Root<Collector> root = criteriaQuery.from(Collector.class);        
-        
+        CriteriaQuery<Collector> criteriaQuery = cb.createQuery(Collector.class);
+        Root<Collector> root = criteriaQuery.from(Collector.class);
+
         Join<Collector, Network> netroot = root.join(Collector_.network);
-        
+
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.equal(netroot.<String>get(Network_.id), networkId));
         predicates.add(cb.equal(root.<String>get(Collector_.id), collectorId));
         criteriaQuery.where(predicates.toArray(new Predicate[]{}));
-        
+
         criteriaQuery.select(root);
         return data.getQuerySingle(criteriaQuery);
     }
@@ -69,9 +73,9 @@ public class CollectorJpa implements CollectorDao {
         CriteriaBuilder cb = data.getCriteriaBuilder();
         CriteriaQuery<Collector> criteriaQuery = cb.createQuery(Collector.class);
         Root<Collector> root = criteriaQuery.from(Collector.class);
-        
+
         Join<Collector, Network> subroot = root.join(Collector_.network);
-        
+
         criteriaQuery.where(cb.equal(subroot.<String>get(Network_.id), networkId));
         criteriaQuery.select(root);
         List<Collector> collectors = data.getQuery(criteriaQuery);
@@ -99,15 +103,14 @@ public class CollectorJpa implements CollectorDao {
         CriteriaBuilder cb = data.getCriteriaBuilder();
         CriteriaQuery<Collector> criteriaQuery = cb.createQuery(Collector.class);
         Root<Collector> root = criteriaQuery.from(Collector.class);
-        
+
         Join<Collector, Network> netroot = root.join(Collector_.network);
-        
-        criteriaQuery.where(cb.equal(netroot.<String>get(Network_.id), networkId));        
+
+        criteriaQuery.where(cb.equal(netroot.<String>get(Network_.id), networkId));
         criteriaQuery.where(cb.equal(root.<ModelState>get(Collector_.modelState), ModelState.INACTIVE));
         criteriaQuery.select(root);
         List<Collector> collectors = data.getQuery(criteriaQuery);
 
         return collectors;
     }
-
 }

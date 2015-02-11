@@ -15,12 +15,11 @@
  */
 package br.uff.labtempo.osiris.sensornet.persistence;
 
-import br.uff.labtempo.osiris.sensornet.model.jpa.Sensor;
+import br.uff.labtempo.osiris.utils.scheduling.SchedulingStorage;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public interface SchedulerDao {
-    void schedule(Sensor sensor);
+public interface SchedulerDao extends SchedulingStorage{
 }

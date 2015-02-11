@@ -44,26 +44,30 @@ public class Revision implements Serializable {
     @OneToMany(mappedBy = "revision", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<RevisionItem> items;
 
-    private long timestamp;
+    private long creationTimestampInMillis;
+    private int creationPrecisionInNano;
+    private long acquisitionTimestampInMillis;
+    private long storageTimestampInMillis;
 
     protected Revision() {
     }
 
-    public Revision(VirtualSensor virtualSensor, List<Field> fields, long timestamp) {
+    public Revision(VirtualSensor virtualSensor) {
         this.virtualSensor = virtualSensor;
-        this.timestamp = timestamp;
+        this.creationTimestampInMillis = virtualSensor.getCreationTimestampInMillis();
+        this.creationPrecisionInNano = virtualSensor.getCreationPrecisionInNano();
+        this.acquisitionTimestampInMillis = virtualSensor.getAcquisitionTimestampInMillis();
 
-        List<RevisionItem> revisionItems = createRevisionItems(fields);
+        List<RevisionItem> revisionItems = createRevisionItems(virtualSensor.getFields());
         this.items = revisionItems;
+        this.storageTimestampInMillis = System.currentTimeMillis();
     }
 
     public List<RevisionItem> getItems() {
         return items;
     }
 
-    public long getTimestamp() {
-        return timestamp;
-    }
+    
 
     private List<RevisionItem> createRevisionItems(List<Field> fields) {
         List<RevisionItem> revisionItems = new ArrayList<>();
@@ -75,4 +79,21 @@ public class Revision implements Serializable {
         }
         return revisionItems;
     }
+    
+    public long getCreationTimestampInMillis() {
+        return creationTimestampInMillis;
+    }    
+
+    public long getStorageTimestampInMillis() {
+        return storageTimestampInMillis;
+    }
+
+    public int getCreationPrecisionInNano() {
+        return creationPrecisionInNano;
+    }
+
+    public long getAcquisitionTimestampInMillis() {
+        return acquisitionTimestampInMillis;
+    }
+    
 }

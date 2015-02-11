@@ -16,7 +16,6 @@
 package br.uff.labtempo.osiris.sensornet.model;
 
 import br.uff.labtempo.osiris.to.collector.CollectorCoTo;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Collector;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;

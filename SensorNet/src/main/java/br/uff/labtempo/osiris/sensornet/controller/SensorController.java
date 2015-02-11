@@ -22,10 +22,16 @@ import br.uff.labtempo.omcp.common.exceptions.InternalServerErrorException;
 import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
 import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
 import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
+import br.uff.labtempo.omcp.common.utils.ResponseBuilder;
 import br.uff.labtempo.osiris.omcp.Controller;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Sensor;
+import br.uff.labtempo.osiris.sensornet.model.Collector;
+import br.uff.labtempo.osiris.sensornet.model.Network;
+import br.uff.labtempo.osiris.sensornet.model.Sensor;
+import br.uff.labtempo.osiris.sensornet.persistence.CollectorDao;
 import br.uff.labtempo.osiris.sensornet.persistence.DaoFactory;
+import br.uff.labtempo.osiris.sensornet.persistence.NetworkDao;
 import br.uff.labtempo.osiris.sensornet.persistence.SensorDao;
+import br.uff.labtempo.osiris.to.common.definitions.Path;
 import br.uff.labtempo.osiris.to.sensornet.SensorSnTo;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,9 +43,9 @@ import java.util.Map;
  */
 public class SensorController extends Controller {
 
-    private final String ALL_OF_NETWORK = ControllerPath.SENSOR_ALL_BY_NETWORK.toString();
-    private final String ALL_OF_COLLECTOR = ControllerPath.SENSOR_ALL_BY_COLLECTOR.toString();
-    private final String UNIQUE = ControllerPath.SENSOR_BY_ID.toString();
+    private final String ALL_OF_NETWORK = Path.RESOURCE_SENSORNET_NETWORK_SENSOR_All.toString();
+    private final String ALL_OF_COLLECTOR = Path.RESOURCE_SENSORNET_SENSOR_All.toString();
+    private final String UNIQUE = Path.RESOURCE_SENSORNET_SENSOR_BY_ID.toString();
 
     private DaoFactory factory;
 
@@ -49,6 +55,14 @@ public class SensorController extends Controller {
 
     @Override
     public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
+        try {
+            return routing(request);
+        } finally {
+            factory.clear();
+        }
+    }
+
+    public Response routing(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
         String contentType = request.getContentType();
         String networkId = null;
         String collectorId = null;
@@ -56,114 +70,133 @@ public class SensorController extends Controller {
         //One sensor
         if (match(request.getResource(), UNIQUE)) {
             Map<String, String> map = extract(request.getResource(), UNIQUE);
-            networkId = map.get(ControllerPath.NETWORK_KEY.toString());
-            collectorId = map.get(ControllerPath.COLLECTOR_KEY.toString());
-            sensorId = map.get(ControllerPath.SENSOR_KEY.toString());
-
-            if (request.getMethod() != RequestMethod.GET) {
-                throw new NotImplementedException("Action not implemented");
+            networkId = map.get(Path.ID1.toString());
+            collectorId = map.get(Path.ID2.toString());
+            sensorId = map.get(Path.ID3.toString());
+            switch (request.getMethod()) {
+                case GET:
+                    SensorSnTo to = getById(networkId, collectorId, sensorId);
+                    Response response = new ResponseBuilder().ok(to, contentType).build();
+                    return response;
+                case PUT:
+                    update();
+                case DELETE:
+                    delete(networkId, collectorId, sensorId);
+                    response = new ResponseBuilder().ok().build();
+                    return response;
+                default:
+                    throw new MethodNotAllowedException("Action not allowed for this resource!");
             }
-            return builderOk(getById(networkId, collectorId, sensorId), contentType);
         }
         //All of Collector
         if (match(request.getResource(), ALL_OF_COLLECTOR)) {
             Map<String, String> map = extract(request.getResource(), ALL_OF_COLLECTOR);
-            networkId = map.get(ControllerPath.NETWORK_KEY.toString());
-            collectorId = map.get(ControllerPath.COLLECTOR_KEY.toString());
+            networkId = map.get(Path.ID1.toString());
+            collectorId = map.get(Path.ID2.toString());
 
-            if (request.getMethod() != RequestMethod.GET) {
-                throw new NotImplementedException("Action not implemented");
+            switch (request.getMethod()) {
+                case GET:
+                    List<SensorSnTo> to = getAll(networkId, collectorId);
+                    Response response = new ResponseBuilder().ok(to, contentType).build();
+                    return response;
+                case POST:
+                    create();
+                default:
+                    throw new MethodNotAllowedException("Action not allowed for this resource!");
             }
-            return builderOk(getAll(networkId, collectorId), contentType);
-        }
-        //All of Network
-        if (match(request.getResource(), ALL_OF_NETWORK)) {
+        } else if (match(request.getResource(), ALL_OF_NETWORK)) {
             Map<String, String> map = extract(request.getResource(), ALL_OF_NETWORK);
-            networkId = map.get(ControllerPath.NETWORK_KEY.toString());
+            networkId = map.get(Path.ID1.toString());
 
-            if (request.getMethod() != RequestMethod.GET) {
-                throw new NotImplementedException("Action not implemented");
+            switch (request.getMethod()) {
+                case GET:
+                    List<SensorSnTo> to = getAllInNetwork(networkId);
+                    Response response = new ResponseBuilder().ok(to, contentType).build();
+                    return response;
+                case POST:
+                    create();
+                default:
+                    throw new MethodNotAllowedException("Action not allowed for this resource!");
             }
-            return builderOk(getAllOfNetwork(networkId), contentType);
         }
-
         return null;
     }
 
-    private List<SensorSnTo> getAllOfNetwork(String networkId) throws NotFoundException {
-//        NetworkDao<Network> ndao = factory.getNetworkDao();
-        SensorDao sdao = factory.getSensorDao();
-
-//        Network nw = ndao.get(networkId);
-//
-//        if (nw == null) {
-//            throw new NotFoundException("Network not exists");
-//        }
-
+    public List<SensorSnTo> getAllInNetwork(String networkId) throws NotFoundException, InternalServerErrorException {
+        SensorDao sdao;
+        try {
+            sdao = factory.getSensorDao();
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Data query error!");
+        }
         List<Sensor> swlist = sdao.getAll(networkId);
-
         List<SensorSnTo> sensors = new ArrayList<>();
         for (Sensor sw : swlist) {
             sensors.add(sw.getTransferObject());
         }
-
         return sensors;
     }
 
-    private List<SensorSnTo> getAll(String networkId, String collectorId) throws NotFoundException {
-//        NetworkDao<Network> ndao = factory.getNetworkDao();
-//        CollectorDao<Collector> cdao = factory.getCollectorDao();
-        SensorDao sdao = factory.getSensorDao();
-
-//        Network nw = ndao.get(networkId);
-//
-//        if (nw == null) {
-//            throw new NotFoundException("Network not exists");
-//        }
-
-        //Collector cw = cdao.get(networkId, collectorId);
-
-        //if (cw == null) {
-            //throw new NotFoundException("Collector not exists");
-        //}
-
+    public List<SensorSnTo> getAll(String networkId, String collectorId) throws NotFoundException, InternalServerErrorException {
+        SensorDao sdao;
+        try {
+            sdao = factory.getSensorDao();
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Data query error!");
+        }
         List<Sensor> swlist = sdao.getAll(networkId, collectorId);
-
         List<SensorSnTo> sensors = new ArrayList<>();
         for (Sensor sw : swlist) {
             sensors.add(sw.getTransferObject());
         }
-
         return sensors;
     }
 
-    private SensorSnTo getById(String networkId, String collectorId, String sensorId) throws NotFoundException {
-//        NetworkDao<Network> ndao = factory.getNetworkDao();
-//        CollectorDao<Collector> cdao = factory.getCollectorDao();
-        SensorDao sdao = factory.getSensorDao();
-
-//        Network nw = ndao.get(networkId);
-//
-//        if (nw == null) {
-//            throw new NotFoundException("Network not exists");
-//        }
-//
-//        Collector cw = cdao.get(networkId, collectorId);
-//
-//        if (cw == null) {
-//            throw new NotFoundException("Collector not exists");
-//        }
-
-        Sensor sw = sdao.get(networkId, collectorId, sensorId);
-
-//        if (sw == null) {
-//            throw new NotFoundException("Sensor not exists");
-//        }
-
-        if (sw != null) {
-            return sw.getTransferObject();
+    public SensorSnTo getById(String networkId, String collectorId, String sensorId) throws NotFoundException, InternalServerErrorException {
+        SensorDao sdao;
+        try {
+            sdao = factory.getSensorDao();
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Data query error!");
         }
-        return null;
+        Sensor sw = sdao.get(networkId, collectorId, sensorId);
+        if (sw == null) {
+            throw new NotFoundException("Sensor not exists");
+        }
+        return sw.getTransferObject();
     }
 
+    public boolean delete(String networkId, String collectorId, String sensorId) throws InternalServerErrorException, NotFoundException {
+        SensorDao sdao;
+        try {
+            sdao = factory.getSensorDao();
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Data query error!");
+        }
+        Sensor sensor = sdao.get(networkId, collectorId, sensorId);
+        if (sensor == null) {
+            throw new NotFoundException("Sensor not exists");
+        }
+        Collector collector = sensor.getCollector();
+        Network network = sensor.getNetwork();
+        network.removeSensor(sensor);
+        collector.removeSensor(sensor);
+
+        try {
+            NetworkDao networkDao = factory.getNetworkDao();
+            networkDao.update(network);
+            sdao.delete(sensor);
+            return true;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Sensor couldn't removed!");
+        }
+    }
+
+    public long create() throws MethodNotAllowedException {
+        throw new MethodNotAllowedException("A Sensor cannot be created directly!");
+    }
+
+    public boolean update() throws MethodNotAllowedException {
+        throw new MethodNotAllowedException("A Sensor is a read-only resource!");
+    }
 }

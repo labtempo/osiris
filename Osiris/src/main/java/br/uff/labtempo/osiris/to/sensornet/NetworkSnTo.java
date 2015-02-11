@@ -34,7 +34,7 @@ public class NetworkSnTo extends NetworkToBase implements INetworkSnTo {
     //helper attributes
     private transient Calendar helperLastModified;
 
-    public NetworkSnTo(String id, State state, Calendar lastModifiedDate, int totalCollectors, int totalSensors) {
+    public NetworkSnTo( String id, State state, Calendar lastModifiedDate, int totalCollectors, int totalSensors) {
         super(id, state);
         this.lastModified = lastModifiedDate.getTimeInMillis();
         this.totalCollectors = totalCollectors;
@@ -76,5 +76,4 @@ public class NetworkSnTo extends NetworkToBase implements INetworkSnTo {
     public Map<String, String> getInfo() {
         return super.getInfo(); //To change body of generated methods, choose Tools | Templates.
     }
-
 }

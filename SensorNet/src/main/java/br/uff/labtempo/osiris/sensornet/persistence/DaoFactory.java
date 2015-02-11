@@ -15,6 +15,8 @@
  */
 package br.uff.labtempo.osiris.sensornet.persistence;
 
+import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistence;
+
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
@@ -26,8 +28,10 @@ public interface DaoFactory {
     CollectorDao getCollectorDao();
 
     NetworkDao getNetworkDao();
-
-    AnnouncerDao getAnnouncerDao();
     
     SchedulerDao getSchedulerDao();
+    
+    BatchPersistence getBatchPersistence();
+
+    void clear();
 }

@@ -40,7 +40,7 @@ import org.junit.runners.MethodSorters;
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+//@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ConverterTest {
 
     private static Bootstrap bootstrap;

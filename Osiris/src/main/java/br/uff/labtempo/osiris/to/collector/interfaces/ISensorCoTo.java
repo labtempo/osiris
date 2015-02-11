@@ -15,32 +15,17 @@
  */
 package br.uff.labtempo.osiris.to.collector.interfaces;
 
-
+import br.uff.labtempo.osiris.to.common.base.ISensorToBase;
 import br.uff.labtempo.osiris.to.common.data.ConsumableRuleTo;
-import br.uff.labtempo.osiris.to.common.data.ConsumableTo;
-import br.uff.labtempo.osiris.to.common.data.InfoTo;
 import br.uff.labtempo.osiris.to.common.definitions.LogicalOperator;
-import br.uff.labtempo.osiris.to.common.definitions.State;
-import br.uff.labtempo.osiris.to.common.data.ValueTo;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public interface ISensorCoTo {
-
-    String getId();
-
-    long getTimestamp();
-    
-    TimeUnit getTimestampUnit();
-    
-    long getTimeOfCollectionInMillis();
-
-    State getState();
+public interface ISensorCoTo extends ISensorToBase {
 
     void addValue(String name, String value, String unit, String symbol);
 
@@ -58,13 +43,7 @@ public interface ISensorCoTo {
 
     void addInfo(Map<String, String> infos);
 
-    List<? extends ValueTo> getValuesTo();
-
-    List<? extends ConsumableTo> getConsumablesTo();
-
     List<? extends ConsumableRuleTo> getConsumableRulesTo();
-
-    List<? extends InfoTo> getInfoTo();
 
     Map<String, String> getInfo();
 

@@ -18,15 +18,21 @@ package br.uff.labtempo.osiris.sensornet.controller;
 import br.uff.labtempo.omcp.common.Request;
 import br.uff.labtempo.omcp.common.RequestMethod;
 import br.uff.labtempo.omcp.common.Response;
+import br.uff.labtempo.omcp.common.exceptions.BadRequestException;
 import br.uff.labtempo.omcp.common.exceptions.InternalServerErrorException;
 import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
 import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
 import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
+import br.uff.labtempo.omcp.common.utils.ResponseBuilder;
 import br.uff.labtempo.osiris.omcp.Controller;
-import br.uff.labtempo.osiris.sensornet.model.jpa.Collector;
+import br.uff.labtempo.osiris.sensornet.model.Collector;
+import br.uff.labtempo.osiris.sensornet.model.Network;
 import br.uff.labtempo.osiris.sensornet.persistence.CollectorDao;
 import br.uff.labtempo.osiris.sensornet.persistence.DaoFactory;
+import br.uff.labtempo.osiris.sensornet.persistence.NetworkDao;
+import br.uff.labtempo.osiris.to.common.definitions.Path;
 import br.uff.labtempo.osiris.to.sensornet.CollectorSnTo;
+import br.uff.labtempo.osiris.to.sensornet.SensorSnTo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,8 +43,8 @@ import java.util.Map;
  */
 public class CollectorController extends Controller {
 
-    private final String ALL = ControllerPath.COLLECTOR_ALL.toString();
-    private final String UNIQUE = ControllerPath.COLLECTOR_BY_ID.toString();
+    private final String ALL = Path.RESOURCE_SENSORNET_COLLECTOR_All.toString();
+    private final String UNIQUE = Path.RESOURCE_SENSORNET_COLLECTOR_BY_ID.toString();
 
     private final DaoFactory factory;
 
@@ -47,38 +53,62 @@ public class CollectorController extends Controller {
     }
 
     @Override
-    public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
+    public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException {
+        try {
+            return routing(request);
+        } finally {
+            factory.clear();
+        }
+    }
+
+    public Response routing(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
         String contentType = request.getContentType();
         String networkId;
         String collectorId;
 
         if (match(request.getResource(), ALL)) {
             Map<String, String> map = extract(request.getResource(), ALL);
-            networkId = map.get(ControllerPath.NETWORK_KEY.toString());
-
-            if (request.getMethod() != RequestMethod.GET) {
-                throw new NotImplementedException("Action not implemented");
+            networkId = map.get(Path.ID1.toString());
+            switch (request.getMethod()) {
+                case GET:
+                    List<CollectorSnTo> to = getAll(networkId);
+                    Response response = new ResponseBuilder().ok(to, contentType).build();
+                    return response;
+                case POST:
+                    create();
+                default:
+                    throw new MethodNotAllowedException("Action not allowed for this resource!");
             }
-            List<CollectorSnTo> collectors = getAll(networkId);
-            return builderOk(collectors, contentType);
-        }
-
-        if (match(request.getResource(), UNIQUE)) {
+        } else if (match(request.getResource(), UNIQUE)) {
             Map<String, String> map = extract(request.getResource(), UNIQUE);
-            networkId = map.get(ControllerPath.NETWORK_KEY.toString());
-            collectorId = map.get(ControllerPath.COLLECTOR_KEY.toString());
+            networkId = map.get(Path.ID1.toString());
+            collectorId = map.get(Path.ID2.toString());
 
-            if (request.getMethod() != RequestMethod.GET) {
-                throw new NotImplementedException("Action not implemented");
+            switch (request.getMethod()) {
+                case GET:
+                    CollectorSnTo to = getById(networkId, collectorId);
+                    Response response = new ResponseBuilder().ok(to, contentType).build();
+                    return response;
+                case PUT:
+                    update();
+                case DELETE:
+                    delete(networkId, collectorId);
+                    response = new ResponseBuilder().ok().build();
+                    return response;
+                default:
+                    throw new MethodNotAllowedException("Action not allowed for this resource!");
             }
-            CollectorSnTo collector = getById(networkId, collectorId);
-            return builderOk(collector, contentType);
         }
         return null;
     }
 
-    private List<CollectorSnTo> getAll(String networkId) throws NotFoundException {
-        CollectorDao cdao = factory.getCollectorDao();
+    public List<CollectorSnTo> getAll(String networkId) throws NotFoundException, InternalServerErrorException {
+        CollectorDao cdao;
+        try {
+            cdao = factory.getCollectorDao();
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Data query error!");
+        }
         List<Collector> cwlist = cdao.getAll(networkId);
 
         List<CollectorSnTo> collectors = new ArrayList<>();
@@ -90,9 +120,49 @@ public class CollectorController extends Controller {
         return collectors;
     }
 
-    private CollectorSnTo getById(String networkId, String collectorId) throws NotFoundException {
-        CollectorDao cdao = factory.getCollectorDao();
-        Collector cw = cdao.get(networkId, collectorId);
-        return cw.getTransferObject();
+    public CollectorSnTo getById(String networkId, String collectorId) throws NotFoundException, InternalServerErrorException {
+        CollectorDao cdao;
+        try {
+            cdao = factory.getCollectorDao();
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Data query error!");
+        }
+        Collector collector = cdao.get(networkId, collectorId);
+        if (collector == null) {
+            throw new NotFoundException("Selected Collector not found!");
+        }
+        return collector.getTransferObject();
+    }
+
+    public boolean delete(String networkId, String collectorId) throws NotFoundException, InternalServerErrorException {
+        CollectorDao cdao;
+        try {
+            cdao = factory.getCollectorDao();
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Data query error!");
+        }
+        Collector collector = cdao.get(networkId, collectorId);
+        if (collector == null) {
+            throw new NotFoundException("Collector not found!");
+        }
+        Network network = collector.getNetwork();
+        network.removeCollector(collector);
+
+        try {
+            NetworkDao networkDao = factory.getNetworkDao();
+            networkDao.update(network);
+            cdao.delete(collector);
+            return true;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Collector couldn't removed!");
+        }
+    }
+
+    public long create() throws MethodNotAllowedException {
+        throw new MethodNotAllowedException("A Collector cannot be created directly!");
+    }
+
+    public boolean update() throws MethodNotAllowedException {
+        throw new MethodNotAllowedException("A Collector is a read-only resource!");
     }
 }

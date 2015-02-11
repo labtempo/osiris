@@ -73,7 +73,8 @@ public enum Path {
     //to static use(request)
     MODULE_SENSORNET("omcp://sensornet/"),
     MODULE_VIRTUALSENSORNET("omcp://virtualsensornet/"),
-    MESSAGEGROUP_COLLECTOR("omcp://collector.messagegroup/"),
+    MESSAGEGROUP_COLLECTOR("omcp://collector.messagegroup/"),    
+    MESSAGEGROUP_COLLECTOR_ALL("omcp://collector.messagegroup/#"),
     MESSAGEGROUP_UPDATE("omcp://update.messagegroup/"),
     MESSAGEGROUP_UPDATE_ALL("omcp://update.messagegroup/#"),
     MESSAGEGROUP_NOTIFICATION("omcp://notification.messagegroup/"),

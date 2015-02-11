@@ -15,11 +15,9 @@
  */
 package br.uff.labtempo.osiris.sensornet.thirdparty.scheduler;
 
-import br.uff.labtempo.osiris.sensornet.model.jpa.Sensor;
-import br.uff.labtempo.osiris.sensornet.persistence.DaoFactory;
-import br.uff.labtempo.osiris.sensornet.persistence.SchedulerDao;
-import br.uff.labtempo.osiris.sensornet.persistence.jpa.DataManager;
-import br.uff.labtempo.osiris.thirdparty.scheduler.core.SchedulingManager;
+import br.uff.labtempo.osiris.utils.scheduling.SchedulingCallback;
+import br.uff.labtempo.osiris.utils.scheduling.SchedulingStorage;
+import br.uff.labtempo.osiris.utils.scheduling.core.SchedulingManager;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -28,16 +26,20 @@ import java.util.concurrent.TimeUnit;
  */
 public class SchedulerBootstrap implements AutoCloseable {
 
-    private SchedulingManager<Sensor> manager;
+    private SchedulingManager manager;
 
-    public SchedulerBootstrap(DataManager data, DaoFactory factory) throws Exception {
+    public SchedulerBootstrap(SchedulingStorage schedulerDao, SchedulingCallback callback) throws Exception {
+        manager = new SchedulingManager(schedulerDao, callback, 2, TimeUnit.SECONDS);
+    }
+
+    public void start() {
         try {
-            SchedulerStorageSensor storage = new SchedulerStorageSensor(data);
-            SchedulerCallbackSensor callback = new SchedulerCallbackSensor(factory);
-            manager = new SchedulingManager<>(storage, callback, 10, TimeUnit.SECONDS);
             manager.initialize();
         } catch (Exception e) {
-            close();
+            try {
+                close();
+            } catch (Exception ex) {
+            }
             throw e;
         }
     }
@@ -47,8 +49,9 @@ public class SchedulerBootstrap implements AutoCloseable {
         manager.close();
     }
 
-    public SchedulerDao getScheduler() {
-        return new SchedulerController(manager.getScheduler());
+    public SchedulerAgent getScheduler() {
+        SchedulerAgent agent = new SchedulerAgentImp(manager.getScheduler());
+        return agent;
     }
 
 }

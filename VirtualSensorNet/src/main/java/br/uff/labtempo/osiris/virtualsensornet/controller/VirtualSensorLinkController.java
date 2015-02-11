@@ -31,10 +31,12 @@ import br.uff.labtempo.osiris.virtualsensornet.model.DataConverter;
 import br.uff.labtempo.osiris.virtualsensornet.model.DataType;
 import br.uff.labtempo.osiris.virtualsensornet.model.Field;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensorLink;
+import br.uff.labtempo.osiris.virtualsensornet.model.util.AnnouncerWrapper;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.ConverterDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DataTypeDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.LinkDao;
+import br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer.AnnouncerAgent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -46,9 +48,19 @@ import java.util.Map;
 public class VirtualSensorLinkController extends Controller {
 
     private final DaoFactory factory;
+    private AnnouncerAgent announcer;
+
+    public VirtualSensorLinkController(DaoFactory factory, AnnouncerAgent announcer) {
+        this.factory = factory;
+        this.announcer = new AnnouncerWrapper(announcer);
+    }
 
     public VirtualSensorLinkController(DaoFactory factory) {
-        this.factory = factory;
+        this(factory, null);
+    }
+
+    public void setAnnouncerAgent(AnnouncerAgent announcer) {
+        this.announcer = announcer;
     }
 
     @Override
@@ -63,12 +75,12 @@ public class VirtualSensorLinkController extends Controller {
                 case POST:
                     LinkVsnTo to = request.getContent(LinkVsnTo.class);
                     long id = create(to);
-                    // omcp://virtualsensornet/link/{id}
-                    String uri = getContext().getHost() + Path.NAMING_RESOURCE_LINK + Path.SEPARATOR + String.valueOf(id);
+                    // /link/{id}
+                    String uri = Path.SEPARATOR.toString() + Path.NAMING_RESOURCE_LINK.toString() + Path.SEPARATOR + String.valueOf(id);
                     response = new ResponseBuilder().created(uri).build();
                     return response;
                 default:
-                    throw new NotImplementedException("Action not implemented");
+                    throw new MethodNotAllowedException("Action not allowed for this resource!");
             }
         } else if (match(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_LINK_BY_ID.toString())) {
             Map<String, String> map = extract(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_LINK_BY_ID.toString());
@@ -91,7 +103,7 @@ public class VirtualSensorLinkController extends Controller {
                     response = new ResponseBuilder().ok().build();
                     return response;
                 default:
-                    throw new NotImplementedException("Action not implemented");
+                    throw new MethodNotAllowedException("Action not allowed for this resource!");
             }
         }
         return null;
@@ -168,6 +180,7 @@ public class VirtualSensorLinkController extends Controller {
         }
 
         lDao.save(link);
+        announcer.broadcastIt(link.getTransferObject());
         return link.getId();
 
     }

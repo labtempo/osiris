@@ -24,28 +24,28 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class CollectorToBase extends ToBaseInfo {
 
-    private final long interval;
-    private final String timeUnit;
+    private final long captureInterval;
+    private final String captureIntervaltimeUnit;
 
     //helper attributes
-    private transient TimeUnit helperTimeUnit;
+    private transient TimeUnit helperCaptureIntervalTimeUnit;
 
-    public CollectorToBase(String id, State state, long interval, TimeUnit timeUnit) {
+    public CollectorToBase(String id, State state, long captureInterval, TimeUnit captureIntervaltimeUnit) {
         super(id, state);
-        this.interval = interval;
-        this.timeUnit = timeUnit.toString();
+        this.captureInterval = captureInterval;
+        this.captureIntervaltimeUnit = captureIntervaltimeUnit.toString();
 
-        this.helperTimeUnit = timeUnit;
+        this.helperCaptureIntervalTimeUnit = captureIntervaltimeUnit;
     }
 
-    public long getInterval() {
-        return interval;
+    public long getCaptureInterval() {
+        return captureInterval;
     }
 
-    public TimeUnit getTimeUnit() {
-        if (helperTimeUnit == null) {
-            helperTimeUnit = Enum.valueOf(TimeUnit.class, timeUnit);
+    public TimeUnit getCaptureIntervalTimeUnit() {
+        if (helperCaptureIntervalTimeUnit == null) {
+            helperCaptureIntervalTimeUnit = Enum.valueOf(TimeUnit.class, captureIntervaltimeUnit.toUpperCase());
         }
-        return helperTimeUnit;
+        return helperCaptureIntervalTimeUnit;
     }
 }

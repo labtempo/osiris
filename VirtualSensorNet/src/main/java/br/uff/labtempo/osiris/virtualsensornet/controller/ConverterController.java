@@ -59,12 +59,12 @@ public class ConverterController extends Controller {
                 case POST:
                     ConverterVsnTo to = request.getContent(ConverterVsnTo.class);
                     long id = create(to);
-                    // omcp://virtualsensornet/converter/{id}
-                    String uri = getContext().getHost() + Path.NAMING_RESOURCE_CONVERTER + Path.SEPARATOR + String.valueOf(id);
+                    // /converter/{id}
+                    String uri = Path.SEPARATOR.toString() + Path.NAMING_RESOURCE_CONVERTER.toString() + Path.SEPARATOR + String.valueOf(id);
                     response = new ResponseBuilder().created(uri).build();
                     return response;
                 default:
-                    throw new NotImplementedException("Action not implemented");
+                    throw new MethodNotAllowedException("Action not allowed for this resource!");
             }
         } else if (match(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_CONVERTER_BY_ID.toString())) {
             Map<String, String> map = extract(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_CONVERTER_BY_ID.toString());
@@ -87,7 +87,7 @@ public class ConverterController extends Controller {
                     response = new ResponseBuilder().ok().build();
                     return response;
                 default:
-                    throw new NotImplementedException("Action not implemented");
+                    throw new MethodNotAllowedException("Action not allowed for this resource!");
             }
         }
         return null;
