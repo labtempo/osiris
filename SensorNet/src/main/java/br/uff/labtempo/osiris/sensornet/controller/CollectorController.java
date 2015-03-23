@@ -16,7 +16,6 @@
 package br.uff.labtempo.osiris.sensornet.controller;
 
 import br.uff.labtempo.omcp.common.Request;
-import br.uff.labtempo.omcp.common.RequestMethod;
 import br.uff.labtempo.omcp.common.Response;
 import br.uff.labtempo.omcp.common.exceptions.BadRequestException;
 import br.uff.labtempo.omcp.common.exceptions.InternalServerErrorException;
@@ -32,7 +31,6 @@ import br.uff.labtempo.osiris.sensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.sensornet.persistence.NetworkDao;
 import br.uff.labtempo.osiris.to.common.definitions.Path;
 import br.uff.labtempo.osiris.to.sensornet.CollectorSnTo;
-import br.uff.labtempo.osiris.to.sensornet.SensorSnTo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

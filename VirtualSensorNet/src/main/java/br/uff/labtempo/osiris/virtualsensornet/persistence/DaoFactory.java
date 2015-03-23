@@ -15,18 +15,33 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.persistence;
 
+import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistence;
+
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
 public interface DaoFactory {
+
     VirtualSensorDao getVirtualSensorDao();
 
     LinkDao getLinkDao();
 
+    LinkDao getPersistentLinkDao();
+    
+    CompositeDao getCompositeDao();
+    
+    CompositeDao getPersistentCompositeDao();
+    
+    FieldDao getFieldDao();
+
     ConverterDao getConverterDao();
 
-    DataTypeDao getDataTypeDao();    
-    
+    DataTypeDao getDataTypeDao();
+
     SchedulerDao getSchedulerDao();
+
+    BatchPersistence getBatchPersistence();
+
+    void clear();
 }

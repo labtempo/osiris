@@ -30,12 +30,16 @@ public abstract class FieldTo {
     private final long dataTypeId;
     private final long converterId;
     private final boolean initialized;
+    private final long sourceId;
+    private final int aggregates;
 
     private final transient String FIELD_ID = "id";
     private final transient String FIELD_NAME = "name";
     private final transient String FIELD_DATATYPE_ID = "datatypeid";
     private final transient String FIELD_CONVERTER_ID = "converterid";
-    private final transient String FIELD_INITIALIZED = "initialized";
+    private final transient String FIELD_INITIALIZED = "initialized";    
+    private final transient String FIELD_SOURCE_ID = "sourceid";
+    private final transient String FIELD_AGGREGATES = "aggregates";
 
     protected FieldTo(Map<String, String> map) {
         this.id = Long.valueOf(map.get(FIELD_ID));
@@ -43,22 +47,26 @@ public abstract class FieldTo {
         this.dataTypeId = Long.valueOf(map.get(FIELD_DATATYPE_ID));
         this.converterId = Long.valueOf(map.get(FIELD_CONVERTER_ID));
         this.initialized = Boolean.valueOf(map.get(FIELD_INITIALIZED));
+        this.sourceId = Long.valueOf(map.get(FIELD_SOURCE_ID));
+        this.aggregates = Integer.valueOf(map.get(FIELD_AGGREGATES));
     }
 
     protected FieldTo(String name, long dataTypeId, long converterId) {
-        this(0, name, dataTypeId, converterId, false);
+        this(0, name, dataTypeId, converterId, false,0,0);
     }
     
     protected FieldTo(long id, String name, long dataTypeId, long converterId) {
-        this(id, name, dataTypeId, converterId, false);
+        this(id, name, dataTypeId, converterId, false,0,0);
     }
 
-    protected FieldTo(long id, String name, long dataTypeId, long converterId, boolean initialized) {
+    protected FieldTo(long id, String name, long dataTypeId, long converterId, boolean initialized,long sourceId, int aggregates) {
         this.id = id;
         this.name = name;
         this.dataTypeId = dataTypeId;
         this.converterId = converterId;
         this.initialized = initialized;
+        this.sourceId = sourceId;
+        this.aggregates = aggregates;
     }
 
     public long getId() {
@@ -81,6 +89,14 @@ public abstract class FieldTo {
         return initialized;
     }
 
+    public long getSourceId() {
+        return sourceId;
+    }
+
+    public int getAggregates() {
+        return aggregates;
+    }
+
     protected Map<String, String> toMap() {
         Map<String, String> map = new LinkedHashMap<>();
         map.put(FIELD_ID, String.valueOf(id));
@@ -88,6 +104,8 @@ public abstract class FieldTo {
         map.put(FIELD_DATATYPE_ID, String.valueOf(dataTypeId));
         map.put(FIELD_CONVERTER_ID, String.valueOf(converterId));
         map.put(FIELD_INITIALIZED, String.valueOf(initialized));
+        map.put(FIELD_SOURCE_ID, String.valueOf(sourceId));
+        map.put(FIELD_AGGREGATES, String.valueOf(aggregates));
         return map;
     }
 

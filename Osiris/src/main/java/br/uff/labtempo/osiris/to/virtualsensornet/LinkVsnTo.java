@@ -15,8 +15,8 @@
  */
 package br.uff.labtempo.osiris.to.virtualsensornet;
 
-import br.uff.labtempo.osiris.to.virtualsensornet.interfaces.ILinkVsnTo;
 import br.uff.labtempo.osiris.to.common.data.FieldTo;
+import br.uff.labtempo.osiris.to.virtualsensornet.interfaces.ILinkVsnTo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -63,8 +63,8 @@ public class LinkVsnTo implements ILinkVsnTo {
     }
 
     @Override
-    public void createField(long id, String name, long dataTypeId, long converterId, boolean initialized) {
-        InternalFieldTo fieldTo = new InternalFieldTo(id, name, dataTypeId, converterId, initialized);
+    public void createField(long id, String name, long dataTypeId, long converterId, boolean initialized, long sourceId, int aggregates) {
+        InternalFieldTo fieldTo = new InternalFieldTo(id, name, dataTypeId, converterId, initialized, sourceId, aggregates);
         createField(fieldTo);
     }
 
@@ -163,8 +163,8 @@ public class LinkVsnTo implements ILinkVsnTo {
             super(id, name, dataTypeId, converterId);
         }
 
-        InternalFieldTo(long id, String name, long dataTypeId, long converterId, boolean initialized) {
-            super(id, name, dataTypeId, converterId, initialized);
+        InternalFieldTo(long id, String name, long dataTypeId, long converterId, boolean initialized, long sourceId, int aggregates) {
+            super(id, name, dataTypeId, converterId, initialized, sourceId, aggregates);
         }
 
         @Override

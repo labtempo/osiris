@@ -15,8 +15,8 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.persistence.jpa;
 
+import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistence;
 import br.uff.labtempo.osiris.utils.scheduling.SchedulerItem;
-import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.SchedulerDao;
 import br.uff.labtempo.osiris.virtualsensornet.thirdparty.scheduler.ModelSchedulerItem;
 import br.uff.labtempo.osiris.virtualsensornet.thirdparty.scheduler.ModelSchedulerItem_;
@@ -33,20 +33,20 @@ import javax.persistence.criteria.Root;
  */
 public class SchedulerJpa implements SchedulerDao {
 
-    private final DataManager data;
+    private final BatchPersistence persistence;
 
-    public SchedulerJpa(DataManager data) {
-        this.data = data;
+    public SchedulerJpa(BatchPersistence persistence) {
+        this.persistence = persistence;
     }
 
     @Override
     public SchedulerItem getItemByObjectId(long objectId) {
-        return data.get(ModelSchedulerItem.class, objectId);
+        return persistence.get(ModelSchedulerItem.class, objectId);
     }
 
     @Override
     public List<? extends SchedulerItem> getAllByTimeLimit(long timeLimitInMillis) {
-        CriteriaBuilder cb = data.getCriteriaBuilder();
+        CriteriaBuilder cb = persistence.getCriteriaBuilder();
         CriteriaQuery<ModelSchedulerItem> criteriaQuery = cb.createQuery(ModelSchedulerItem.class);
         Root<ModelSchedulerItem> root = criteriaQuery.from(ModelSchedulerItem.class);
 
@@ -56,23 +56,23 @@ public class SchedulerJpa implements SchedulerDao {
         criteriaQuery.where(predicates.toArray(new Predicate[]{}));
 
         criteriaQuery.select(root);
-        List<ModelSchedulerItem> items = data.getQuery(criteriaQuery);
+        List<ModelSchedulerItem> items = persistence.getQuery(criteriaQuery);
         return items;
     }
 
     @Override
     public void save(SchedulerItem o) {
-        data.save(o);
+        persistence.save(o);
     }
 
     @Override
     public void update(SchedulerItem o) {
-        data.update(o);
+        persistence.update(o);
     }
 
     @Override
     public void delete(SchedulerItem o) {
-        data.delete(o);
+        persistence.delete(o);
     }
 
 }

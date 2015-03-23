@@ -50,16 +50,17 @@ import javax.transaction.Transactional;
 public class SchedulerController implements SchedulingCallback {
 
     private final BatchPersistence persistence;
+    private final DaoFactory factory;
     private AnnouncerAgent announcer;
 
     public SchedulerController(DaoFactory factory, AnnouncerAgent announcer) {
+        this.factory = factory;
         this.persistence = factory.getBatchPersistence();
         this.announcer = new AnnouncerWrapper(announcer);
     }
 
     public SchedulerController(DaoFactory factory) {
-        this.persistence = factory.getBatchPersistence();
-        this.announcer = new AnnouncerWrapper(null);
+        this(factory, null);
     }
 
     @Transactional
@@ -74,7 +75,7 @@ public class SchedulerController implements SchedulingCallback {
     }
 
     private synchronized void checkSensor(long sensorId) {
-
+        SensorDao sdao = factory.getPersistentSensorDao();
         //check collector and network to deactivation
         Sensor sensor = getSensorById(sensorId);
 
@@ -89,7 +90,7 @@ public class SchedulerController implements SchedulingCallback {
         Network network = sensor.getNetwork();
         Collector collector = sensor.getCollector();
 
-        List<Sensor> sensors = getAllInactive(network.getId(), collector.getId());
+        List<Sensor> sensors = sdao.getAllInactive(network.getId(), collector.getId());
 
         if (collector.getSensors().length == sensors.size()) {
             collector.deactivate();
@@ -99,7 +100,7 @@ public class SchedulerController implements SchedulingCallback {
             announcer.broadcastIt(to);
         }
 
-        sensors = getAllInactive(network.getId());
+        sensors = sdao.getAllInactive(network.getId());
         if (network.getSensors().length == sensors.size()) {
             network.deactivate();
             update(network);
@@ -120,40 +121,5 @@ public class SchedulerController implements SchedulingCallback {
     private void update(Object o){
         persistence.update(o);
     }
-
-
-    public synchronized List<Sensor> getAllInactive(String networkId) {
-        CriteriaBuilder cb = persistence.getCriteriaBuilder();
-        CriteriaQuery<Sensor> criteriaQuery = cb.createQuery(Sensor.class);
-        Root<Sensor> root = criteriaQuery.from(Sensor.class);
-        Join<Sensor, Network> netroot = root.join(Sensor_.network);
-        List<Predicate> predicates = new ArrayList<>();
-        predicates.add(cb.equal(netroot.<String>get(Network_.id), networkId));
-        predicates.add(cb.equal(root.<ModelState>get(Sensor_.modelState), ModelState.INACTIVE));
-        criteriaQuery.where(predicates.toArray(new Predicate[]{}));
-
-        criteriaQuery.select(root);
-        List<Sensor> sensors = persistence.getQuery(criteriaQuery);
-
-        return sensors;
-    }
-
-
-    public synchronized List<Sensor> getAllInactive(String networkId, String collectorId) {
-        CriteriaBuilder cb = persistence.getCriteriaBuilder();
-        CriteriaQuery<Sensor> criteriaQuery = cb.createQuery(Sensor.class);
-        Root<Sensor> root = criteriaQuery.from(Sensor.class);
-        Join<Sensor, Network> netroot = root.join(Sensor_.network);
-        Join<Sensor, Collector> colroot = root.join(Sensor_.collector);
-        List<Predicate> predicates = new ArrayList<>();
-        predicates.add(cb.equal(netroot.<String>get(Network_.id), networkId));
-        predicates.add(cb.equal(colroot.<String>get(Collector_.id), collectorId));
-        predicates.add(cb.equal(root.<ModelState>get(Sensor_.modelState), ModelState.INACTIVE));
-        criteriaQuery.where(predicates.toArray(new Predicate[]{}));
-
-        criteriaQuery.select(root);
-        List<Sensor> sensors = persistence.getQuery(criteriaQuery);
-
-        return sensors;
-    }
+    
 }

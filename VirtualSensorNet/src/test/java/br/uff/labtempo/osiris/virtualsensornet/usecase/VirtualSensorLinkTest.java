@@ -120,14 +120,18 @@ public class VirtualSensorLinkTest {
     @Test
     public void TestCreateLink_Valid_ShouldPass() throws BadRequestException, NotFoundException, InternalServerErrorException {
         List<LinkVsnTo> vsnTos = controller.getAll();
+        long currentSize = vsnTos.size();
+
         LinkVsnTo to = new LinkVsnTo("sensor", "collector", "network");
 
         to.createField("temperature", dt2, cc1);
         to.createField("temperature", dt1);
 
         long id = controller.create(to);
-        long expectedId = vsnTos.size() + 1;
-        Assert.assertEquals(expectedId, id);
+
+        vsnTos = controller.getAll();
+        long expectedSize = currentSize + 1;
+        Assert.assertEquals(expectedSize, vsnTos.size());
     }
 
     @Test
@@ -227,6 +231,7 @@ public class VirtualSensorLinkTest {
         int expectedFieldListSize = 2;
         Assert.assertEquals(expectedFieldListSize, list.size());
     }
+
     @Test
     public void TestUpdateLink_AddRemoveField_Valid_ShouldPass() throws NotFoundException, MethodNotAllowedException, BadRequestException, InternalServerErrorException {
         LinkVsnTo to = new LinkVsnTo("sensor", "collector", "network");
@@ -513,7 +518,7 @@ public class VirtualSensorLinkTest {
         to.createField("temperature", dt1);
         long id = controller.create(to);
 
-        CollectorDataBuilder builder = new CollectorDataBuilder("network", "collector","2");
+        CollectorDataBuilder builder = new CollectorDataBuilder("network", "collector", "2");
         SampleCoTo sampleCoTo = builder.generateSample();
         notifycontroller.updateValues(sampleCoTo);
 
@@ -547,11 +552,11 @@ public class VirtualSensorLinkTest {
         Assert.assertEquals(true, ft1.isInitialized());
         Assert.assertEquals(true, ft2.isInitialized());
     }
-    
+
     @Test(expected = BadRequestException.class)
     public void TestUpdateLink_RemoveLogicallyField_WithValue_Invalid_ShouldThrowException() throws NotFoundException, MethodNotAllowedException, InternalServerErrorException, BadRequestException {
         LinkVsnTo to = new LinkVsnTo("1", "collector", "network");
-        to.createField("temperature", dt2,cc1);
+        to.createField("temperature", dt2, cc1);
         to.createField("temperature", dt1);
         long id = controller.create(to);
 
@@ -577,7 +582,7 @@ public class VirtualSensorLinkTest {
 //        LinkVsnTo lvt1 = controller.get(id);
 //        int expectedListSize = 1;
 //        Assert.assertEquals(expectedListSize, lvt1.getFields().size());
-    
+
     }
 
     @Test

@@ -18,6 +18,8 @@ package br.uff.labtempo.osiris.virtualsensornet.usecase.server;
 import br.uff.labtempo.osiris.virtualsensornet.controller.ConverterController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.DataTypeController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.NotifyController;
+import br.uff.labtempo.osiris.virtualsensornet.controller.VirtualSensorBlendingController;
+import br.uff.labtempo.osiris.virtualsensornet.controller.VirtualSensorCompositeController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.VirtualSensorController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.VirtualSensorLinkController;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.jpa.JpaDaoFactory;
@@ -31,18 +33,23 @@ public class Bootstrap implements AutoCloseable {
     private final JpaDaoFactory factory;
 
     private final NotifyController notifyController;
-    private final VirtualSensorLinkController linkController;
+    private final VirtualSensorLinkController linkController;    
+    private final VirtualSensorCompositeController compositeController;       
+    private final VirtualSensorBlendingController blendingController;
     private final DataTypeController dataTypeController;
     private final ConverterController converterController;
     private final VirtualSensorController virtualSensorController;
 
     public Bootstrap() throws Exception {
+        //String persistenceUnitName = "postgres";
         String persistenceUnitName = "hsqldb";
 
         this.factory = PersistenceProvider.getInstance(persistenceUnitName);
 
         this.notifyController = new NotifyController(factory);
         this.linkController = new VirtualSensorLinkController(factory);
+        this.compositeController = new VirtualSensorCompositeController(factory);
+        this.blendingController = new VirtualSensorBlendingController(factory);
         this.dataTypeController = new DataTypeController(factory);
         this.converterController = new ConverterController(factory);
         this.virtualSensorController = new VirtualSensorController(factory);
@@ -54,6 +61,14 @@ public class Bootstrap implements AutoCloseable {
 
     public VirtualSensorLinkController getLinkController() {
         return linkController;
+    }
+
+    public VirtualSensorCompositeController getCompositeController() {
+        return compositeController;
+    }
+
+    public VirtualSensorBlendingController getBlendingController() {
+        return blendingController;
     }
 
     public DataTypeController getDataTypeController() {

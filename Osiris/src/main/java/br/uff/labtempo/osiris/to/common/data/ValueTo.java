@@ -98,5 +98,4 @@ public abstract class ValueTo {
         map.put(SYMBOL, symbol);
         return map;
     }
-
 }

@@ -17,6 +17,7 @@ package br.uff.labtempo.osiris.virtualsensornet.controller;
 
 import br.uff.labtempo.omcp.common.Request;
 import br.uff.labtempo.omcp.common.Response;
+import br.uff.labtempo.omcp.common.exceptions.BadRequestException;
 import br.uff.labtempo.omcp.common.exceptions.InternalServerErrorException;
 import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
 import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
@@ -45,7 +46,15 @@ public class VirtualSensorController extends Controller {
     }
 
     @Override
-    public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
+    public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException {
+        try {
+            return routing(request);
+        } finally {
+            factory.clear();
+        }
+    }
+
+    public Response routing(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
         String contentType = request.getContentType();
         if (match(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_VIRTUALSENSOR_ALL.toString())) {
             switch (request.getMethod()) {

@@ -20,6 +20,7 @@ import br.uff.labtempo.omcp.client.OmcpClientBuilder;
 import br.uff.labtempo.omcp.server.OmcpServer;
 import br.uff.labtempo.omcp.server.rabbitmq.RabbitServer;
 import br.uff.labtempo.osiris.to.common.definitions.Path;
+import br.uff.labtempo.osiris.utils.requestpool.RequestPool;
 import br.uff.labtempo.osiris.virtualsensornet.controller.AnnouncementController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.ConverterController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.DataTypeController;
@@ -45,6 +46,7 @@ public class Bootstrap implements AutoCloseable {
     private final OmcpClient omcpClient;
     private final SchedulerBootstrap schedulerBootstrap;
     private final AnnouncementBootstrap announcementBootstrap;
+    private RequestPool requestPool;
 
     public Bootstrap(Properties properties) throws Exception {
 
@@ -61,8 +63,9 @@ public class Bootstrap implements AutoCloseable {
             Properties persistenceProperties = overrideProperties(properties);
             EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnitName, persistenceProperties);
             factory = JpaDaoFactory.newInstance(emf);
-
-            NotifyController nc = new NotifyController(factory);
+            requestPool = new RequestPool();
+            
+            NotifyController nc = new NotifyController(factory, requestPool);
             VirtualSensorController vsc = new VirtualSensorController(factory);
             VirtualSensorLinkController vslc = new VirtualSensorLinkController(factory);
             DataTypeController dtc = new DataTypeController(factory);
@@ -101,6 +104,7 @@ public class Bootstrap implements AutoCloseable {
 
     public void start() {
         try {
+            requestPool.start();
             announcementBootstrap.start();
             schedulerBootstrap.start();
             omcpServer.start();
@@ -130,6 +134,10 @@ public class Bootstrap implements AutoCloseable {
         }
         try {
             factory.close();
+        } catch (Exception e) {
+        }
+        try {
+            requestPool.close();
         } catch (Exception e) {
         }
     }

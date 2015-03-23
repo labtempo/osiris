@@ -53,10 +53,9 @@ public class VirtualSensorVsnTo implements IVirtualSensorVsnTo {
     private transient Calendar helperLastModified;
     private transient TimeUnit helperCreationIntervalTimeUnit;
     private transient VirtualSensorType helperVirtualSensorType;
-    private transient List<? extends ValueTo> helperValueToList;
+    private transient List<ValueVsnTo> helperValueToList;
 
-    public VirtualSensorVsnTo(long id, State state, long creationTimestampInMillis, int creationPrecisionInNano, long creationInterval, TimeUnit creationIntervalTimeUnit, long acquisitionTimestampInMillis, long storageTimestampInMillis, Calendar lastModified, VirtualSensorType sensorType
-    ) {
+    public VirtualSensorVsnTo(long id, State state, long creationTimestampInMillis, int creationPrecisionInNano, long creationInterval, TimeUnit creationIntervalTimeUnit, long acquisitionTimestampInMillis, long storageTimestampInMillis, Calendar lastModified, VirtualSensorType sensorType) {
         this.id = id;
         this.state = state.toString();
         this.creationTimestampInMillis = creationTimestampInMillis;
@@ -147,38 +146,22 @@ public class VirtualSensorVsnTo implements IVirtualSensorVsnTo {
         return helperVirtualSensorType;
     }
 
-    public void addValue(String name, ValueType valueType, String value, String unit, String symbol) {
-        InternalValueTo valueTo = new InternalValueTo(name, valueType, value, unit, symbol);
+    public void addValue(long id, String name, ValueType valueType, String value, String unit, String symbol) {
+        ValueVsnTo valueTo = new ValueVsnTo(id, name, valueType, value, unit, symbol);
         values.add(valueTo.toMap());
     }
 
     @Override
-    public List<? extends ValueTo> getValuesTo() {
+    public List<ValueVsnTo> getValuesTo() {
         if (helperValueToList != null) {
             return helperValueToList;
         }
-        List<InternalValueTo> valuesTo = new ArrayList<>();
+        List<ValueVsnTo> valuesTo = new ArrayList<>();
         for (Map<String, String> value : values) {
-            InternalValueTo valueTo = new InternalValueTo(value);
+            ValueVsnTo valueTo = new ValueVsnTo(value);
             valuesTo.add(valueTo);
         }
         helperValueToList = valuesTo;
         return valuesTo;
-    }
-
-    private class InternalValueTo extends ValueTo {
-
-        public InternalValueTo(String name, ValueType valueType, String value, String unit, String symbol) {
-            super(name, valueType, value, unit, symbol);
-        }
-
-        InternalValueTo(Map<String, String> map) {
-            super(map);
-        }
-
-        @Override
-        public Map<String, String> toMap() {
-            return super.toMap();
-        }
     }
 }

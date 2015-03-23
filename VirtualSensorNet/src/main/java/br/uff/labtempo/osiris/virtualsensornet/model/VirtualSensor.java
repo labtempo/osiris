@@ -31,6 +31,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 
@@ -46,10 +47,12 @@ public abstract class VirtualSensor extends Model {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    private String label;
+
     @Enumerated(EnumType.STRING)
     private VirtualSensorType virtualSensorType;
 
-    @OneToMany(mappedBy = "virtualSensor", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH}, fetch = FetchType.EAGER)
     private List<Field> fields;
 
     private long creationTimestampInMillis;
@@ -69,18 +72,20 @@ public abstract class VirtualSensor extends Model {
     protected VirtualSensor() {
     }
 
-    public VirtualSensor(VirtualSensorType type, List<Field> fields, long creationInterval, TimeUnit creationIntervalTimeUnit) {
+    public VirtualSensor(VirtualSensorType type, String label, List<Field> fields, long creationInterval, TimeUnit creationIntervalTimeUnit) {
         this.virtualSensorType = type;
+        this.label = label;
         this.fields = fields;
         this.creationInterval = creationInterval;
         this.creationIntervalTimeUnit = creationIntervalTimeUnit;
-        for (Field field : fields) {
-            field.setVirtualSensor(this);
-        }
     }
 
     public long getId() {
         return id;
+    }
+
+    public String getLabel() {
+        return label;
     }
 
     public long getCreationTimestampInMillis() {
@@ -112,7 +117,12 @@ public abstract class VirtualSensor extends Model {
     }
 
     public List<Field> getFields() {
-        return getConcurrentFields();
+        return fields;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+        update();
     }
 
     protected boolean updateInterval(long creationInterval, TimeUnit creationIntervalTimeUnit) {
@@ -125,28 +135,12 @@ public abstract class VirtualSensor extends Model {
         return false;
     }
 
-    protected boolean addNewValues(List<Field> fs, long creationTimestampInMillis, int creationPrecisionInNano, long acquisitionTimestampInMillis) {
-        boolean isUpdated = false;
-        synchronized (fields) {
-            for (Field field : getConcurrentFields()) {
-                for (Field newField : fs) {
-                    if (field.equalsInputReference(newField)) {
-                        field.setValue(newField.getValue());
-                        isUpdated = true;
-                    }
-                }
-            }
-        }
-
-        if (isUpdated) {
-            this.creationTimestampInMillis = creationTimestampInMillis;
-            this.creationPrecisionInNano = creationPrecisionInNano;
-            this.acquisitionTimestampInMillis = acquisitionTimestampInMillis;
-            this.storageTimestampInMillis = getStorageTimestamp();
-            update();
-        }
-
-        return isUpdated;
+    protected void setAllTimestamp(long creationTimestampInMillis, int creationPrecisionInNano, long acquisitionTimestampInMillis) {
+        this.creationTimestampInMillis = creationTimestampInMillis;
+        this.creationPrecisionInNano = creationPrecisionInNano;
+        this.acquisitionTimestampInMillis = acquisitionTimestampInMillis;
+        this.storageTimestampInMillis = getStorageTimestamp();
+        update();
     }
 
     protected boolean addField(Field field) {
@@ -154,7 +148,7 @@ public abstract class VirtualSensor extends Model {
             fields = new ArrayList<>();
         }
 
-        boolean isUpdated = getConcurrentFields().add(field);
+        boolean isUpdated = fields.add(field);
         if (isUpdated) {
             update();
         }
@@ -169,7 +163,7 @@ public abstract class VirtualSensor extends Model {
                 return false;
             }
 
-            boolean isUpdated = getConcurrentFields().remove(oldField);
+            boolean isUpdated = fields.remove(oldField);
 
             if (isUpdated) {
                 update();
@@ -177,67 +171,7 @@ public abstract class VirtualSensor extends Model {
             return isUpdated;
         }
     }
-
-    protected boolean upgradeFields(List<Field> newFields) {
-        List<Field> oldSet, newSet, intersectionOld, intersectionNew, toRemove, toAdd;
-
-        synchronized (fields) {
-            oldSet = new ArrayList<>(getConcurrentFields());
-            newSet = newFields;
-
-            intersectionOld = new ArrayList<>();
-            intersectionNew = new ArrayList<>();
-
-            for (Field oldField : oldSet) {
-                for (Field newField : newSet) {
-                    newField.setVirtualSensor(this);
-                    if (oldField.getId() == newField.getId()) {
-                        if (!oldField.equals(newField)) {
-                            if (!oldField.isStored()) {
-                                oldField.setDataType(newField.getDataType());
-                            } else {
-                                if (oldField.getDataTypeId() != newField.getDataTypeId()) {
-                                    throw new RuntimeException("You cannot to change DataType of a initialized Field!");
-                                }
-                            }
-                            oldField.setConverter(newField.getConverter());
-                            oldField.setReferenceName(newField.getReferenceName());
-                        }
-                        intersectionOld.add(oldField);
-                        intersectionNew.add(newField);
-                    }
-                }
-            }
-
-            newSet.removeAll(intersectionNew);
-
-            toRemove = new ArrayList<>();
-            toAdd = new ArrayList<>();
-
-            if (intersectionOld.size() > 0) {
-                oldSet.removeAll(intersectionOld);
-                //remove fields
-                for (Field currF : oldSet) {
-                    if (currF.isStored()) {
-                        throw new RuntimeException("You cannot delete a Field with already stored value!");
-                    } else {
-                        currF.setVirtualSensor(null);
-                        toRemove.add(currF);
-                    }
-                }
-
-                toAdd.addAll(newFields);
-                //insert updated fields
-                fields.removeAll(toRemove);
-                //add new fields
-                fields.addAll(toAdd);
-                update();
-                return true;
-            }
-            return false;
-        }
-    }
-
+    
     private long getStorageTimestamp() {
         if (revisions == null) {
             revisions = new ArrayList<>();
@@ -249,7 +183,7 @@ public abstract class VirtualSensor extends Model {
 
     private Field getField(Field field) {
         synchronized (fields) {
-            for (Field oldField : getConcurrentFields()) {
+            for (Field oldField : fields) {
                 if (oldField.equals(field)) {
                     return oldField;
                 }
@@ -258,18 +192,39 @@ public abstract class VirtualSensor extends Model {
         }
     }
 
-    private List<Field> getConcurrentFields() {
-        return fields;
-    }
-
     public synchronized VirtualSensorVsnTo getTransferObject() {
         VirtualSensorVsnTo sensorVsnTo = new VirtualSensorVsnTo(id, getModelState().getState(), creationTimestampInMillis, creationPrecisionInNano, creationInterval, creationIntervalTimeUnit, acquisitionTimestampInMillis, storageTimestampInMillis, getLastModifiedDate(), virtualSensorType);
 
-        for (Field field : getConcurrentFields()) {
-            sensorVsnTo.addValue(field.getReferenceName(), field.getValueType(), field.getValue(), field.getUnit(), field.getSymbol());
+        for (Field field : fields) {
+            sensorVsnTo.addValue(field.getId(), field.getReferenceName(), field.getValueType(), field.getValue(), field.getUnit(), field.getSymbol());
         }
 
         return sensorVsnTo;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 11 * hash + (int) (this.id ^ (this.id >>> 32));
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final VirtualSensor other = (VirtualSensor) obj;
+        if (this.id == 0) {
+            return false;
+        }
+        if (this.id != other.id) {
+            return false;
+        }
+        return true;
     }
 
 }

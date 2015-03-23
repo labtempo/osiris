@@ -16,7 +16,6 @@
 package br.uff.labtempo.osiris.sensornet.controller;
 
 import br.uff.labtempo.omcp.common.Request;
-import br.uff.labtempo.omcp.common.RequestMethod;
 import br.uff.labtempo.omcp.common.Response;
 import br.uff.labtempo.omcp.common.exceptions.InternalServerErrorException;
 import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
@@ -27,7 +26,6 @@ import br.uff.labtempo.osiris.omcp.Controller;
 import br.uff.labtempo.osiris.sensornet.model.Collector;
 import br.uff.labtempo.osiris.sensornet.model.Network;
 import br.uff.labtempo.osiris.sensornet.model.Sensor;
-import br.uff.labtempo.osiris.sensornet.persistence.CollectorDao;
 import br.uff.labtempo.osiris.sensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.sensornet.persistence.NetworkDao;
 import br.uff.labtempo.osiris.sensornet.persistence.SensorDao;

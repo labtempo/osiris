@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Felipe.
+ * Copyright 2015 Felipe Santos <fralph at ic.uff.br>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import javax.persistence.criteria.CriteriaQuery;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public interface BatchPersistence extends AutoCloseable {
 

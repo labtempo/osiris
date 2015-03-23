@@ -16,7 +16,10 @@
 package br.uff.labtempo.osiris.virtualsensornet.model;
 
 import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorType;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -30,12 +33,36 @@ import java.util.concurrent.TimeUnit;
  *
  * Delete to remove BlendingVSensor from virtualsensornet
  */
-public class VirtualSensorBlending extends VirtualSensor {
+public class VirtualSensorBlending extends VirtualSensor implements Aggregatable {
 
-    private List<VirtualSensor> sources;
+    private List<Field> sourceFields;
     private Function function;
+    private boolean isAggregated;
 
-    public VirtualSensorBlending(List<Field> fields, long interval, TimeUnit intervalTimeUnit) {
-        super(VirtualSensorType.BLENDING, fields,interval,intervalTimeUnit);
+    public VirtualSensorBlending(String label, List<Field> fields, long interval, TimeUnit intervalTimeUnit) {
+        super(VirtualSensorType.BLENDING, label, fields, interval, intervalTimeUnit);
+        this.sourceFields = new ArrayList<>();
+    }
+
+    @Override
+    public boolean isAggregated() {
+        return isAggregated;
+    }
+
+    @Override
+    public VirtualSensor getVirtualSensor() {
+        return this;
+    }
+
+    public void addSourceField(Field field){
+        sourceFields.add(field);
+    }
+    
+    public boolean removeSourceField(Field field){
+        return sourceFields.remove(field);
+    }
+
+    public List<Field> getSourceFields() {
+        return sourceFields;
     }
 }

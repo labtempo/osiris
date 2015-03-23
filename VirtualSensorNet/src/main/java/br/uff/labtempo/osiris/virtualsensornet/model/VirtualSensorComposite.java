@@ -15,44 +15,197 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.model;
 
+import br.uff.labtempo.osiris.to.virtualsensornet.CompositeVsnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorType;
+import br.uff.labtempo.osiris.virtualsensornet.model.state.ModelState;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import javax.persistence.Entity;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-/**
- * Post to create
- *
- * Put to update value
- *
- * Delete to remove CompositeVSensor from virtualsensornet
- */
-public class VirtualSensorComposite extends VirtualSensor {
+@Entity
+public class VirtualSensorComposite extends VirtualSensor implements Aggregatable {
 
-    private Map<VirtualSensor, List<String>> sources;
-
-    public VirtualSensorComposite(List<Field> fields,long interval, TimeUnit intervalTimeUnit) {
-        super(VirtualSensorType.COMPOSITE, fields,interval,intervalTimeUnit);
-        this.sources = new HashMap<>();
+    public VirtualSensorComposite() {
     }
 
-    public void addSource(VirtualSensor vsensor, String[] fields) {
-        List<String> fieldNames = new ArrayList<>(Arrays.asList(fields));
+    public VirtualSensorComposite(String label, List<Field> fields, long creationInterval, TimeUnit creationIntervalTimeUnit) {
+        super(VirtualSensorType.COMPOSITE, label, fields, creationInterval, creationIntervalTimeUnit);
+        //add as aggregate
+        for (Field field : fields) {
+            field.addAggregate(this);
+        }
+    }
 
-        for (String fieldName : fieldNames) {
-            for (Field field : vsensor.getFields()) {
-                if (field.getReferenceName().equals(fieldName)) {
-                    addField(field);
-                    break;
-                }
+    @Override
+    public boolean isAggregated() {
+        return true;
+    }
+
+    @Override
+    public VirtualSensor getVirtualSensor() {
+        return this;
+    }
+
+    public void removeAllFields() {
+        List<Field> fields = new ArrayList<>(getFields());
+        for (Field field : fields) {
+            field.removeAggregate(this);
+            super.removeField(field);
+        }
+    }
+
+    public void setSensorFieldsUpdated() {
+        update();
+    }
+
+    public void setSensorValuesUpdated() {
+        boolean isError = false;
+        boolean isWorking = false;
+
+        Field latestUpdatedField = null;
+        Field minorIntervalField = null;
+
+        for (Field field : getFields()) {
+            VirtualSensor sensor = field.getVirtualSensor();
+
+            latestUpdatedField = compareLatestUpdatedSensor(latestUpdatedField, field);
+            minorIntervalField = compareMinorUpdateIntervalSensor(minorIntervalField, field);
+
+            //select operation state of the composite 
+            if (sensor.getModelState() == ModelState.INACTIVE
+                    || sensor.getModelState() == ModelState.MALFUNCTION) {
+                isError = true;
+            } else {
+                isWorking = true;
             }
         }
+
+        VirtualSensor latestUpdatedSensor = latestUpdatedField.getVirtualSensor();
+        VirtualSensor minorIntervalSensor = minorIntervalField.getVirtualSensor();
+
+        //put new time values
+        if (isWorking) {
+            setAllTimestamp(latestUpdatedSensor.getCreationTimestampInMillis(), latestUpdatedSensor.getCreationPrecisionInNano(), latestUpdatedSensor.getAcquisitionTimestampInMillis());
+            updateInterval(minorIntervalSensor.getCreationInterval(), minorIntervalSensor.getCreationIntervalTimeUnit());
+        }
+
+        //reset operation state of the composite to reflect new state properly
+        if (isWorking && !isError) {
+            super.update();
+        } else if (isWorking && isError) {
+            super.malfunction();
+        } else if (!isWorking) {
+            super.deactivate();
+        }
+    }
+
+    public CompositeVsnTo getCompositeTransferObject() {
+        CompositeVsnTo compositeVsnTo = new CompositeVsnTo(getId(), getLabel());
+        List<Field> fields = getFields();
+        for (Field field : fields) {
+            VirtualSensor sensor = field.getVirtualSensor();
+            int aggregates = field.getAggregates().size();
+            compositeVsnTo.addField(field.getId(), field.getReferenceName(), field.getDataTypeId(), field.getConverterId(), field.isStored(), sensor.getId(), aggregates);
+        }
+        return compositeVsnTo;
+    }
+
+    private static Field compareMinorUpdateIntervalSensor(Field currentField, Field newField) {
+        VirtualSensor currentSensor = null;
+        VirtualSensor newSensor = null;
+
+        if (currentField == null && newField == null) {
+            return null;
+        }
+
+        if (newField == null) {
+            return currentField;
+        }
+
+        if (currentField != null) {
+            currentSensor = currentField.getVirtualSensor();
+        }
+        newSensor = newField.getVirtualSensor();
+
+        //sensor not evaluated(discarded)
+        if (newSensor.getModelState() == ModelState.INACTIVE) {
+            return currentField;
+        }
+
+        //initialize null
+        if (currentField == null || currentSensor == null) {
+            return newField;
+        }
+
+        //not equals timeUnit: select the smallest unit
+        if (currentSensor.getCreationIntervalTimeUnit() != newSensor.getCreationIntervalTimeUnit()) {
+            TimeUnit currentTimeUnit = currentSensor.getCreationIntervalTimeUnit();
+            TimeUnit newTimeUnit = newSensor.getCreationIntervalTimeUnit();
+            if (currentTimeUnit.compareTo(newTimeUnit) > 0) {
+                return newField;
+            }
+            return currentField;
+        }
+
+        //select the smallest interval 
+        if (currentSensor.getCreationInterval() < newSensor.getCreationInterval()) {
+            return newField;
+        }
+
+        return currentField;
+    }
+
+    private static Field compareLatestUpdatedSensor(Field currentField, Field newField) {
+        VirtualSensor currentSensor = null;
+        VirtualSensor newSensor = null;
+
+        if (currentField == null && newField == null) {
+            return null;
+        }
+
+        if (newField == null) {
+            return currentField;
+        }
+
+        if (currentField != null) {
+            currentSensor = currentField.getVirtualSensor();
+        }
+        newSensor = newField.getVirtualSensor();
+
+        //sensor not evaluated(discarded)
+        if (newSensor.getModelState() == ModelState.INACTIVE) {
+            return currentField;
+        }
+
+        //initialize null
+        if (currentField == null || currentSensor == null) {
+            return newField;
+        }
+
+        //select latest updated field
+        if (currentSensor.getCreationTimestampInMillis() < newSensor.getCreationTimestampInMillis()) {
+            return newField;
+        }
+
+        //if equals, select by precision 
+        if (currentSensor.getCreationTimestampInMillis() == newSensor.getCreationTimestampInMillis()
+                && currentSensor.getCreationPrecisionInNano() < newSensor.getCreationPrecisionInNano()) {
+            return newField;
+        }
+
+        return currentField;
+    }
+
+    public static Field selectMinorUpdateIntervalSensor(List<Field> fields) {
+        Field currentField = null;
+        for (Field field : fields) {
+            currentField = compareMinorUpdateIntervalSensor(currentField, field);
+        }
+        return currentField;
     }
 }

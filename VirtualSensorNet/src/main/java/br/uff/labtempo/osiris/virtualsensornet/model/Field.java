@@ -17,6 +17,8 @@ package br.uff.labtempo.osiris.virtualsensornet.model;
 
 import br.uff.labtempo.osiris.to.common.definitions.ValueType;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,9 +26,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.script.ScriptException;
-import org.hibernate.annotations.Where;
 
 /**
  *
@@ -50,6 +52,9 @@ public class Field implements Serializable {
     @ManyToOne
     private VirtualSensor virtualSensor;
 
+    @ManyToMany
+    private List<VirtualSensor> aggregates;
+
     private boolean isStored;
 
     public Field(String referenceName, DataType dataType) {
@@ -60,6 +65,7 @@ public class Field implements Serializable {
         this.id = id;
         this.referenceName = referenceName;
         this.dataType = dataType;
+        this.aggregates = new ArrayList<>();
 
         if (referenceName == null || dataType == null) {
             throw new RuntimeException("Arguments cannot be null!");
@@ -67,7 +73,16 @@ public class Field implements Serializable {
     }
 
     public void setVirtualSensor(VirtualSensor vsensor) {
-        this.virtualSensor = vsensor;
+        virtualSensor = vsensor;
+    }
+
+    public void addAggregate(Aggregatable aggregatable) {
+        aggregates.add(aggregatable.getVirtualSensor());
+    }
+
+    public boolean removeAggregate(Aggregatable aggregatable) {
+        boolean isRemoved = aggregates.remove(aggregatable.getVirtualSensor());
+        return isRemoved;
     }
 
     protected Field() {
@@ -131,6 +146,14 @@ public class Field implements Serializable {
         }
     }
 
+    public VirtualSensor getVirtualSensor() {
+        return virtualSensor;
+    }
+
+    public List<VirtualSensor> getAggregates() {
+        return aggregates;
+    }
+
     public void setStored() {
         this.isStored = true;
     }
@@ -141,6 +164,13 @@ public class Field implements Serializable {
 
     public boolean isStored() {
         return isStored;
+    }
+
+    public boolean hasAggregates() {
+        if (aggregates.isEmpty()) {
+            return false;
+        }
+        return true;
     }
 
     public void setReferenceName(String referenceName) {
@@ -174,6 +204,17 @@ public class Field implements Serializable {
 
     public void setValue(String value) {
         this.currentValue = convertNewValue(value);
+    }
+
+    private String convertNewValue(String value) {
+        if (converter != null) {
+            try {
+                return converter.convert(value);
+            } catch (ScriptException ex) {
+                Logger.getLogger(Field.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return value;
     }
 
     public boolean equalsValue(Field obj) {
@@ -214,10 +255,8 @@ public class Field implements Serializable {
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 41 * hash + Objects.hashCode(this.referenceName);
-        hash = 41 * hash + Objects.hashCode(this.dataType);
-        hash = 41 * hash + Objects.hashCode(this.converter);
+        int hash = 7;
+        hash = 17 * hash + (int) (this.id ^ (this.id >>> 32));
         return hash;
     }
 
@@ -230,27 +269,9 @@ public class Field implements Serializable {
             return false;
         }
         final Field other = (Field) obj;
-        if (!Objects.equals(this.referenceName, other.referenceName)) {
-            return false;
-        }
-        if (!Objects.equals(this.dataType, other.dataType)) {
-            return false;
-        }
-        if (!Objects.equals(this.converter, other.converter)) {
+        if (this.id != other.id) {
             return false;
         }
         return true;
     }
-
-    private String convertNewValue(String value) {
-        if (converter != null) {
-            try {
-                return converter.convert(value);
-            } catch (ScriptException ex) {
-                Logger.getLogger(Field.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        return value;
-    }
-
 }

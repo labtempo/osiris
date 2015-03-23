@@ -32,6 +32,7 @@ import br.uff.labtempo.osiris.virtualsensornet.model.DataType;
 import br.uff.labtempo.osiris.virtualsensornet.model.Field;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensorLink;
 import br.uff.labtempo.osiris.virtualsensornet.model.util.AnnouncerWrapper;
+import br.uff.labtempo.osiris.virtualsensornet.model.util.FieldUpgradeHelper;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.ConverterDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DataTypeDao;
@@ -65,6 +66,14 @@ public class VirtualSensorLinkController extends Controller {
 
     @Override
     public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException {
+        try {
+            return routing(request);
+        } finally {
+            factory.clear();
+        }
+    }
+
+    public Response routing(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException {
         String contentType = request.getContentType();
         if (match(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_LINK_ALL.toString())) {
             switch (request.getMethod()) {
@@ -112,7 +121,7 @@ public class VirtualSensorLinkController extends Controller {
     public LinkVsnTo get(long id) throws NotFoundException, InternalServerErrorException {
         LinkDao lDao;
         try {
-            lDao = factory.getLinkDao();
+            lDao = factory.getPersistentLinkDao();
         } catch (Exception e) {
             throw new InternalServerErrorException("Data query error!");
         }
@@ -123,13 +132,12 @@ public class VirtualSensorLinkController extends Controller {
         }
         LinkVsnTo to = sensorLink.getLinkTransferObject();
         return to;
-
     }
 
     public List<LinkVsnTo> getAll() throws NotFoundException, InternalServerErrorException {
         LinkDao lDao;
         try {
-            lDao = factory.getLinkDao();
+            lDao = factory.getPersistentLinkDao();
         } catch (Exception e) {
             throw new InternalServerErrorException("Data query error!");
         }
@@ -154,13 +162,13 @@ public class VirtualSensorLinkController extends Controller {
             networkId = linkTo.getNetworkId().trim();
             fieldsTo = linkTo.getFields();
 
-            //check nulpointer           
+            //check nullpointer           
             fieldsTo.size();
         } catch (Exception e) {
             throw new BadRequestException("Params cannot be null!");
         }
 
-        List<Field> fields = getFields(fieldsTo);
+        List<Field> fields = createFields(fieldsTo);
         //not able to fields with no entries
 
         if (fieldsTo.isEmpty()) {
@@ -170,11 +178,11 @@ public class VirtualSensorLinkController extends Controller {
             throw new BadRequestException("Declared Fields not found!");
         }
 
-        VirtualSensorLink link = new VirtualSensorLink(networkId, collectorId, sensorId, fields);
+        VirtualSensorLink link = new VirtualSensorLink("", networkId, collectorId, sensorId, fields);
 
         LinkDao lDao;
         try {
-            lDao = factory.getLinkDao();
+            lDao = factory.getPersistentLinkDao();
         } catch (Exception e) {
             throw new InternalServerErrorException("Data query error!");
         }
@@ -182,10 +190,9 @@ public class VirtualSensorLinkController extends Controller {
         lDao.save(link);
         announcer.broadcastIt(link.getTransferObject());
         return link.getId();
-
     }
 
-    private synchronized List<Field> getFields(List<? extends FieldTo> fieldsTo) throws NotFoundException, InternalServerErrorException, BadRequestException {
+    private synchronized List<Field> createFields(List<? extends FieldTo> fieldsTo) throws NotFoundException, InternalServerErrorException, BadRequestException {
         DataTypeDao dtDao;
         ConverterDao cDao;
         try {
@@ -214,15 +221,14 @@ public class VirtualSensorLinkController extends Controller {
                 }
             }
             list.add(field);
-
         }
         return list;
     }
 
-    public boolean delete(long id) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException {
+    public boolean delete(long id) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, BadRequestException {
         LinkDao lDao;
         try {
-            lDao = factory.getLinkDao();
+            lDao = factory.getPersistentLinkDao();
         } catch (Exception e) {
             throw new InternalServerErrorException("Data query error!");
         }
@@ -231,7 +237,32 @@ public class VirtualSensorLinkController extends Controller {
         if (sensorLink == null) {
             throw new NotFoundException("VirtualSensor not found!");
         }
+
+        //remove fields
+        //remove initialized fields
+        FieldSubController fieldSubController = new FieldSubController(factory);
+        List<Field> currentFields = sensorLink.getFields();
+        List<Field> temList = new ArrayList<>(currentFields);
+        for (Field field : temList) {
+            fieldSubController.deleteIgnoringInitialization(currentFields, field);
+            //detaches sensor from field
+            field.setVirtualSensor(null);
+        }
+
+        /**
+         * Needs
+         *
+         * update sensor - remove binds between sensor to fields
+         *
+         * remove fields - remove binds between fields to sensor
+         *
+         * remove sensor
+         */
         try {
+            lDao.update(sensorLink);
+            for (Field currentField : currentFields) {
+                fieldSubController.delete(currentField);
+            }
             lDao.delete(sensorLink);
             return true;
         } catch (Exception e) {
@@ -243,6 +274,7 @@ public class VirtualSensorLinkController extends Controller {
         String sensorId;
         String collectorId;
         String networkId;
+        //check arguments
         try {
             sensorId = linkTo.getSensorId().trim();
             collectorId = linkTo.getCollectorId().trim();
@@ -251,13 +283,15 @@ public class VirtualSensorLinkController extends Controller {
             throw new BadRequestException("Params cannot be null!");
         }
 
+        //get DAO
         LinkDao lDao;
         try {
-            lDao = factory.getLinkDao();
+            lDao = factory.getPersistentLinkDao();
         } catch (Exception e) {
             throw new InternalServerErrorException("Data query error!");
         }
 
+        //recovery virtual sensor link
         VirtualSensorLink sensorLink = lDao.get(id);
         if (sensorLink == null) {
             throw new NotFoundException("VirtualSensor not found!");
@@ -265,6 +299,7 @@ public class VirtualSensorLinkController extends Controller {
 
         boolean isUpdated = false;
 
+        //update properties 
         if (!sensorLink.getSensorId().equals(sensorId)
                 || !sensorLink.getCollectorId().equals(collectorId)
                 || !sensorLink.getNetworkId().equals(networkId)) {
@@ -275,25 +310,41 @@ public class VirtualSensorLinkController extends Controller {
             isUpdated = true;
         }
 
+        //check field list
         List<? extends FieldTo> fieldsTo = linkTo.getFields();
         if (fieldsTo == null || fieldsTo.isEmpty()) {
             throw new BadRequestException("Is required at least one field!");
         }
 
-        List<Field> fields = getFields(fieldsTo);
-
-        if (!fields.isEmpty()) {
-            try {
-                if (sensorLink.upgradeFields(fields)) {
-                    isUpdated = true;
-                }
-            } catch (Exception e) {
-                throw new BadRequestException(e.getMessage());
-            }
+        List<Field> newFields = createFields(fieldsTo);
+        if (newFields == null || newFields.isEmpty()) {
+            throw new InternalServerErrorException("Fields cannot had been loaded!");
         }
 
+        //get current fields        
+        List<Field> currentFields = sensorLink.getFields();
+
+        //upgrade the fields by field upgrade helper
+        FieldUpgradeHelper operator = new FieldUpgradeHelper();
+        operator.upgradeFieldList(currentFields, newFields);
+        isUpdated = operator.isChanged();
+        List<Field> removedFields = operator.getRemovedFields();
+        List<Field> insertedFields = operator.getInsertedFields();
+
+        //bind field to virtualsensor
+        for (Field inserted : insertedFields) {
+            inserted.setVirtualSensor(sensorLink);
+        }
+
+        //commit changes
         if (isUpdated) {
+            //commit sensor changes
             lDao.update(sensorLink);
+            //remove unusable fields
+            FieldSubController fieldSubController = new FieldSubController(factory);
+            for (Field removed : removedFields) {
+                fieldSubController.delete(removed);
+            }
         }
         return isUpdated;
     }

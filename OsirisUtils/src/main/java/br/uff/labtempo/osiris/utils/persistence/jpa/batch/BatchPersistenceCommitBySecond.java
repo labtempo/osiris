@@ -25,7 +25,7 @@ import javax.persistence.EntityTransaction;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class BatchPersistenceCommitBySecond extends AbstractBatchPersistence {
 

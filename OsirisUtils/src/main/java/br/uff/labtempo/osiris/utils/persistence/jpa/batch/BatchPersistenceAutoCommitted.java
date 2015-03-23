@@ -19,7 +19,7 @@ import javax.persistence.EntityManager;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class BatchPersistenceAutoCommitted extends AbstractBatchPersistence {
 

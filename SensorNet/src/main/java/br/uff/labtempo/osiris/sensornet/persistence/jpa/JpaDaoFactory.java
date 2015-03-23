@@ -22,7 +22,6 @@ import br.uff.labtempo.osiris.sensornet.persistence.SchedulerDao;
 import br.uff.labtempo.osiris.sensornet.persistence.SensorDao;
 import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistence;
 import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistenceAutoCommitted;
-import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistenceCommitBySecond;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -81,6 +80,11 @@ public class JpaDaoFactory implements DaoFactory, AutoCloseable {
     }
 
     @Override
+    public SensorDao getPersistentSensorDao() {
+        return new SensorJpaPersistent(batchPersistence);
+    }
+
+    @Override
     public CollectorDao getCollectorDao() {
         return new CollectorJpa(getDataManager());
     }
@@ -99,7 +103,7 @@ public class JpaDaoFactory implements DaoFactory, AutoCloseable {
     public BatchPersistence getBatchPersistence() {
         return batchPersistence;
     }
-    
+
     @Override
     public void clear() {
         EntityManager em = threadLocal.get();
@@ -124,5 +128,5 @@ public class JpaDaoFactory implements DaoFactory, AutoCloseable {
 
     private EntityManager getNewEntityManager() {
         return emf.createEntityManager();
-    }    
+    }
 }

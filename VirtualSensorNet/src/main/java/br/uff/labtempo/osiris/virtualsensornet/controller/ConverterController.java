@@ -49,6 +49,14 @@ public class ConverterController extends Controller {
 
     @Override
     public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException {
+        try {
+            return routing(request);
+        } finally {
+            factory.clear();
+        }
+    }
+
+    public Response routing(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException {
         String contentType = request.getContentType();
         if (match(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_CONVERTER_ALL.toString())) {
             switch (request.getMethod()) {

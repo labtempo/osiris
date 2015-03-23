@@ -28,6 +28,13 @@ import br.uff.labtempo.osiris.utils.scheduling.Scheduler;
 import br.uff.labtempo.osiris.to.collector.SampleCoTo;
 import br.uff.labtempo.osiris.to.common.definitions.Path;
 import br.uff.labtempo.osiris.to.sensornet.SensorSnTo;
+import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorType;
+import br.uff.labtempo.osiris.utils.requestpool.RequestHandler;
+import br.uff.labtempo.osiris.utils.requestpool.RequestPool;
+import br.uff.labtempo.osiris.virtualsensornet.model.Aggregatable;
+import br.uff.labtempo.osiris.virtualsensornet.model.Field;
+import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
+import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensorComposite;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensorLink;
 import br.uff.labtempo.osiris.virtualsensornet.model.state.ModelState;
 import br.uff.labtempo.osiris.virtualsensornet.model.util.AnnouncerWrapper;
@@ -35,46 +42,71 @@ import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.virtualsensornet.model.util.SensorCoToWrapper;
 import br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer.AnnouncerAgent;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.LinkDao;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public class NotifyController extends Controller {
+public class NotifyController extends Controller implements RequestHandler {
 
     private final String UNIQUE_SENSOR = Path.SEPARATOR.toString() + Path.NAMING_MODULE_SENSORNET + Path.RESOURCE_SENSORNET_SENSOR_BY_ID;
     private final DaoFactory factory;
     private AnnouncerAgent announcer;
     private Scheduler scheduler;
+    private RequestPool requestPool;
+    private ExecutorService executor;
 
-    public NotifyController(DaoFactory factory, AnnouncerAgent announcer) {
+    public NotifyController(DaoFactory factory, AnnouncerAgent announcer, RequestPool requestPool) {
         this.factory = factory;
         this.announcer = new AnnouncerWrapper(announcer);
+        this.requestPool = requestPool;
+        if (requestPool != null) {
+            requestPool.setHandler(this);
+        }
+        this.executor = Executors.newCachedThreadPool();
+    }
+
+    public NotifyController(DaoFactory factory, RequestPool requestPool) {
+        this(factory, null, requestPool);
     }
 
     public NotifyController(DaoFactory factory) {
-        this(factory,null);
+        this(factory, null, null);
     }
 
     @Override
     public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
 
         if (request.getMethod() == RequestMethod.NOTIFY) {
-            if (request.getModule().contains(Path.NAMING_MESSAGEGROUP_COLLECTOR.toString())) {
-                SampleCoTo sample = request.getContent(SampleCoTo.class);
-                updateValues(sample);
-            }
-
-            if (request.getModule().contains(Path.NAMING_MESSAGEGROUP_UPDATE.toString())) {
-                if (match(request.getResource(), UNIQUE_SENSOR)) {
-                    SensorSnTo sensor = request.getContent(SensorSnTo.class);
-                    updateModelStatus(sensor);
-                }
+            if (requestPool != null) {
+                requestPool.add(request);
+            } else {
+                handle(request);
             }
             return new ResponseBuilder().buildNull();
         }
         return null;
+    }
+
+    @Override
+    public void handle(Request request) {
+        if (request.getModule().contains(Path.NAMING_MESSAGEGROUP_COLLECTOR.toString())) {
+            SampleCoTo sample = request.getContent(SampleCoTo.class);
+            updateValues(sample);
+        }
+
+        if (request.getModule().contains(Path.NAMING_MESSAGEGROUP_UPDATE.toString())) {
+            if (match(request.getResource(), UNIQUE_SENSOR)) {
+                SensorSnTo sensor = request.getContent(SensorSnTo.class);
+                updateModelStatus(sensor);
+            }
+        }
     }
 
     public synchronized void updateValues(SampleCoTo sample) {
@@ -94,7 +126,7 @@ public class NotifyController extends Controller {
     }
 
     private void changeLinkModelState(SensorSnTo sensor, ModelState modelState) {
-        LinkDao lDao = factory.getLinkDao();
+        LinkDao lDao = factory.getPersistentLinkDao();
 
         String sensorId = sensor.getId();
         String networkId = sensor.getNetworkId();
@@ -121,7 +153,7 @@ public class NotifyController extends Controller {
     }
 
     private void updateLink(SensorCoToWrapper wrapper) {
-        LinkDao lDao = factory.getLinkDao();
+        LinkDao lDao = factory.getPersistentLinkDao();
 
         String sensorId = wrapper.getSensorId();
         String networkId = wrapper.getNetworkId();
@@ -137,6 +169,7 @@ public class NotifyController extends Controller {
                     announcer.notifyReactivation(link.getTransferObject());
                 }
                 announcer.broadcastIt(link.getTransferObject());
+                checkAggregates(link.getFields());
             }
         }
     }
@@ -147,5 +180,33 @@ public class NotifyController extends Controller {
 
     public void setSchedulerAgent(Scheduler scheduler) {
         this.scheduler = scheduler;
+    }
+
+    private void checkAggregates(final List<Field> fields) {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                
+                Set<VirtualSensor> aggregatables = new HashSet<>();
+                for (Field field : fields) {
+                    aggregatables.addAll(field.getAggregates());
+                }
+
+                if (!aggregatables.isEmpty()) {
+                    for (VirtualSensor aggregatable : aggregatables) {
+                        VirtualSensor virtualSensor = aggregatable;
+                        
+                        if (virtualSensor.getVirtualSensorType() == VirtualSensorType.COMPOSITE) {
+                            VirtualSensorComposite composite = (VirtualSensorComposite) virtualSensor;
+                            composite.setSensorValuesUpdated();
+                            //save composite
+                            announcer.notifyReactivation(composite.getTransferObject());
+                            announcer.broadcastIt(composite.getTransferObject());
+                        }
+                    }
+                }
+            }
+        };
+        executor.execute(runnable);
     }
 }

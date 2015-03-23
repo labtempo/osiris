@@ -26,7 +26,6 @@ import br.uff.labtempo.osiris.sensornet.controller.NotifyController;
 import br.uff.labtempo.osiris.sensornet.controller.SchedulerController;
 import br.uff.labtempo.osiris.sensornet.controller.SensorController;
 import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistence;
-import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistenceCommitBySecond;
 import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistenceAutoCommitted;
 import br.uff.labtempo.osiris.utils.requestpool.RequestPool;
 import br.uff.labtempo.osiris.sensornet.persistence.jpa.JpaDaoFactory;
@@ -44,7 +43,6 @@ import javax.persistence.Persistence;
 public class Bootstrap implements AutoCloseable {
 
     private JpaDaoFactory factory;
-    private BatchPersistence persistence;
     private RequestPool requestPool;
     private OmcpServer omcpServer;
     private final OmcpClient omcpClient;
@@ -65,7 +63,6 @@ public class Bootstrap implements AutoCloseable {
             Properties persistenceProperties = overrideProperties(properties);
             EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnitName, persistenceProperties);
             factory = JpaDaoFactory.newInstance(emf);
-            persistence = new BatchPersistenceAutoCommitted(emf.createEntityManager());
             requestPool = new RequestPool();
             
             NotifyController notifyController = new NotifyController(factory,requestPool);

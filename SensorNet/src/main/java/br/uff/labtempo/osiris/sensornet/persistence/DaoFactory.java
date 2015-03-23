@@ -25,12 +25,14 @@ public interface DaoFactory {
 
     SensorDao getSensorDao();
 
+    SensorDao getPersistentSensorDao();
+
     CollectorDao getCollectorDao();
 
     NetworkDao getNetworkDao();
-    
+
     SchedulerDao getSchedulerDao();
-    
+
     BatchPersistence getBatchPersistence();
 
     void clear();
