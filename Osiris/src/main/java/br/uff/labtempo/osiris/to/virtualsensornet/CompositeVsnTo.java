@@ -61,14 +61,14 @@ public class CompositeVsnTo implements ICompositeVsnTo {
     }
 
     @Override
-    public void linkField(long id) {
+    public void bindToField(long id) {
         InternalFieldTo fieldTo = new InternalFieldTo(id);
         createField(fieldTo);
     }
 
     @Override
-    public void linkField(FieldTo fieldTo) {
-        linkField(fieldTo.getId());
+    public void bindToField(FieldTo fieldTo) {
+        bindToField(fieldTo.getId());
     }
 
     @Override

@@ -15,7 +15,6 @@
  */
 package br.uff.labtempo.osiris.utils.scheduling.core;
 
-
 import br.uff.labtempo.osiris.utils.scheduling.Scheduler;
 import br.uff.labtempo.osiris.utils.scheduling.SchedulerItem;
 import br.uff.labtempo.osiris.utils.scheduling.Scheduling;
@@ -84,7 +83,7 @@ public class SchedulingManagerTest {
 
         private Item item;
         private long id;
-        
+
         public Container(Item id) {
             this.item = item;
         }
@@ -109,6 +108,11 @@ public class SchedulingManagerTest {
         public long getIntervalInMillis() {
             System.out.println("Pegou o intervalo de atualização");
             return TimeUnit.MILLISECONDS.convert(1, TimeUnit.MINUTES) / 60;
+        }
+
+        @Override
+        public boolean isRemovable() {
+            return true;
         }
     }
 
@@ -142,6 +146,7 @@ public class SchedulingManagerTest {
     }
 
     class Callback implements SchedulingCallback {
+
         @Override
         public void callback(List<? extends SchedulerItem> items) throws Exception {
             System.out.println("Executou o Callback");

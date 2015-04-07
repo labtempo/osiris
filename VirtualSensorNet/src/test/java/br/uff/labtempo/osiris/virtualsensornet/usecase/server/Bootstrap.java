@@ -17,6 +17,7 @@ package br.uff.labtempo.osiris.virtualsensornet.usecase.server;
 
 import br.uff.labtempo.osiris.virtualsensornet.controller.ConverterController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.DataTypeController;
+import br.uff.labtempo.osiris.virtualsensornet.controller.FunctionController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.NotifyController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.VirtualSensorBlendingController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.VirtualSensorCompositeController;
@@ -33,12 +34,13 @@ public class Bootstrap implements AutoCloseable {
     private final JpaDaoFactory factory;
 
     private final NotifyController notifyController;
-    private final VirtualSensorLinkController linkController;    
-    private final VirtualSensorCompositeController compositeController;       
+    private final VirtualSensorLinkController linkController;
+    private final VirtualSensorCompositeController compositeController;
     private final VirtualSensorBlendingController blendingController;
     private final DataTypeController dataTypeController;
     private final ConverterController converterController;
     private final VirtualSensorController virtualSensorController;
+    private final FunctionController functionController;
 
     public Bootstrap() throws Exception {
         //String persistenceUnitName = "postgres";
@@ -52,6 +54,7 @@ public class Bootstrap implements AutoCloseable {
         this.blendingController = new VirtualSensorBlendingController(factory);
         this.dataTypeController = new DataTypeController(factory);
         this.converterController = new ConverterController(factory);
+        this.functionController = new FunctionController(factory);
         this.virtualSensorController = new VirtualSensorController(factory);
     }
 
@@ -81,6 +84,10 @@ public class Bootstrap implements AutoCloseable {
 
     public VirtualSensorController getVirtualSensorController() {
         return virtualSensorController;
+    }
+
+    public FunctionController getFunctionController() {
+        return functionController;
     }
 
     @Override

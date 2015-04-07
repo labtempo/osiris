@@ -15,6 +15,7 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.controller;
 
+import br.uff.labtempo.osiris.virtualsensornet.controller.internal.FieldController;
 import br.uff.labtempo.omcp.common.Request;
 import br.uff.labtempo.omcp.common.Response;
 import br.uff.labtempo.omcp.common.exceptions.BadRequestException;
@@ -31,16 +32,14 @@ import br.uff.labtempo.osiris.virtualsensornet.model.Field;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensorComposite;
 import br.uff.labtempo.osiris.virtualsensornet.model.util.AnnouncerWrapper;
-import br.uff.labtempo.osiris.virtualsensornet.model.util.FieldUpdateHelper;
+import br.uff.labtempo.osiris.virtualsensornet.model.util.FieldListManager;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.CompositeDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.FieldDao;
 import br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer.AnnouncerAgent;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  *
@@ -130,7 +129,7 @@ public class VirtualSensorCompositeController extends Controller {
         if (composite == null) {
             throw new NotFoundException("VirtualSensor not found!");
         }
-        CompositeVsnTo to = composite.getCompositeTransferObject();
+        CompositeVsnTo to = composite.getUniqueTransferObject();
         return to;
 
     }
@@ -146,7 +145,7 @@ public class VirtualSensorCompositeController extends Controller {
         List<VirtualSensorComposite> virtualSensors = cd.getAll();
         List<CompositeVsnTo> compositeVsnTos = new ArrayList<>();
         for (VirtualSensorComposite vs : virtualSensors) {
-            compositeVsnTos.add(vs.getCompositeTransferObject());
+            compositeVsnTos.add(vs.getUniqueTransferObject());
         }
         return compositeVsnTos;
     }
@@ -194,7 +193,7 @@ public class VirtualSensorCompositeController extends Controller {
 
     //pronto
     private synchronized List<Field> getFields(List<? extends FieldTo> fieldsTo) throws NotFoundException, InternalServerErrorException, BadRequestException {
-        FieldSubController fsc = new FieldSubController(factory);
+        FieldController fsc = new FieldController(factory);
 
         List<Long> ids = new ArrayList<>();
         for (FieldTo fieldTo : fieldsTo) {
@@ -207,7 +206,7 @@ public class VirtualSensorCompositeController extends Controller {
 
     //pronto
     public boolean delete(long id) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException {
-        FieldSubController fsc = new FieldSubController(factory);
+        FieldController fsc = new FieldController(factory);
         CompositeDao cd;
         try {
             cd = factory.getPersistentCompositeDao();
@@ -221,7 +220,7 @@ public class VirtualSensorCompositeController extends Controller {
         }
         try {
             List<Field> fields = composite.getFields();
-            composite.removeAllFields();
+            composite.removeFields();
             cd.delete(composite);
 
             for (Field field : fields) {
@@ -285,12 +284,15 @@ public class VirtualSensorCompositeController extends Controller {
         //get current fields of composite
         List<Field> currentFields = composite.getFields();
 
-        //operates on list adding and removing fields by FieldUpdateHelper
-        FieldUpdateHelper updateHelper = new FieldUpdateHelper();
-        updateHelper.updateFieldList(currentFields, newestFields);
-        List<Field> toRemove = updateHelper.getRemovedFields();
-        List<Field> toInsert = updateHelper.getInsertedFields();
-        isUpdated = updateHelper.isChanged();
+        //operates on list adding and removing fields by UpdateFieldListHelper
+        FieldListManager listManager = new FieldListManager(newestFields);
+        try {
+            isUpdated = composite.updateFields(listManager);
+        } catch (Exception e) {
+            throw new BadRequestException(e.getMessage());
+        }
+        List<Field> toRemove = listManager.getExcluded();
+        List<Field> toInsert = listManager.getIncluded();
         
         //adding aggregates to added fields
         for (Field inserted : toInsert) {
@@ -299,8 +301,6 @@ public class VirtualSensorCompositeController extends Controller {
 
         //commit changes
         if (isUpdated) {
-            //set composite sensor for update
-            composite.setSensorFieldsUpdated();
             //persists composite        
             cd.update(composite);
             //persists removed fields, removing aggregates 

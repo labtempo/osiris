@@ -15,6 +15,7 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.model.state;
 
+import br.uff.labtempo.osiris.virtualsensornet.model.interfaces.IModel;
 import java.io.Serializable;
 import java.util.Calendar;
 import javax.persistence.EnumType;
@@ -28,7 +29,7 @@ import javax.persistence.TemporalType;
  * @author Felipe Santos <fralph at ic.uff.br>
  */
 @MappedSuperclass
-public abstract class Model implements Serializable {
+public abstract class Model implements IModel {
 
     @Enumerated(EnumType.STRING)
     protected ModelState modelState;
@@ -41,15 +42,17 @@ public abstract class Model implements Serializable {
         updateDate();
     }
 
+    @Override
     public void deactivate() {
         modelState.deactivate(this);
     }
 
+    @Override
     public void reactivate() {
         modelState.reactivate(this);
     }
-
-    protected final void update() {
+@Override
+    public final void update() {
         if (modelState == ModelState.INACTIVE) {
             modelState.reactivate(this);
         } else {
@@ -57,14 +60,17 @@ public abstract class Model implements Serializable {
         }
     }
 
+    @Override
     public void malfunction() {
         modelState.malfunction(this);
     }
 
+    @Override
     public Calendar getLastModifiedDate() {
         return lastModified;
     }
 
+    @Override
     public ModelState getModelState() {
         return modelState;
     }

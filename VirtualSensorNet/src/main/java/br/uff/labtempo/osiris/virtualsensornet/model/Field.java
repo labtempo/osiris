@@ -19,7 +19,6 @@ import br.uff.labtempo.osiris.to.common.definitions.ValueType;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.Entity;

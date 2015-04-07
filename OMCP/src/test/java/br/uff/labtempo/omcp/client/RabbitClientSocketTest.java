@@ -16,14 +16,6 @@
 package br.uff.labtempo.omcp.client;
 
 //import br.uff.labtempo.omcp.client.rabbitmq.RabbitClientSocket;
-import br.uff.labtempo.omcp.common.Request;
-import br.uff.labtempo.omcp.common.Response;
-import br.uff.labtempo.omcp.common.utils.RequestBuilder;
-import br.uff.labtempo.omcp.common.utils.RequestPacket;
-import br.uff.labtempo.omcp.common.utils.ResponsePacket;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  *

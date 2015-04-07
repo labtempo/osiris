@@ -15,12 +15,20 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.model;
 
+import br.uff.labtempo.osiris.virtualsensornet.model.interfaces.IBlending;
+import br.uff.labtempo.osiris.to.common.definitions.FunctionOperation;
+import br.uff.labtempo.osiris.to.virtualsensornet.BlendingVsnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorType;
-import java.util.ArrayList;
-import java.util.HashSet;
+import br.uff.labtempo.osiris.virtualsensornet.model.util.BlendingValuesWrapper;
+import br.uff.labtempo.osiris.virtualsensornet.model.util.FieldListManager;
+import br.uff.labtempo.osiris.virtualsensornet.model.util.field.FieldValuesWrapper;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.ManyToOne;
 
 /**
  *
@@ -33,15 +41,112 @@ import java.util.concurrent.TimeUnit;
  *
  * Delete to remove BlendingVSensor from virtualsensornet
  */
-public class VirtualSensorBlending extends VirtualSensor implements Aggregatable {
+@Entity
+public class VirtualSensorBlending extends VirtualSensor<BlendingVsnTo> implements Aggregatable, IBlending {
 
-    private List<Field> sourceFields;
+    //changeable
+    @ManyToOne
     private Function function;
+
+    @Enumerated(EnumType.STRING)
+    private FunctionOperation callMode;
+    private long callIntervalInMillis;
+
+    //updateable
+    @Embedded
+    private List<BlendingBond> requestFields;
+    @Embedded
+    private List<BlendingBond> responseFields;
+
     private boolean isAggregated;
 
-    public VirtualSensorBlending(String label, List<Field> fields, long interval, TimeUnit intervalTimeUnit) {
-        super(VirtualSensorType.BLENDING, label, fields, interval, intervalTimeUnit);
-        this.sourceFields = new ArrayList<>();
+    protected VirtualSensorBlending() {
+    }
+
+    public VirtualSensorBlending(String label, List<Field> fields) {
+        super(VirtualSensorType.BLENDING, label, fields, 0, TimeUnit.MILLISECONDS);
+        for (Field field : fields) {
+            field.setVirtualSensor(this);
+        }
+    }
+
+    @Override
+    public Function getFunction() {
+        return function;
+    }
+
+    @Override
+    public FunctionOperation getCallMode() {
+        return callMode;
+    }
+
+    @Override
+    public long getCallIntervalInMillis() {
+        return callIntervalInMillis;
+    }
+
+    @Override
+    public List<BlendingBond> getRequestFields() {
+        return requestFields;
+    }
+
+    @Override
+    public List<BlendingBond> getResponseFields() {
+        return responseFields;
+    }
+
+    //updateable
+    @Override
+    public void setRequestFields(List<BlendingBond> requestFields) {
+        this.requestFields = requestFields;
+        update();
+    }
+
+    //updateable
+    @Override
+    public void setResponseFields(List<BlendingBond> responseFields) {
+        this.responseFields = responseFields;
+        update();
+    }
+
+    //changeable
+    @Override
+    public void setFunction(Function function, FunctionOperation mode) {
+        this.function = function;
+        this.callMode = mode;
+        update();
+    }
+
+    //changeable
+    @Override
+    public void setFunction(Function function) {
+        this.function = function;
+        update();
+    }
+
+    //changeable
+    @Override
+    public void removeFunction() {
+        function = null;
+        callMode = null;
+        callIntervalInMillis = 0;
+        requestFields = null;
+        responseFields = null;
+        update();
+    }
+
+    //changeable
+    @Override
+    public void setCallMode(FunctionOperation callMode) {
+        this.callMode = callMode;
+        update();
+    }
+
+    //changeable
+    @Override
+    public void setCallIntervalInMillis(long callIntervalInMillis) {
+        this.callIntervalInMillis = callIntervalInMillis;
+        update();
     }
 
     @Override
@@ -54,15 +159,57 @@ public class VirtualSensorBlending extends VirtualSensor implements Aggregatable
         return this;
     }
 
-    public void addSourceField(Field field){
-        sourceFields.add(field);
-    }
-    
-    public boolean removeSourceField(Field field){
-        return sourceFields.remove(field);
+    @Override
+    public boolean setFieldsValues(FieldValuesWrapper valuesWrapper) {
+        BlendingValuesWrapper wrapper = (BlendingValuesWrapper) valuesWrapper;
+        List<BlendingValuesWrapper.BlendingValue> valueWrappers = wrapper.getValues();
+        List<Field> current = getFields();
+        boolean isUpdated = false;
+        synchronized (current) {
+            //update field values
+            //response value has only one field, not has array
+            boolean isValueUpdated = false;
+            for (BlendingBond responseField : responseFields) {
+                String paramName = responseField.getName();
+                Field field = responseField.getField();
+                for (BlendingValuesWrapper.BlendingValue blendingValue : valueWrappers) {
+                    if (paramName.equalsIgnoreCase(blendingValue.getName())) {
+                        field.setValue(blendingValue.getValue());
+                        isValueUpdated = true;
+                    }
+                }
+            }
+
+            if (isValueUpdated) {
+                super.setFieldsValues(valuesWrapper);
+                isUpdated = true;
+            }
+        }
+        return isUpdated;
     }
 
-    public List<Field> getSourceFields() {
-        return sourceFields;
+    @Override
+    public boolean updateFields(FieldListManager listManager) {
+        List<Field> fields = getFields();
+        synchronized (fields) {
+            boolean updated = listManager.doCreateModifyDelete(fields);
+            if (updated) {
+                update();
+            }
+            return updated;
+        }
     }
+
+    @Override
+    public BlendingVsnTo getUniqueTransferObject() {
+        BlendingVsnTo blendingVsnTo = new BlendingVsnTo(getId(), getLabel());
+        List<Field> fields = getFields();
+        for (Field field : fields) {
+            VirtualSensor sensor = field.getVirtualSensor();
+            int aggregates = field.getAggregates().size();
+            blendingVsnTo.createField(field.getId(), field.getReferenceName(), field.getDataTypeId(), field.getConverterId(), field.isStored(), sensor.getId(), aggregates);
+        }
+        return blendingVsnTo;
+    }
+
 }

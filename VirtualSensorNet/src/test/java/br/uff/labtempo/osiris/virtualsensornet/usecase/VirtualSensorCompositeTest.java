@@ -126,7 +126,7 @@ public class VirtualSensorCompositeTest {
     @Test(expected = BadRequestException.class)
     public void TestCreateComposite_NullLabel_ShouldThrowException() throws BadRequestException, NotFoundException, InternalServerErrorException {
         CompositeVsnTo to = new CompositeVsnTo(null);
-        to.linkField(1);
+        to.bindToField(1);
         controller.create(to);
     }
 
@@ -141,10 +141,10 @@ public class VirtualSensorCompositeTest {
         List<CompositeVsnTo> vsnTos = controller.getAll();
 
         CompositeVsnTo to = new CompositeVsnTo("TestCreateComposite");
-        to.linkField(fld1);
-        to.linkField(fld2);
-        to.linkField(fld3);
-        to.linkField(fld4);
+        to.bindToField(fld1);
+        to.bindToField(fld2);
+        to.bindToField(fld3);
+        to.bindToField(fld4);
         controller.create(to);
 
         int expectedSize = vsnTos.size() + 1;
@@ -158,7 +158,7 @@ public class VirtualSensorCompositeTest {
         List<CompositeVsnTo> vsnTos = controller.getAll();
 
         CompositeVsnTo to = new CompositeVsnTo("TestGetAllComposite");
-        to.linkField(fld1);
+        to.bindToField(fld1);
         controller.create(to);
 
         List<CompositeVsnTo> vsnTos1 = controller.getAll();
@@ -169,10 +169,10 @@ public class VirtualSensorCompositeTest {
     @Test
     public void TestGetComposite_Valid_ShouldPass() throws NotFoundException, BadRequestException, InternalServerErrorException {
         CompositeVsnTo to = new CompositeVsnTo("TestGetComposite");
-        to.linkField(fld1);
-        to.linkField(fld2);
-        to.linkField(fld3);
-        to.linkField(fld4);
+        to.bindToField(fld1);
+        to.bindToField(fld2);
+        to.bindToField(fld3);
+        to.bindToField(fld4);
 
         long id = controller.create(to);
         CompositeVsnTo vsnTo = controller.get(id);
@@ -188,10 +188,10 @@ public class VirtualSensorCompositeTest {
     @Test(expected = BadRequestException.class)
     public void TestUpdateComposite_NullFields_ShouldThrowException() throws NotFoundException, MethodNotAllowedException, BadRequestException, InternalServerErrorException {
         CompositeVsnTo to = new CompositeVsnTo("TestUpdateComposite_NullParams");
-        to.linkField(fld1);
-        to.linkField(fld2);
-        to.linkField(fld3);
-        to.linkField(fld4);
+        to.bindToField(fld1);
+        to.bindToField(fld2);
+        to.bindToField(fld3);
+        to.bindToField(fld4);
 
         long id = controller.create(to);
 
@@ -203,15 +203,15 @@ public class VirtualSensorCompositeTest {
     @Test(expected = BadRequestException.class)
     public void TestUpdateComposite_NullLabel_ShouldThrowException() throws NotFoundException, MethodNotAllowedException, BadRequestException, InternalServerErrorException {
         CompositeVsnTo to = new CompositeVsnTo("TestUpdateComposite_NullLabel");
-        to.linkField(fld1);
-        to.linkField(fld2);
-        to.linkField(fld3);
-        to.linkField(fld4);
+        to.bindToField(fld1);
+        to.bindToField(fld2);
+        to.bindToField(fld3);
+        to.bindToField(fld4);
 
         long id = controller.create(to);
 
         CompositeVsnTo to1 = new CompositeVsnTo(null);
-        to.linkField(fld1);
+        to.bindToField(fld1);
 
         controller.update(id, to1);
     }
@@ -219,10 +219,10 @@ public class VirtualSensorCompositeTest {
     @Test
     public void TestUpdateComposite_RemoveField_Valid_ShouldPass() throws NotFoundException, MethodNotAllowedException, BadRequestException, InternalServerErrorException {
         CompositeVsnTo to = new CompositeVsnTo("TestUpdateComposite_NoFieldUpdate");
-        to.linkField(fld1);
-        to.linkField(fld2);
-        to.linkField(fld3);
-        to.linkField(fld4);
+        to.bindToField(fld1);
+        to.bindToField(fld2);
+        to.bindToField(fld3);
+        to.bindToField(fld4);
 
         long id = controller.create(to);
 
@@ -233,7 +233,7 @@ public class VirtualSensorCompositeTest {
         CompositeVsnTo to1 = new CompositeVsnTo(expectedLabel);
 
         for (FieldTo field : lvt.getFields()) {
-            to1.linkField(field.getId());
+            to1.bindToField(field.getId());
             break;
         }
 
@@ -254,7 +254,7 @@ public class VirtualSensorCompositeTest {
     @Test
     public void TestUpdateComposite_AddField_Valid_ShouldPass() throws NotFoundException, MethodNotAllowedException, BadRequestException, InternalServerErrorException {
         CompositeVsnTo to = new CompositeVsnTo("TestUpdateComposite_AddRemoveField");
-        to.linkField(fld1);
+        to.bindToField(fld1);
 
         long id = controller.create(to);
 
@@ -263,12 +263,12 @@ public class VirtualSensorCompositeTest {
         CompositeVsnTo lvt = controller.get(id);
 
         CompositeVsnTo to1 = new CompositeVsnTo(expectedLabel);
-        to1.linkField(fld2);
-        to1.linkField(fld3);
-        to1.linkField(fld4);
+        to1.bindToField(fld2);
+        to1.bindToField(fld3);
+        to1.bindToField(fld4);
 
         for (FieldTo field : lvt.getFields()) {
-            to1.linkField(field.getId());
+            to1.bindToField(field.getId());
             break;
         }
 
@@ -289,10 +289,10 @@ public class VirtualSensorCompositeTest {
     @Test
     public void TestUpdateComposite_CheckValues_CheckFieldIsInitialized_Valid_ShouldPass() throws NotFoundException, MethodNotAllowedException, InternalServerErrorException, BadRequestException {
         CompositeVsnTo to = new CompositeVsnTo("TestUpdateComposite_CheckValues");
-        to.linkField(fld1);
-        to.linkField(fld2);
-        to.linkField(fld3);
-        to.linkField(fld4);
+        to.bindToField(fld1);
+        to.bindToField(fld2);
+        to.bindToField(fld3);
+        to.bindToField(fld4);
         long id = controller.create(to);
 
         CompositeVsnTo lvt = controller.get(id);
@@ -339,9 +339,9 @@ public class VirtualSensorCompositeTest {
     @Test
     public void TestDeleteComposite_Valid_ShouldPass() throws NotFoundException, MethodNotAllowedException, InternalServerErrorException, BadRequestException {
         CompositeVsnTo to = new CompositeVsnTo("TestDeleteComposite");
-        to.linkField(fld2);
-        to.linkField(fld3);
-        to.linkField(fld4);
+        to.bindToField(fld2);
+        to.bindToField(fld3);
+        to.bindToField(fld4);
 
         long id = controller.create(to);
         boolean result = controller.delete(id);

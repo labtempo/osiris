@@ -23,6 +23,7 @@ import br.uff.labtempo.osiris.to.common.data.ValueTo;
 import br.uff.labtempo.osiris.to.common.definitions.ValueType;
 import br.uff.labtempo.osiris.virtualsensornet.model.DataType;
 import br.uff.labtempo.osiris.virtualsensornet.model.Field;
+import br.uff.labtempo.osiris.virtualsensornet.model.util.field.FieldValuesWrapper;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -33,7 +34,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public class SensorCoToWrapper {
+public class LinkValuesWrapper implements FieldValuesWrapper<Field>{
 
     private final String id;
     private final String networkId;
@@ -48,7 +49,7 @@ public class SensorCoToWrapper {
     private final long captureInterval;
     private final TimeUnit captureIntervalTimeUnit;
 
-    public SensorCoToWrapper(SampleCoTo sample) {
+    public LinkValuesWrapper(SampleCoTo sample) {
         SensorCoTo sensor = sample.getSensor();
         CollectorCoTo collector = sample.getCollector();
         NetworkCoTo network = sample.getNetwork();
@@ -78,27 +79,33 @@ public class SensorCoToWrapper {
         return collectorId;
     }
 
-    public long getCaptureTimestampInMillis() {
+    @Override
+    public long getCreationTimestampInMillis() {
         return captureTimestampInMillis;
     }
 
-    public int getCapturePrecisionInNano() {
+    @Override
+    public int getCreationPrecisionInNano() {
         return capturePrecisionInNano;
     }
 
+    @Override
     public long getAcquisitionTimestampInMillis() {
         return acquisitionTimestampInMillis;
     }    
   
-    public long getCaptureInterval() {
+    @Override
+    public long getCreationInterval() {
         return captureInterval;
     }
 
-    public TimeUnit getCaptureIntervalTimeUnit() {
+    @Override
+    public TimeUnit getCreationIntervalTimeUnit() {
         return captureIntervalTimeUnit;
     }
 
-    public List<Field> getFields() {
+    @Override
+    public List<Field> getValues() {
         return fields;
     }
 

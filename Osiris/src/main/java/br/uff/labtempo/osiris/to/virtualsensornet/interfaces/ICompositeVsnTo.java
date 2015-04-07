@@ -30,9 +30,9 @@ public interface ICompositeVsnTo {
 
     List<? extends FieldTo> getFields();
 
-    void linkField(long id);
+    void bindToField(long id);
 
-    void linkField(FieldTo fieldTo);
+    void bindToField(FieldTo fieldTo);
 
     void addField(long id, String name, long dataTypeId, long converterId, boolean initialized, long sourceId, int aggregates);
 

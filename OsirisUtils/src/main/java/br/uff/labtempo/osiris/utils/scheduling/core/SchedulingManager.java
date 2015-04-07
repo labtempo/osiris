@@ -79,7 +79,9 @@ public class SchedulingManager implements Scheduling, TaskCallback {
         List<? extends SchedulerItem> items = storage.getAllByTimeLimit(currentTimeInMillis);
         if (items != null && items.size() > 0) {
             for (SchedulerItem item : items) {
-                storage.delete(item);
+                if (item.isRemovable()) {
+                    storage.delete(item);
+                }
             }
 
             try {

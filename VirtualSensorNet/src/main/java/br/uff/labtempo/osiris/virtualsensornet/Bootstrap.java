@@ -21,13 +21,16 @@ import br.uff.labtempo.omcp.server.OmcpServer;
 import br.uff.labtempo.omcp.server.rabbitmq.RabbitServer;
 import br.uff.labtempo.osiris.to.common.definitions.Path;
 import br.uff.labtempo.osiris.utils.requestpool.RequestPool;
-import br.uff.labtempo.osiris.virtualsensornet.controller.AnnouncementController;
+import br.uff.labtempo.osiris.virtualsensornet.controller.internal.AnnouncementController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.ConverterController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.DataTypeController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.NotifyController;
-import br.uff.labtempo.osiris.virtualsensornet.controller.SchedulerController;
+import br.uff.labtempo.osiris.virtualsensornet.controller.VirtualSensorBlendingController;
+import br.uff.labtempo.osiris.virtualsensornet.controller.VirtualSensorCompositeController;
+import br.uff.labtempo.osiris.virtualsensornet.controller.internal.SchedulerController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.VirtualSensorController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.VirtualSensorLinkController;
+import br.uff.labtempo.osiris.virtualsensornet.controller.internal.AggregatesCheckerController;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.jpa.JpaDaoFactory;
 import br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer.AnnouncementBootstrap;
 import br.uff.labtempo.osiris.virtualsensornet.thirdparty.scheduler.SchedulerBootstrap;
@@ -46,6 +49,7 @@ public class Bootstrap implements AutoCloseable {
     private final OmcpClient omcpClient;
     private final SchedulerBootstrap schedulerBootstrap;
     private final AnnouncementBootstrap announcementBootstrap;
+    private final AggregatesCheckerController checkerController;
     private RequestPool requestPool;
 
     public Bootstrap(Properties properties) throws Exception {
@@ -64,28 +68,40 @@ public class Bootstrap implements AutoCloseable {
             EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnitName, persistenceProperties);
             factory = JpaDaoFactory.newInstance(emf);
             requestPool = new RequestPool();
+            checkerController = new AggregatesCheckerController(factory);
+
+            //external controllers
+            NotifyController nc = new NotifyController(factory, requestPool, checkerController);
             
-            NotifyController nc = new NotifyController(factory, requestPool);
             VirtualSensorController vsc = new VirtualSensorController(factory);
             VirtualSensorLinkController vslc = new VirtualSensorLinkController(factory);
+            VirtualSensorCompositeController vscc = new VirtualSensorCompositeController(factory);
+            VirtualSensorBlendingController vsbc = new VirtualSensorBlendingController(factory, checkerController);
+            
             DataTypeController dtc = new DataTypeController(factory);
             ConverterController cc = new ConverterController(factory);
 
+            //scheduling
             SchedulerController schedulerController = new SchedulerController(factory);
             schedulerBootstrap = new SchedulerBootstrap(factory.getSchedulerDao(), schedulerController);
-
+            //announcement
             omcpClient = new OmcpClientBuilder().host(ip).user(user, pass).source(moduleName).build();
             announcementBootstrap = new AnnouncementBootstrap(omcpClient);
             AnnouncementController announcementController = new AnnouncementController(announcementBootstrap.getAnnouncer());
 
-            schedulerController.setAnnouncerAgent(announcementController);
+            //setting extra components to the controllers
             nc.setAnnouncerAgent(announcementController);
             nc.setSchedulerAgent(schedulerBootstrap.getScheduler());
             vslc.setAnnouncerAgent(announcementController);
+            vscc.setAnnouncerAgent(announcementController);
+            vsbc.setAnnouncerAgent(announcementController);
 
+            //chain of responsibility
             nc.setNext(vsc);
             vsc.setNext(vslc);
-            vslc.setNext(dtc);
+            vslc.setNext(vscc);
+            vscc.setNext(vsbc);
+            vsbc.setNext(dtc);
             dtc.setNext(cc);
 
             omcpServer = new RabbitServer(moduleName, ip, user, pass);

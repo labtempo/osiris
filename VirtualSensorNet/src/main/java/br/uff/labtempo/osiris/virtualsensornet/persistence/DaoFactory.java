@@ -28,16 +28,22 @@ public interface DaoFactory {
     LinkDao getLinkDao();
 
     LinkDao getPersistentLinkDao();
-    
+
     CompositeDao getCompositeDao();
-    
+
     CompositeDao getPersistentCompositeDao();
-    
+
+    BlendingDao getBlendingDao();
+
+    BlendingDao getPersistentBlendingDao();
+
     FieldDao getFieldDao();
 
     ConverterDao getConverterDao();
 
     DataTypeDao getDataTypeDao();
+
+    FunctionDao getFunctionDao();
 
     SchedulerDao getSchedulerDao();
 

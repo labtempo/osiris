@@ -15,9 +15,12 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.model;
 
+import br.uff.labtempo.osiris.virtualsensornet.model.interfaces.IVirtualSensor;
 import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorType;
 import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorVsnTo;
 import br.uff.labtempo.osiris.virtualsensornet.model.state.Model;
+import br.uff.labtempo.osiris.virtualsensornet.model.util.FieldListManager;
+import br.uff.labtempo.osiris.virtualsensornet.model.util.field.FieldValuesWrapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -41,7 +44,7 @@ import javax.persistence.OrderBy;
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class VirtualSensor extends Model {
+public abstract class VirtualSensor<T> extends Model implements IVirtualSensor<T> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -80,98 +83,93 @@ public abstract class VirtualSensor extends Model {
         this.creationIntervalTimeUnit = creationIntervalTimeUnit;
     }
 
+    @Override
     public long getId() {
         return id;
     }
 
+    @Override
     public String getLabel() {
         return label;
     }
 
-    public long getCreationTimestampInMillis() {
-        return creationTimestampInMillis;
-    }
-
-    public int getCreationPrecisionInNano() {
-        return creationPrecisionInNano;
-    }
-
-    public long getStorageTimestampInMillis() {
-        return storageTimestampInMillis;
-    }
-
-    public long getAcquisitionTimestampInMillis() {
-        return acquisitionTimestampInMillis;
-    }
-
-    public VirtualSensorType getVirtualSensorType() {
-        return virtualSensorType;
-    }
-
-    public long getCreationInterval() {
-        return creationInterval;
-    }
-
-    public TimeUnit getCreationIntervalTimeUnit() {
-        return creationIntervalTimeUnit;
-    }
-
-    public List<Field> getFields() {
-        return fields;
-    }
-
+    @Override
     public void setLabel(String label) {
         this.label = label;
         update();
     }
 
-    protected boolean updateInterval(long creationInterval, TimeUnit creationIntervalTimeUnit) {
-        if (this.creationInterval != creationInterval || !this.creationIntervalTimeUnit.equals(creationIntervalTimeUnit)) {
-            this.creationInterval = creationInterval;
-            this.creationIntervalTimeUnit = creationIntervalTimeUnit;
-            update();
-            return true;
-        }
-        return false;
+    @Override
+    public long getCreationTimestampInMillis() {
+        return creationTimestampInMillis;
     }
 
-    protected void setAllTimestamp(long creationTimestampInMillis, int creationPrecisionInNano, long acquisitionTimestampInMillis) {
-        this.creationTimestampInMillis = creationTimestampInMillis;
-        this.creationPrecisionInNano = creationPrecisionInNano;
-        this.acquisitionTimestampInMillis = acquisitionTimestampInMillis;
+    @Override
+    public long getAcquisitionTimestampInMillis() {
+        return acquisitionTimestampInMillis;
+    }
+
+    @Override
+    public long getStorageTimestampInMillis() {
+        return storageTimestampInMillis;
+    }
+
+    @Override
+    public TimeUnit getCreationIntervalTimeUnit() {
+        return creationIntervalTimeUnit;
+    }
+
+    @Override
+    public int getCreationPrecisionInNano() {
+        return creationPrecisionInNano;
+    }
+
+    @Override
+    public long getCreationInterval() {
+        return creationInterval;
+    }
+
+    @Override
+    public List<Field> getFields() {
+        return fields;
+    }
+
+    @Override
+    public boolean setFieldsValues(FieldValuesWrapper valuesWrapper) {
+        this.creationTimestampInMillis = valuesWrapper.getCreationTimestampInMillis();
+        this.creationPrecisionInNano = valuesWrapper.getCreationPrecisionInNano();
+        this.acquisitionTimestampInMillis = valuesWrapper.getAcquisitionTimestampInMillis();
         this.storageTimestampInMillis = getStorageTimestamp();
+        
+        this.creationInterval = valuesWrapper.getCreationInterval();
+        this.creationIntervalTimeUnit = valuesWrapper.getCreationIntervalTimeUnit();
         update();
+        
+        return true;
     }
 
-    protected boolean addField(Field field) {
-        if (fields == null) {
-            fields = new ArrayList<>();
-        }
+    @Override
+    public abstract boolean updateFields(FieldListManager listManager);
 
-        boolean isUpdated = fields.add(field);
-        if (isUpdated) {
-            update();
-        }
-        return isUpdated;
+    @Override
+    public VirtualSensorType getVirtualSensorType() {
+        return virtualSensorType;
     }
 
-    protected boolean removeField(Field field) {
-        synchronized (fields) {
-            Field oldField = getField(field);
+    @Override
+    public synchronized VirtualSensorVsnTo getTransferObject() {
+        VirtualSensorVsnTo sensorVsnTo = new VirtualSensorVsnTo(id, getModelState().getState(), creationTimestampInMillis, creationPrecisionInNano, creationInterval, creationIntervalTimeUnit, acquisitionTimestampInMillis, storageTimestampInMillis, getLastModifiedDate(), virtualSensorType);
 
-            if (oldField == null) {
-                return false;
-            }
-
-            boolean isUpdated = fields.remove(oldField);
-
-            if (isUpdated) {
-                update();
-            }
-            return isUpdated;
+        for (Field field : fields) {
+            sensorVsnTo.addValue(field.getId(), field.getReferenceName(), field.getValueType(), field.getValue(), field.getUnit(), field.getSymbol());
         }
+
+        return sensorVsnTo;
     }
-    
+
+    @Override
+    public abstract T getUniqueTransferObject();
+
     private long getStorageTimestamp() {
         if (revisions == null) {
             revisions = new ArrayList<>();
@@ -190,16 +188,6 @@ public abstract class VirtualSensor extends Model {
             }
             return null;
         }
-    }
-
-    public synchronized VirtualSensorVsnTo getTransferObject() {
-        VirtualSensorVsnTo sensorVsnTo = new VirtualSensorVsnTo(id, getModelState().getState(), creationTimestampInMillis, creationPrecisionInNano, creationInterval, creationIntervalTimeUnit, acquisitionTimestampInMillis, storageTimestampInMillis, getLastModifiedDate(), virtualSensorType);
-
-        for (Field field : fields) {
-            sensorVsnTo.addValue(field.getId(), field.getReferenceName(), field.getValueType(), field.getValue(), field.getUnit(), field.getSymbol());
-        }
-
-        return sensorVsnTo;
     }
 
     @Override

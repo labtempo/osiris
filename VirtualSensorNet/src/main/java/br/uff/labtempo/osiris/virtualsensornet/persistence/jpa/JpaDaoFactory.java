@@ -17,11 +17,13 @@ package br.uff.labtempo.osiris.virtualsensornet.persistence.jpa;
 
 import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistence;
 import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistenceAutoCommitted;
+import br.uff.labtempo.osiris.virtualsensornet.persistence.BlendingDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.CompositeDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.ConverterDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DataTypeDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.FieldDao;
+import br.uff.labtempo.osiris.virtualsensornet.persistence.FunctionDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.LinkDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.SchedulerDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.VirtualSensorDao;
@@ -36,13 +38,13 @@ public class JpaDaoFactory implements DaoFactory, AutoCloseable {
 
     private static JpaDaoFactory instance;
     private EntityManagerFactory emf;
-     private BatchPersistence batchPersistence;
+    private BatchPersistence batchPersistence;
     private ThreadLocal<EntityManager> threadLocal = new ThreadLocal();
 
     private JpaDaoFactory(EntityManagerFactory emf) throws Exception {
         try {
             this.emf = emf;
-            this.batchPersistence = new BatchPersistenceAutoCommitted(emf.createEntityManager());       
+            this.batchPersistence = new BatchPersistenceAutoCommitted(emf.createEntityManager());
         } catch (Exception ex) {
             close();
             throw ex;
@@ -87,9 +89,9 @@ public class JpaDaoFactory implements DaoFactory, AutoCloseable {
 
     @Override
     public LinkDao getPersistentLinkDao() {
-         return new LinkJpaPersistent(batchPersistence);
+        return new LinkJpaPersistent(batchPersistence);
     }
-    
+
     @Override
     public CompositeDao getCompositeDao() {
         return new CompositeJpa(getDataManager());
@@ -97,7 +99,17 @@ public class JpaDaoFactory implements DaoFactory, AutoCloseable {
 
     @Override
     public CompositeDao getPersistentCompositeDao() {
-         return new CompositeJpaPersistent(batchPersistence);
+        return new CompositeJpaPersistent(batchPersistence);
+    }
+
+    @Override
+    public BlendingDao getBlendingDao() {
+        return new BlendingJpa(getDataManager());
+    }
+
+    @Override
+    public BlendingDao getPersistentBlendingDao() {
+        return new BlendingJpaPersistent(batchPersistence);
     }
 
     @Override
@@ -116,15 +128,20 @@ public class JpaDaoFactory implements DaoFactory, AutoCloseable {
     }
 
     @Override
+    public FunctionDao getFunctionDao() {
+        return new FunctionJpa(getDataManager());
+    }
+
+    @Override
     public SchedulerDao getSchedulerDao() {
         return new SchedulerJpa(batchPersistence);
     }
-    
+
     @Override
     public BatchPersistence getBatchPersistence() {
         return batchPersistence;
     }
-    
+
     @Override
     public void clear() {
         EntityManager em = threadLocal.get();
@@ -132,7 +149,7 @@ public class JpaDaoFactory implements DaoFactory, AutoCloseable {
             em.close();
             threadLocal.set(null);
         }
-    }    
+    }
 
     private DataManager getDataManager() {
         return new DataManager(this);
@@ -149,5 +166,5 @@ public class JpaDaoFactory implements DaoFactory, AutoCloseable {
 
     private EntityManager getNewEntityManager() {
         return emf.createEntityManager();
-    }    
+    }
 }

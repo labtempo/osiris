@@ -15,6 +15,7 @@
  */
 package br.uff.labtempo.omcp.common;
 
+import br.uff.labtempo.omcp.common.exceptions.BadRequestException;
 import br.uff.labtempo.omcp.common.utils.Serializer;
 import java.util.Calendar;
 
@@ -72,10 +73,14 @@ public class Request {
         return content;
     }
 
-    public <T> T getContent(Class klass) {
-        Serializer serializer = new Serializer();
-        T obj = serializer.<T>deserialize(content, contentType, klass);
-        return obj;
+    public <T> T getContent(Class klass) throws BadRequestException {
+        try {
+            Serializer serializer = new Serializer();
+            T obj = serializer.<T>deserialize(content, contentType, klass);
+            return obj;
+        } catch (Exception ex) {
+            throw new BadRequestException("Request message format is not correct.");
+        }
     }
 
     public int getContentLength() {

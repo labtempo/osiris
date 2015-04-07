@@ -29,4 +29,6 @@ public interface SchedulerItem {
     
     long getIntervalInMillis();
     
+    boolean isRemovable();
+    
 }

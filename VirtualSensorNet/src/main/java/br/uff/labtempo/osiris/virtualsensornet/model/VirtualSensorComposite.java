@@ -15,9 +15,12 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.model;
 
+import br.uff.labtempo.osiris.virtualsensornet.model.interfaces.IComposite;
 import br.uff.labtempo.osiris.to.virtualsensornet.CompositeVsnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorType;
 import br.uff.labtempo.osiris.virtualsensornet.model.state.ModelState;
+import br.uff.labtempo.osiris.virtualsensornet.model.util.FieldListManager;
+import br.uff.labtempo.osiris.virtualsensornet.model.util.field.FieldValuesWrapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -28,7 +31,7 @@ import javax.persistence.Entity;
  * @author Felipe Santos <fralph at ic.uff.br>
  */
 @Entity
-public class VirtualSensorComposite extends VirtualSensor implements Aggregatable {
+public class VirtualSensorComposite extends VirtualSensor<CompositeVsnTo> implements IComposite {
 
     public VirtualSensorComposite() {
     }
@@ -51,19 +54,20 @@ public class VirtualSensorComposite extends VirtualSensor implements Aggregatabl
         return this;
     }
 
-    public void removeAllFields() {
-        List<Field> fields = new ArrayList<>(getFields());
-        for (Field field : fields) {
-            field.removeAggregate(this);
-            super.removeField(field);
+    @Override
+    public void removeFields() {
+        List<Field> fields = getFields();
+        synchronized (fields) {
+            List<Field> tempFields = new ArrayList<>(getFields());
+            for (Field field : tempFields) {
+                field.removeAggregate(this);
+                fields.remove(field);
+            }
         }
     }
 
-    public void setSensorFieldsUpdated() {
-        update();
-    }
-
-    public void setSensorValuesUpdated() {
+    @Override    
+    public boolean setFieldsValues(FieldValuesWrapper valuesWrapper) {
         boolean isError = false;
         boolean isWorking = false;
 
@@ -85,26 +89,74 @@ public class VirtualSensorComposite extends VirtualSensor implements Aggregatabl
             }
         }
 
-        VirtualSensor latestUpdatedSensor = latestUpdatedField.getVirtualSensor();
-        VirtualSensor minorIntervalSensor = minorIntervalField.getVirtualSensor();
+        final VirtualSensor latestUpdatedSensor = latestUpdatedField.getVirtualSensor();
+        final VirtualSensor minorIntervalSensor = minorIntervalField.getVirtualSensor();
 
         //put new time values
         if (isWorking) {
-            setAllTimestamp(latestUpdatedSensor.getCreationTimestampInMillis(), latestUpdatedSensor.getCreationPrecisionInNano(), latestUpdatedSensor.getAcquisitionTimestampInMillis());
-            updateInterval(minorIntervalSensor.getCreationInterval(), minorIntervalSensor.getCreationIntervalTimeUnit());
+            FieldValuesWrapper<Object> wrapper = new FieldValuesWrapper<Object>() {
+
+                @Override
+                public long getCreationTimestampInMillis() {
+                    return latestUpdatedSensor.getCreationTimestampInMillis();
+                }
+
+                @Override
+                public long getAcquisitionTimestampInMillis() {
+                    return latestUpdatedSensor.getAcquisitionTimestampInMillis();
+                }
+
+                @Override
+                public TimeUnit getCreationIntervalTimeUnit() {
+                    return minorIntervalSensor.getCreationIntervalTimeUnit();
+                }
+
+                @Override
+                public int getCreationPrecisionInNano() {
+                    return latestUpdatedSensor.getCreationPrecisionInNano();
+                }
+
+                @Override
+                public long getCreationInterval() {
+                    return minorIntervalSensor.getCreationInterval();
+                }
+
+                @Override
+                public List<Object> getValues() {
+                    return null;
+                }
+            };
+            super.setFieldsValues(valuesWrapper);
         }
 
         //reset operation state of the composite to reflect new state properly
         if (isWorking && !isError) {
             super.update();
+            return true;
         } else if (isWorking && isError) {
             super.malfunction();
+            return true;
         } else if (!isWorking) {
             super.deactivate();
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean updateFields(FieldListManager listManager) {
+        List<Field> fields = getFields();
+        synchronized (fields) {
+            boolean updated = listManager.doAddRemove(fields);
+            if (updated) {
+                update();
+            }
+            return updated;
         }
     }
 
-    public CompositeVsnTo getCompositeTransferObject() {
+    @Override
+    public CompositeVsnTo getUniqueTransferObject() {
         CompositeVsnTo compositeVsnTo = new CompositeVsnTo(getId(), getLabel());
         List<Field> fields = getFields();
         for (Field field : fields) {

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package br.uff.labtempo.osiris.virtualsensornet.controller;
+package br.uff.labtempo.osiris.virtualsensornet.controller.internal;
 
 import br.uff.labtempo.osiris.to.common.definitions.Path;
 import br.uff.labtempo.osiris.to.notification.Notification;

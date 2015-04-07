@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package br.uff.labtempo.osiris.virtualsensornet.controller;
+package br.uff.labtempo.osiris.virtualsensornet.controller.internal;
 
 import br.uff.labtempo.osiris.utils.scheduling.SchedulerItem;
 import br.uff.labtempo.osiris.utils.scheduling.SchedulingCallback;
-import br.uff.labtempo.osiris.virtualsensornet.model.util.AnnouncerWrapper;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer.AnnouncerAgent;
 import java.util.List;
@@ -31,14 +30,8 @@ public class SchedulerController implements SchedulingCallback {
     private final DaoFactory factory;
     private AnnouncerAgent announcer;
 
-    public SchedulerController(DaoFactory factory, AnnouncerAgent announcer) {
-        this.factory = factory;
-        this.announcer = new AnnouncerWrapper(announcer);
-    }
-
     public SchedulerController(DaoFactory factory) {
         this.factory = factory;
-        this.announcer = new AnnouncerWrapper(null);
     }
 
     @Override
@@ -87,9 +80,5 @@ public class SchedulerController implements SchedulingCallback {
          announcerDao.notifyDeactivation(to);
          announcerDao.broadcastIt(to);
          }*/
-    }
-
-    public void setAnnouncerAgent(AnnouncerAgent announcerAgent) {
-        announcer = announcerAgent;
     }
 }

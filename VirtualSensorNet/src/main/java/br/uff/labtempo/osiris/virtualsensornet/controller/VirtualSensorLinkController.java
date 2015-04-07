@@ -15,6 +15,7 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.controller;
 
+import br.uff.labtempo.osiris.virtualsensornet.controller.internal.FieldController;
 import br.uff.labtempo.osiris.to.virtualsensornet.LinkVsnTo;
 import br.uff.labtempo.omcp.common.Request;
 import br.uff.labtempo.omcp.common.Response;
@@ -32,7 +33,8 @@ import br.uff.labtempo.osiris.virtualsensornet.model.DataType;
 import br.uff.labtempo.osiris.virtualsensornet.model.Field;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensorLink;
 import br.uff.labtempo.osiris.virtualsensornet.model.util.AnnouncerWrapper;
-import br.uff.labtempo.osiris.virtualsensornet.model.util.FieldUpgradeHelper;
+import br.uff.labtempo.osiris.virtualsensornet.model.util.FieldListManager;
+import br.uff.labtempo.osiris.virtualsensornet.model.util.field.UpgradeFieldListHelper;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.ConverterDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DataTypeDao;
@@ -130,7 +132,7 @@ public class VirtualSensorLinkController extends Controller {
         if (sensorLink == null) {
             throw new NotFoundException("VirtualSensor not found!");
         }
-        LinkVsnTo to = sensorLink.getLinkTransferObject();
+        LinkVsnTo to = sensorLink.getUniqueTransferObject();
         return to;
     }
 
@@ -145,7 +147,7 @@ public class VirtualSensorLinkController extends Controller {
         List<VirtualSensorLink> virtualSensors = lDao.getAll();
         List<LinkVsnTo> linkVsnTos = new ArrayList<>();
         for (VirtualSensorLink vs : virtualSensors) {
-            linkVsnTos.add(vs.getLinkTransferObject());
+            linkVsnTos.add(vs.getUniqueTransferObject());
         }
         return linkVsnTos;
     }
@@ -240,7 +242,7 @@ public class VirtualSensorLinkController extends Controller {
 
         //remove fields
         //remove initialized fields
-        FieldSubController fieldSubController = new FieldSubController(factory);
+        FieldController fieldSubController = new FieldController(factory);
         List<Field> currentFields = sensorLink.getFields();
         List<Field> temList = new ArrayList<>(currentFields);
         for (Field field : temList) {
@@ -325,11 +327,14 @@ public class VirtualSensorLinkController extends Controller {
         List<Field> currentFields = sensorLink.getFields();
 
         //upgrade the fields by field upgrade helper
-        FieldUpgradeHelper operator = new FieldUpgradeHelper();
-        operator.upgradeFieldList(currentFields, newFields);
-        isUpdated = operator.isChanged();
-        List<Field> removedFields = operator.getRemovedFields();
-        List<Field> insertedFields = operator.getInsertedFields();
+        FieldListManager listManager = new FieldListManager(newFields);
+        try {
+            isUpdated = sensorLink.updateFields(listManager);
+        } catch (Exception e) {
+            throw new BadRequestException(e.getMessage());
+        }
+        List<Field> removedFields = listManager.getExcluded();
+        List<Field> insertedFields = listManager.getIncluded();
 
         //bind field to virtualsensor
         for (Field inserted : insertedFields) {
@@ -341,7 +346,7 @@ public class VirtualSensorLinkController extends Controller {
             //commit sensor changes
             lDao.update(sensorLink);
             //remove unusable fields
-            FieldSubController fieldSubController = new FieldSubController(factory);
+            FieldController fieldSubController = new FieldController(factory);
             for (Field removed : removedFields) {
                 fieldSubController.delete(removed);
             }

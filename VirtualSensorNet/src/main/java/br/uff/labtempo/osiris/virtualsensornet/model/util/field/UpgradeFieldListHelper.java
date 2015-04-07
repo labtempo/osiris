@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package br.uff.labtempo.osiris.virtualsensornet.model.util;
+package br.uff.labtempo.osiris.virtualsensornet.model.util.field;
 
-import br.uff.labtempo.omcp.common.exceptions.BadRequestException;
 import br.uff.labtempo.osiris.virtualsensornet.model.DataConverter;
 import br.uff.labtempo.osiris.virtualsensornet.model.DataType;
 import br.uff.labtempo.osiris.virtualsensornet.model.Field;
@@ -24,19 +23,37 @@ import java.util.List;
 
 /**
  *
- * @author Felipe Santos <feliperalph at hotmail.com>
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
-public class FieldUpgradeHelper {
+public class UpgradeFieldListHelper implements FieldListHelper {
 
     private boolean isChanged;
     private List<Field> insertedFields;
     private List<Field> removedFields;
+    private List<Field> modifiedFields;
 
+    @Override
     public boolean isChanged() {
         return isChanged;
     }
 
-    public void upgradeFieldList(List<Field> current, List<Field> newest) throws BadRequestException {
+    @Override
+    public List<Field> getInsertedFields() {
+        return insertedFields;
+    }
+
+    @Override
+    public List<Field> getRemovedFields() {
+        return removedFields;
+    }
+
+    @Override
+    public List<Field> getModifiedFields() {
+        return modifiedFields;
+    }
+
+    @Override
+    public void process(List<Field> current, List<Field> newest) throws RuntimeException {
         isChanged = false;
         /**
          * current - all fields has id
@@ -88,45 +105,45 @@ public class FieldUpgradeHelper {
         //return toRemove;
     }
 
-    private void deletion(List<Field> current, Field deleted) throws BadRequestException {
+    private void deletion(List<Field> current, Field deleted) throws RuntimeException {
         //cannot delete Field it was initialized
         if (deleted.isStored()) {
-            throw new BadRequestException("You cannot to delete a initialized Field!");
+            throw new RuntimeException("You cannot to delete a initialized Field!");
         }
         //cannot delete Field it has aggregates
         if (deleted.hasAggregates()) {
-            throw new BadRequestException("You cannot to delete Field because it has aggregates!");
+            throw new RuntimeException("You cannot to delete Field because it has aggregates!");
         }
         isChanged = true;
         current.remove(deleted);
     }
 
-    private void updating(Field current, Field newest) throws BadRequestException {
+    private void updating(Field current, Field newest) throws RuntimeException {
         //check datatype - isStored or has aggregates exeception
         DataType currDataType = current.getDataType();
         DataType newestDataType = newest.getDataType();
         if (currDataType.getId() != newestDataType.getId()) {
             //cannot change datatype if field was initialized
             if (current.isStored()) {
-                throw new BadRequestException("You cannot to change DataType of a initialized Field!");
+                throw new RuntimeException("You cannot to change DataType of a initialized Field!");
             }
             //cannot change datatype if field has aggregates
             if (current.hasAggregates()) {
-                throw new BadRequestException("You cannot to change DataType because Field has aggregates!");
+                throw new RuntimeException("You cannot to change DataType because Field has aggregates!");
             }
 
             //check if newest update has converter and if converter is compatible with new datatype 
             if (newest.hasConverter()) {
                 DataConverter converter = newest.getConverter();
                 if (!converter.getOutputDataType().equals(newestDataType)) {
-                    throw new BadRequestException("You cannot set incompatibles converter and datatype!");
+                    throw new RuntimeException("You cannot set incompatibles converter and datatype!");
                 }
-            
-            //check if current field has converter and if converter is compatible with new datatype     
+
+                //check if current field has converter and if converter is compatible with new datatype     
             } else if (current.hasConverter()) {
                 DataConverter converter = current.getConverter();
                 if (!converter.getOutputDataType().equals(newestDataType)) {
-                    throw new BadRequestException("You cannot set a datatype incompatible with present converter!");
+                    throw new RuntimeException("You cannot set a datatype incompatible with present converter!");
                 }
             }
 
@@ -140,26 +157,19 @@ public class FieldUpgradeHelper {
                 current.setConverter(newest.getConverter());
                 isChanged = true;
             } catch (Exception ex) {
-                throw new BadRequestException(ex.getMessage());
+                throw new RuntimeException(ex.getMessage());
             }
         } else {
             current.removeConverter();
         }
-        
+
         //set new reference name to field
-        if(!current.getReferenceName().equals(newest.getReferenceName())){
+        if (!current.getReferenceName().equals(newest.getReferenceName())) {
             current.setReferenceName(newest.getReferenceName());
             isChanged = true;
         }
     }
 
-    public List<Field> getInsertedFields() {
-        return insertedFields;
-    }
-
-    public List<Field> getRemovedFields() {
-        return removedFields;
-    }
     //create cascade
     //update cascade(em alguns casos)
     /**

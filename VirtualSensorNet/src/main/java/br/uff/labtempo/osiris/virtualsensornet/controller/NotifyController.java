@@ -18,6 +18,7 @@ package br.uff.labtempo.osiris.virtualsensornet.controller;
 import br.uff.labtempo.omcp.common.Request;
 import br.uff.labtempo.omcp.common.RequestMethod;
 import br.uff.labtempo.omcp.common.Response;
+import br.uff.labtempo.omcp.common.exceptions.BadRequestException;
 import br.uff.labtempo.omcp.common.exceptions.InternalServerErrorException;
 import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
 import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
@@ -28,26 +29,19 @@ import br.uff.labtempo.osiris.utils.scheduling.Scheduler;
 import br.uff.labtempo.osiris.to.collector.SampleCoTo;
 import br.uff.labtempo.osiris.to.common.definitions.Path;
 import br.uff.labtempo.osiris.to.sensornet.SensorSnTo;
-import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorType;
 import br.uff.labtempo.osiris.utils.requestpool.RequestHandler;
 import br.uff.labtempo.osiris.utils.requestpool.RequestPool;
-import br.uff.labtempo.osiris.virtualsensornet.model.Aggregatable;
-import br.uff.labtempo.osiris.virtualsensornet.model.Field;
-import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
-import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensorComposite;
+import br.uff.labtempo.osiris.virtualsensornet.model.util.aggregates.AggregatesChecker;
+import br.uff.labtempo.osiris.virtualsensornet.controller.internal.AggregatesCheckerController;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensorLink;
 import br.uff.labtempo.osiris.virtualsensornet.model.state.ModelState;
+import br.uff.labtempo.osiris.virtualsensornet.model.util.aggregates.AggregatesCheckerWrapper;
 import br.uff.labtempo.osiris.virtualsensornet.model.util.AnnouncerWrapper;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
-import br.uff.labtempo.osiris.virtualsensornet.model.util.SensorCoToWrapper;
+import br.uff.labtempo.osiris.virtualsensornet.model.util.LinkValuesWrapper;
 import br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer.AnnouncerAgent;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.LinkDao;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  *
@@ -57,32 +51,35 @@ public class NotifyController extends Controller implements RequestHandler {
 
     private final String UNIQUE_SENSOR = Path.SEPARATOR.toString() + Path.NAMING_MODULE_SENSORNET + Path.RESOURCE_SENSORNET_SENSOR_BY_ID;
     private final DaoFactory factory;
+    private final AggregatesChecker checker;
     private AnnouncerAgent announcer;
     private Scheduler scheduler;
     private RequestPool requestPool;
-    private ExecutorService executor;
 
-    public NotifyController(DaoFactory factory, AnnouncerAgent announcer, RequestPool requestPool) {
+    public NotifyController(DaoFactory factory, AnnouncerAgent announcer, RequestPool requestPool, AggregatesChecker checkerController) {
         this.factory = factory;
         this.announcer = new AnnouncerWrapper(announcer);
+        this.checker = new AggregatesCheckerWrapper(checkerController);
         this.requestPool = requestPool;
         if (requestPool != null) {
             requestPool.setHandler(this);
         }
-        this.executor = Executors.newCachedThreadPool();
     }
 
-    public NotifyController(DaoFactory factory, RequestPool requestPool) {
-        this(factory, null, requestPool);
+    public NotifyController(DaoFactory factory, RequestPool requestPool, AggregatesCheckerController checkerController) {
+        this(factory, null, requestPool, checkerController);
     }
 
+    public NotifyController(DaoFactory factory, AggregatesCheckerController checkerController) {
+        this(factory, null, null, checkerController);
+    }
+    
     public NotifyController(DaoFactory factory) {
-        this(factory, null, null);
+        this(factory, null, null, null);
     }
 
     @Override
-    public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
-
+    public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException {
         if (request.getMethod() == RequestMethod.NOTIFY) {
             if (requestPool != null) {
                 requestPool.add(request);
@@ -95,7 +92,7 @@ public class NotifyController extends Controller implements RequestHandler {
     }
 
     @Override
-    public void handle(Request request) {
+    public void handle(Request request) throws BadRequestException {
         if (request.getModule().contains(Path.NAMING_MESSAGEGROUP_COLLECTOR.toString())) {
             SampleCoTo sample = request.getContent(SampleCoTo.class);
             updateValues(sample);
@@ -110,7 +107,7 @@ public class NotifyController extends Controller implements RequestHandler {
     }
 
     public synchronized void updateValues(SampleCoTo sample) {
-        SensorCoToWrapper wrapper = new SensorCoToWrapper(sample);
+        LinkValuesWrapper wrapper = new LinkValuesWrapper(sample);
         updateLink(wrapper);
     }
 
@@ -152,7 +149,7 @@ public class NotifyController extends Controller implements RequestHandler {
         }
     }
 
-    private void updateLink(SensorCoToWrapper wrapper) {
+    private void updateLink(LinkValuesWrapper wrapper) {
         LinkDao lDao = factory.getPersistentLinkDao();
 
         String sensorId = wrapper.getSensorId();
@@ -163,13 +160,15 @@ public class NotifyController extends Controller implements RequestHandler {
 
         for (VirtualSensorLink link : links) {
             if (link != null) {
-                link.updateVirtualSensorDataFromCollectorData(wrapper);
+                link.setFieldsValues(wrapper);
                 lDao.save(link);
                 if (ModelState.REACTIVATED.equals(link.getModelState())) {
                     announcer.notifyReactivation(link.getTransferObject());
                 }
                 announcer.broadcastIt(link.getTransferObject());
-                checkAggregates(link.getFields());
+                
+                //check aggregates
+                checker.check(link);
             }
         }
     }
@@ -180,33 +179,5 @@ public class NotifyController extends Controller implements RequestHandler {
 
     public void setSchedulerAgent(Scheduler scheduler) {
         this.scheduler = scheduler;
-    }
-
-    private void checkAggregates(final List<Field> fields) {
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                
-                Set<VirtualSensor> aggregatables = new HashSet<>();
-                for (Field field : fields) {
-                    aggregatables.addAll(field.getAggregates());
-                }
-
-                if (!aggregatables.isEmpty()) {
-                    for (VirtualSensor aggregatable : aggregatables) {
-                        VirtualSensor virtualSensor = aggregatable;
-                        
-                        if (virtualSensor.getVirtualSensorType() == VirtualSensorType.COMPOSITE) {
-                            VirtualSensorComposite composite = (VirtualSensorComposite) virtualSensor;
-                            composite.setSensorValuesUpdated();
-                            //save composite
-                            announcer.notifyReactivation(composite.getTransferObject());
-                            announcer.broadcastIt(composite.getTransferObject());
-                        }
-                    }
-                }
-            }
-        };
-        executor.execute(runnable);
     }
 }

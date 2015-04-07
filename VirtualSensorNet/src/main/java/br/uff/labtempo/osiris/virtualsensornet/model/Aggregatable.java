@@ -22,5 +22,6 @@ package br.uff.labtempo.osiris.virtualsensornet.model;
 public interface Aggregatable {
 
     boolean isAggregated();
+
     VirtualSensor getVirtualSensor();
 }

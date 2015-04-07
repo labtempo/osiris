@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package br.uff.labtempo.osiris.sensornet.controller;
+package br.uff.labtempo.osiris.sensornet.controller.internal;
 
 import br.uff.labtempo.osiris.sensornet.model.Collector;
 import br.uff.labtempo.osiris.sensornet.model.Collector_;

@@ -53,7 +53,7 @@ class SchedulerConsumer implements Runnable, AutoCloseable {
             } catch (InterruptedException ex) {
                 break;
             }
-        }       
+        }
     }
 
     private void schedule(SchedulerItem item) {
@@ -81,6 +81,11 @@ class SchedulerConsumer implements Runnable, AutoCloseable {
             @Override
             public long getIntervalInMillis() {
                 return -1;
+            }
+
+            @Override
+            public boolean isRemovable() {
+                return true;
             }
         };
         queue.add(item);

@@ -83,4 +83,8 @@ public class ModelSchedulerItem implements Serializable, SchedulerItem {
         return intervalInMillis / 2;
     }
 
+    @Override
+    public boolean isRemovable() {
+        return false;
+    }
 }

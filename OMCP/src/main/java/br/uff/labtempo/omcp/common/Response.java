@@ -15,7 +15,6 @@
  */
 package br.uff.labtempo.omcp.common;
 
-import br.uff.labtempo.omcp.common.StatusCode.*;
 import br.uff.labtempo.omcp.common.utils.Serializer;
 import java.util.Calendar;
 
@@ -84,7 +83,7 @@ public class Response {
     public String getContent() {
         return this.content;
     }
-    
+
     public String getContentType() {
         return this.contentType;
     }

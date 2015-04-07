@@ -18,6 +18,7 @@ package br.uff.labtempo.osiris.sensornet.controller;
 import br.uff.labtempo.omcp.common.Request;
 import br.uff.labtempo.omcp.common.RequestMethod;
 import br.uff.labtempo.omcp.common.Response;
+import br.uff.labtempo.omcp.common.exceptions.BadRequestException;
 import br.uff.labtempo.omcp.common.exceptions.InternalServerErrorException;
 import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
 import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
@@ -78,7 +79,7 @@ public class NotifyController extends Controller implements RequestHandler {
     }
 
     @Override
-    public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException {
+    public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException {
         if (request.getMethod() == RequestMethod.NOTIFY) {
             if (request.getModule().contains(Path.NAMING_MESSAGEGROUP_COLLECTOR.toString())) {
                 if (requestPool != null) {
@@ -93,7 +94,7 @@ public class NotifyController extends Controller implements RequestHandler {
     }
 
     @Override
-    public void handle(Request request) {
+    public void handle(Request request) throws BadRequestException {
         SampleCoTo sample = request.getContent(SampleCoTo.class);
         analyzeSample(sample);
     }

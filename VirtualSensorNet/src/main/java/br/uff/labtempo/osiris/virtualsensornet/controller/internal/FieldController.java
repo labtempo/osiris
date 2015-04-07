@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package br.uff.labtempo.osiris.virtualsensornet.controller;
+package br.uff.labtempo.osiris.virtualsensornet.controller.internal;
 
 import br.uff.labtempo.omcp.common.exceptions.BadRequestException;
 import br.uff.labtempo.omcp.common.exceptions.InternalServerErrorException;
 import br.uff.labtempo.osiris.virtualsensornet.model.Aggregatable;
-import br.uff.labtempo.osiris.virtualsensornet.model.DataType;
 import br.uff.labtempo.osiris.virtualsensornet.model.Field;
-import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.FieldDao;
 import java.util.ArrayList;
@@ -28,14 +26,13 @@ import java.util.List;
 
 /**
  *
- * @author Felipe Santos <feliperalph at hotmail.com>
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
-public class FieldSubController {
+public class FieldController {
 
     private final DaoFactory factory;
-    private boolean isChanged;
 
-    public FieldSubController(DaoFactory factory) {
+    public FieldController(DaoFactory factory) {
         this.factory = factory;
     }
 

@@ -37,8 +37,8 @@ public class ModelSchedulerItem implements Serializable, SchedulerItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    
-    private long sensorId;    
+
+    private long sensorId;
     private long timeToNextUpdate;
     private long intervalInMillis;
 
@@ -78,6 +78,11 @@ public class ModelSchedulerItem implements Serializable, SchedulerItem {
     @Override
     public long getIntervalInMillis() {
         return intervalInMillis / 2;
+    }
+
+    @Override
+    public boolean isRemovable() {
+        return true;
     }
 
 }

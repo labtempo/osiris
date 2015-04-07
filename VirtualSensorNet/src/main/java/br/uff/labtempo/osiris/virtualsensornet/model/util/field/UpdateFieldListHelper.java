@@ -13,28 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package br.uff.labtempo.osiris.virtualsensornet.model.util;
+package br.uff.labtempo.osiris.virtualsensornet.model.util.field;
 
-import br.uff.labtempo.omcp.common.exceptions.BadRequestException;
 import br.uff.labtempo.osiris.virtualsensornet.model.Field;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  *
- * @author Felipe Santos <feliperalph at hotmail.com>
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
-public class FieldUpdateHelper {
+public class UpdateFieldListHelper implements FieldListHelper {
 
     private boolean isChanged;
     private List<Field> insertedFields;
     private List<Field> removedFields;
 
+    @Override
     public boolean isChanged() {
         return isChanged;
     }
 
-    public void updateFieldList(List<Field> current, List<Field> newest) throws BadRequestException {
+    @Override
+    public List<Field> getInsertedFields() {
+        return insertedFields;
+    }
+
+    @Override
+    public List<Field> getRemovedFields() {
+        return removedFields;
+    }
+
+    @Override
+    public List<Field> getModifiedFields() {
+        return null;
+    }
+
+    @Override
+    public void process(List<Field> current, List<Field> newest) {
         isChanged = false;
         /**
          * current - all fields has id
@@ -83,16 +99,9 @@ public class FieldUpdateHelper {
         }
     }
 
-    private void deletion(List<Field> current, Field deleted) throws BadRequestException {
+    private void deletion(List<Field> current, Field deleted) {
         isChanged = true;
         current.remove(deleted);
     }
 
-    public List<Field> getInsertedFields() {
-        return insertedFields;
-    }
-
-    public List<Field> getRemovedFields() {
-        return removedFields;
-    }
 }

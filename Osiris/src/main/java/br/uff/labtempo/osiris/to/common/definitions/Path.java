@@ -41,6 +41,7 @@ public enum Path {
     NAMING_RESOURCE_BLENDING("blending"),
     NAMING_RESOURCE_CONVERTER("converter"),
     NAMING_RESOURCE_DATATYPE("datatype"),
+    NAMING_RESOURCE_FUNCTION("function"),
     NAMING_MESSAGEGROUP_COLLECTOR("collector.messagegroup"),    
     NAMING_MESSAGEGROUP_UPDATE("update.messagegroup"),    
     NAMING_MESSAGEGROUP_NOTIFICATION("notification.messagegroup"),
@@ -70,6 +71,8 @@ public enum Path {
     RESOURCE_VIRTUALSENSORNET_CONVERTER_BY_ID("/converter/:k1"),
     RESOURCE_VIRTUALSENSORNET_DATATYPE_ALL("/datatype/"),
     RESOURCE_VIRTUALSENSORNET_DATATYPE_BY_ID("/datatype/:k1"),
+    RESOURCE_VIRTUALSENSORNET_FUNCTION_ALL("/function/"),
+    RESOURCE_VIRTUALSENSORNET_FUNCTION_BY_ID("/function/:k1"),    
     //to static use(request)
     MODULE_SENSORNET("omcp://sensornet/"),
     MODULE_VIRTUALSENSORNET("omcp://virtualsensornet/"),
