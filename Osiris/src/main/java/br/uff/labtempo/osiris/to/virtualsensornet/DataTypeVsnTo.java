@@ -32,9 +32,6 @@ public class DataTypeVsnTo implements IDataTypeVsnTo {
     private String symbol;
     private long usedBy;
 
-    //helper attributes
-    private transient ValueType helperValueType;    
-
     public DataTypeVsnTo(String displayName, ValueType valueType, String unit, String symbol) {
         this(0, displayName, valueType, unit, symbol);
     }
@@ -45,8 +42,6 @@ public class DataTypeVsnTo implements IDataTypeVsnTo {
         this.type = valueType.toString();
         this.unit = unit;
         this.symbol = symbol;
-
-        this.helperValueType = valueType;
     }
 
     public void setUsedBy(long usedBy) {
@@ -65,10 +60,7 @@ public class DataTypeVsnTo implements IDataTypeVsnTo {
 
     @Override
     public ValueType getType() {
-        if (helperValueType == null) {
-            helperValueType = Enum.valueOf(ValueType.class, type.toUpperCase());
-        }
-        return helperValueType;
+        return Enum.valueOf(ValueType.class, type.toUpperCase());
     }
 
     @Override
@@ -84,6 +76,26 @@ public class DataTypeVsnTo implements IDataTypeVsnTo {
     @Override
     public long getUsedBy() {
         return usedBy;
+    }
+
+    @Override
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    @Override
+    public void setType(ValueType valueType) {
+        this.type = valueType.toString();
+    }
+
+    @Override
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+
+    @Override
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 
     @Override

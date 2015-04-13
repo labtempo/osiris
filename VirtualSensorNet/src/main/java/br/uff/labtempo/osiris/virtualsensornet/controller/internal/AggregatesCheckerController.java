@@ -15,16 +15,15 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.controller.internal;
 
-import br.uff.labtempo.osiris.virtualsensornet.model.util.aggregates.AggregatesChecker;
+import br.uff.labtempo.osiris.virtualsensornet.controller.util.AggregatesChecker;
 import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorType;
-import br.uff.labtempo.osiris.utils.requestpool.RequestPool;
 import br.uff.labtempo.osiris.virtualsensornet.model.Field;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensorComposite;
-import br.uff.labtempo.osiris.virtualsensornet.model.util.AnnouncerWrapper;
+import br.uff.labtempo.osiris.virtualsensornet.controller.util.AnnouncerWrapper;
+import br.uff.labtempo.osiris.virtualsensornet.model.state.ModelState;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.CompositeDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
-import br.uff.labtempo.osiris.virtualsensornet.persistence.VirtualSensorDao;
 import br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer.AnnouncerAgent;
 import java.util.HashSet;
 import java.util.List;
@@ -89,8 +88,10 @@ public class AggregatesCheckerController implements AggregatesChecker {
                             VirtualSensorComposite composite = (VirtualSensorComposite) virtualSensor;
                             composite.setFieldsValues(null);
                             compositeDao.save(composite);
-                            //TODO: ajustar notificação aqui
-                            announcer.notifyReactivation(composite.getTransferObject());
+                            //notify sensor if its state is equals "reactivated"
+                            if (ModelState.REACTIVATED.equals(composite.getModelState())) {
+                                announcer.notifyReactivation(composite.getTransferObject());
+                            }
                             announcer.broadcastIt(composite.getTransferObject());
                         }
                     }

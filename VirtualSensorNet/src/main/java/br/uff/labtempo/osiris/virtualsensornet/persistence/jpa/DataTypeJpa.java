@@ -84,15 +84,14 @@ public class DataTypeJpa implements DataTypeDao {
         CriteriaQuery<Long> criteriaQuery = cb.createQuery(Long.class);
         Root<Field> root = criteriaQuery.from(Field.class);
         criteriaQuery.select(cb.count(root));
-        
-        Join<Field, DataConverter> convertRoot = root.join(Field_.converter,JoinType.LEFT);
+
+        Join<Field, DataConverter> convertRoot = root.join(Field_.converter, JoinType.LEFT);
 
         Predicate dt = cb.equal(root.<DataType>get(Field_.dataType), dataType);
         Predicate in = cb.equal(convertRoot.<DataType>get(DataConverter_.inputDataType), dataType);
         Predicate out = cb.equal(convertRoot.<DataType>get(DataConverter_.outputDataType), dataType);
 
-        criteriaQuery.where( cb.or(dt,cb.or(in, out)));
-        
+        criteriaQuery.where(cb.or(dt, cb.or(in, out)));
 
         long totalUseAsDataType = data.getQuerySingle(criteriaQuery);
 

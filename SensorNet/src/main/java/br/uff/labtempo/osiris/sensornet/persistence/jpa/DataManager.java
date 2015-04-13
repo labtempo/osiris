@@ -15,7 +15,6 @@
  */
 package br.uff.labtempo.osiris.sensornet.persistence.jpa;
 
-import br.uff.labtempo.osiris.sensornet.persistence.jpa.JpaDaoFactory;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -106,6 +105,6 @@ public class DataManager {
     
     
     private EntityManager getEntityManager(){
-        return getEntityManager();
+        return factory.getEntityManager();
     }
 }

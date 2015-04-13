@@ -23,8 +23,9 @@ import javax.persistence.Embeddable;
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-@Embeddable 
+@Embeddable
 public class FunctionParam implements Serializable {
+
     private String name;
     private FunctionType type;
 
@@ -46,7 +47,7 @@ public class FunctionParam implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    } 
+    }
 
     @Override
     public int hashCode() {
@@ -73,6 +74,5 @@ public class FunctionParam implements Serializable {
         }
         return true;
     }
-    
-    
+
 }

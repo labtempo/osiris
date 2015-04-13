@@ -87,6 +87,10 @@ class SchedulerConsumer implements Runnable, AutoCloseable {
             public boolean isRemovable() {
                 return true;
             }
+
+            @Override
+            public void updateIntervalInMillis(long intervalInMillis) {
+            }
         };
         queue.add(item);
         if (thread != null) {

@@ -30,7 +30,16 @@ public interface IConverterVsnTo {
     long getInputDataTypeId();
 
     long getOutputDataTypeId();
-    
+
     long getUsedBy();
+
+    //edit
+    void setDisplayName(String displayName);
+
+    void setExpression(String expression);
+
+    void setInputDataTypeId(long inputDataTypeId);
+
+    void setOutputDataTypeId(long outputDataTypeId);
 
 }

@@ -232,7 +232,7 @@ public class VirtualSensorCompositeTest {
 
         CompositeVsnTo to1 = new CompositeVsnTo(expectedLabel);
 
-        for (FieldTo field : lvt.getFields()) {
+        for (FieldTo field : lvt.getBoundFields()) {
             to1.bindToField(field.getId());
             break;
         }
@@ -246,7 +246,7 @@ public class VirtualSensorCompositeTest {
         Assert.assertEquals(id, vsnTo.getId());
         Assert.assertEquals(expectedLabel, vsnTo.getLabel());
 
-        List<? extends FieldTo> list = vsnTo.getFields();
+        List<? extends FieldTo> list = vsnTo.getBoundFields();
         int expectedFieldListSize = 1;
         Assert.assertEquals(expectedFieldListSize, list.size());
     }
@@ -267,7 +267,7 @@ public class VirtualSensorCompositeTest {
         to1.bindToField(fld3);
         to1.bindToField(fld4);
 
-        for (FieldTo field : lvt.getFields()) {
+        for (FieldTo field : lvt.getBoundFields()) {
             to1.bindToField(field.getId());
             break;
         }
@@ -281,7 +281,7 @@ public class VirtualSensorCompositeTest {
         Assert.assertEquals(id, vsnTo.getId());
         Assert.assertEquals(expectedLabel, vsnTo.getLabel());
 
-        List<? extends FieldTo> list = vsnTo.getFields();
+        List<? extends FieldTo> list = vsnTo.getBoundFields();
         int expectedFieldListSize = 4;
         Assert.assertEquals(expectedFieldListSize, list.size());
     }
@@ -297,10 +297,10 @@ public class VirtualSensorCompositeTest {
 
         CompositeVsnTo lvt = controller.get(id);
 
-        FieldTo ft1 = lvt.getFields().get(0);
-        FieldTo ft2 = lvt.getFields().get(1);
-        FieldTo ft3 = lvt.getFields().get(2);
-        FieldTo ft4 = lvt.getFields().get(3);
+        FieldTo ft1 = lvt.getBoundFields().get(0);
+        FieldTo ft2 = lvt.getBoundFields().get(1);
+        FieldTo ft3 = lvt.getBoundFields().get(2);
+        FieldTo ft4 = lvt.getBoundFields().get(3);
 
         Assert.assertEquals(false, ft1.isInitialized());
         Assert.assertEquals(false, ft2.isInitialized());
@@ -323,12 +323,12 @@ public class VirtualSensorCompositeTest {
 
         CompositeVsnTo lvt1 = controller.get(id);
         int expectedListSize = 4;
-        Assert.assertEquals(expectedListSize, lvt1.getFields().size());
+        Assert.assertEquals(expectedListSize, lvt1.getBoundFields().size());
 
-        ft1 = lvt.getFields().get(0);
-        ft2 = lvt.getFields().get(1);
-        ft3 = lvt.getFields().get(2);
-        ft4 = lvt.getFields().get(3);
+        ft1 = lvt.getBoundFields().get(0);
+        ft2 = lvt.getBoundFields().get(1);
+        ft3 = lvt.getBoundFields().get(2);
+        ft4 = lvt.getBoundFields().get(3);
 
         Assert.assertEquals(true, ft1.isInitialized());
         Assert.assertEquals(true, ft2.isInitialized());

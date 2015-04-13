@@ -27,7 +27,6 @@ import br.uff.labtempo.osiris.virtualsensornet.controller.DataTypeController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.NotifyController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.VirtualSensorBlendingController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.VirtualSensorCompositeController;
-import br.uff.labtempo.osiris.virtualsensornet.controller.internal.SchedulerController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.VirtualSensorController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.VirtualSensorLinkController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.internal.AggregatesCheckerController;
@@ -72,18 +71,17 @@ public class Bootstrap implements AutoCloseable {
 
             //external controllers
             NotifyController nc = new NotifyController(factory, requestPool, checkerController);
-            
+
             VirtualSensorController vsc = new VirtualSensorController(factory);
             VirtualSensorLinkController vslc = new VirtualSensorLinkController(factory);
             VirtualSensorCompositeController vscc = new VirtualSensorCompositeController(factory);
             VirtualSensorBlendingController vsbc = new VirtualSensorBlendingController(factory, checkerController);
-            
+
             DataTypeController dtc = new DataTypeController(factory);
             ConverterController cc = new ConverterController(factory);
 
             //scheduling
-            SchedulerController schedulerController = new SchedulerController(factory);
-            schedulerBootstrap = new SchedulerBootstrap(factory.getSchedulerDao(), schedulerController);
+            schedulerBootstrap = new SchedulerBootstrap(factory.getSchedulerDao(), vsbc);
             //announcement
             omcpClient = new OmcpClientBuilder().host(ip).user(user, pass).source(moduleName).build();
             announcementBootstrap = new AnnouncementBootstrap(omcpClient);
@@ -91,10 +89,10 @@ public class Bootstrap implements AutoCloseable {
 
             //setting extra components to the controllers
             nc.setAnnouncerAgent(announcementController);
-            nc.setSchedulerAgent(schedulerBootstrap.getScheduler());
             vslc.setAnnouncerAgent(announcementController);
             vscc.setAnnouncerAgent(announcementController);
             vsbc.setAnnouncerAgent(announcementController);
+            vsbc.setSchedulerAgent(schedulerBootstrap.getScheduler());
 
             //chain of responsibility
             nc.setNext(vsc);

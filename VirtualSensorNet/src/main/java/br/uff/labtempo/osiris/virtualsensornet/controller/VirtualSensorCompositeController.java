@@ -31,7 +31,7 @@ import br.uff.labtempo.osiris.to.virtualsensornet.CompositeVsnTo;
 import br.uff.labtempo.osiris.virtualsensornet.model.Field;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensorComposite;
-import br.uff.labtempo.osiris.virtualsensornet.model.util.AnnouncerWrapper;
+import br.uff.labtempo.osiris.virtualsensornet.controller.util.AnnouncerWrapper;
 import br.uff.labtempo.osiris.virtualsensornet.model.util.FieldListManager;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.CompositeDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
@@ -155,7 +155,7 @@ public class VirtualSensorCompositeController extends Controller {
         List<? extends FieldTo> fieldsTo;
         String label;
         try {
-            fieldsTo = compositeVsnTo.getFields();
+            fieldsTo = compositeVsnTo.getBoundFields();
             label = compositeVsnTo.getLabel().trim();
             //check nullpointer           
             fieldsTo.size();
@@ -237,7 +237,7 @@ public class VirtualSensorCompositeController extends Controller {
         List<? extends FieldTo> fieldsTo;
         String label;
         try {
-            fieldsTo = compositeVsnTo.getFields();
+            fieldsTo = compositeVsnTo.getBoundFields();
             label = compositeVsnTo.getLabel().trim();
             //check nullpointer           
             fieldsTo.size();
@@ -293,7 +293,7 @@ public class VirtualSensorCompositeController extends Controller {
         }
         List<Field> toRemove = listManager.getExcluded();
         List<Field> toInsert = listManager.getIncluded();
-        
+
         //adding aggregates to added fields
         for (Field inserted : toInsert) {
             inserted.addAggregate(composite);

@@ -45,7 +45,6 @@ public class VsnDeleteAllClient {
                 }
             } else {
                 throw new RuntimeException(r.getStatusCode().toString());
-
             }
 
             r = client.doGet("omcp://virtualsensornet/converter/");

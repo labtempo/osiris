@@ -32,6 +32,15 @@ public interface IDataTypeVsnTo {
     String getUnit();
 
     String getSymbol();
-    
+
     long getUsedBy();
+
+    //edit
+    void setDisplayName(String displayName);
+
+    void setType(ValueType type);
+
+    void setUnit(String unit);
+
+    void setSymbol(String Symbol);
 }

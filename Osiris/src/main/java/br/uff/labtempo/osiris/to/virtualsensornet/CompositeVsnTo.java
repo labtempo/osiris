@@ -15,9 +15,11 @@
  */
 package br.uff.labtempo.osiris.to.virtualsensornet;
 
+import br.uff.labtempo.omcp.common.utils.DateUtil;
 import br.uff.labtempo.osiris.to.common.data.FieldTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.interfaces.ICompositeVsnTo;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +29,7 @@ import java.util.Map;
  */
 public class CompositeVsnTo implements ICompositeVsnTo {
 
-    private long id;
+    private final long id;
     private String label;
     private List<Map<String, String>> fields;
 
@@ -43,6 +45,12 @@ public class CompositeVsnTo implements ICompositeVsnTo {
     public CompositeVsnTo(String label) {
         this(0, label);
     }
+    
+    public CompositeVsnTo() {        
+        this("");
+        DateUtil dateUtil = new DateUtil();
+        this.label = "composite-"+dateUtil.generate(Calendar.getInstance());
+    }
 
     @Override
     public long getId() {
@@ -55,7 +63,12 @@ public class CompositeVsnTo implements ICompositeVsnTo {
     }
 
     @Override
-    public void addField(long id, String name, long dataTypeId, long converterId, boolean initialized, long sourceId, int aggregates) {
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    @Override
+    public void addBoundField(long id, String name, long dataTypeId, long converterId, boolean initialized, long sourceId, int aggregates) {
         InternalFieldTo fieldTo = new InternalFieldTo(id, name, dataTypeId, converterId, initialized, sourceId, aggregates);
         createField(fieldTo);
     }
@@ -72,7 +85,7 @@ public class CompositeVsnTo implements ICompositeVsnTo {
     }
 
     @Override
-    public List<? extends FieldTo> getFields() {
+    public List<? extends FieldTo> getBoundFields() {
         if (helperFieldToList != null) {
             return helperFieldToList;
         }
@@ -86,6 +99,11 @@ public class CompositeVsnTo implements ICompositeVsnTo {
 
     private void createField(InternalFieldTo fieldTo) {
         fields.add(fieldTo.toMap());
+    }
+
+    @Override
+    public void removeBoundFields() {
+        fields.clear();
     }
 
     private class InternalFieldTo extends FieldTo {

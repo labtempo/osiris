@@ -40,7 +40,7 @@ public class SchedulerBootstrap implements AutoCloseable {
         } catch (Exception e) {
             try {
                 close();
-            } catch (Exception ex) {                
+            } catch (Exception ex) {
             }
             throw e;
         }
@@ -52,7 +52,7 @@ public class SchedulerBootstrap implements AutoCloseable {
     }
 
     public Scheduler getScheduler() {
-        return  manager.getScheduler();
+        return manager.getScheduler();
     }
 
 }

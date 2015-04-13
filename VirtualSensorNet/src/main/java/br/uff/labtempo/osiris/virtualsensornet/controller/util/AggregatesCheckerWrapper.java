@@ -1,5 +1,5 @@
-/* 
- * Copyright 2015 Felipe Santos <fralph at ic.uff.br>.
+/*
+ * Copyright 2015 Felipe Santos <feliperalph at hotmail.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package br.uff.labtempo.osiris.virtualsensornet.persistence;
+package br.uff.labtempo.osiris.virtualsensornet.controller.util;
 
+import br.uff.labtempo.osiris.virtualsensornet.controller.util.AggregatesChecker;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
-import java.util.List;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public interface VirtualSensorDao extends Dao<VirtualSensor> {
+public class AggregatesCheckerWrapper implements AggregatesChecker {
 
-    public VirtualSensor get(VirtualSensor o);
+    private final AggregatesChecker checker;
 
-    public VirtualSensor get(long vsensorId);
+    public AggregatesCheckerWrapper(AggregatesChecker checker) {
+        this.checker = checker;
+    }
 
-    public List<VirtualSensor> getAll();
+    @Override
 
-    public List<VirtualSensor> getAllInactive();
-
+    public void check(VirtualSensor virtualSensor) {
+        if (checker != null) {
+            checker.check(virtualSensor);
+        }
+    }
 }

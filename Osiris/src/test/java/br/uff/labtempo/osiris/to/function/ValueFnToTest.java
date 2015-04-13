@@ -93,7 +93,32 @@ public class ValueFnToTest {
         List<ValueFnTo> l1 = requestFnTo.getValues();
         List<ValueFnTo> l2 = requestFnTo2.getValues();
 
-        Assert.assertEquals(requestFnTo.getValues(), requestFnTo.getValues());
+        Assert.assertEquals(l1.size(), l2.size());
+
+    }
+    
+    @Test
+    public void testParameterizedRequestFn_ShouldPass() {
+        List<String> list = new ArrayList<>();
+        list.add("1");
+        list.add("2");
+        list.add("3");
+        list.add("4");
+
+        RequestFnTo requestFnTo = new RequestFnTo();
+        requestFnTo.addValue("1", "1");
+        requestFnTo.addValue("2", "1");
+        requestFnTo.addValue("3", "1");
+        requestFnTo.addValue("4", list);
+        requestFnTo.addValue("5", list);
+
+        String uri = "omcp://sum.function/";
+        
+        ParameterizedRequestFn requestFn = new ParameterizedRequestFn(uri, requestFnTo);
+
+        String result = requestFn.getRequestUri();
+        String expectedUri = "omcp://sum.function/?1=1&2=1&3=1&4=[1,2,3,4]&5=[1,2,3,4]";
+        Assert.assertEquals(expectedUri, result);
 
     }
 

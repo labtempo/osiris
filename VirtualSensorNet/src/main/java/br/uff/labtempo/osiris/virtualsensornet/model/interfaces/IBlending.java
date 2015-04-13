@@ -16,6 +16,7 @@
 package br.uff.labtempo.osiris.virtualsensornet.model.interfaces;
 
 import br.uff.labtempo.osiris.to.common.definitions.FunctionOperation;
+import br.uff.labtempo.osiris.to.function.RequestFnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.BlendingVsnTo;
 import br.uff.labtempo.osiris.virtualsensornet.model.BlendingBond;
 import br.uff.labtempo.osiris.virtualsensornet.model.Function;
@@ -64,5 +65,7 @@ public interface IBlending {
 
     //updateable
     void setResponseFields(List<BlendingBond> responseFields);
-    
+
+    RequestFnTo getFunctionRequest();
+
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package br.uff.labtempo.osiris.virtualsensornet.model.util.aggregates;
+package br.uff.labtempo.osiris.virtualsensornet.controller.util;
 
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
 
@@ -21,19 +21,8 @@ import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public class AggregatesCheckerWrapper implements AggregatesChecker {
+public interface AggregatesChecker {
 
-    private final AggregatesChecker checker;
+    void check(VirtualSensor virtualSensor);
 
-    public AggregatesCheckerWrapper(AggregatesChecker checker) {
-        this.checker = checker;
-    }
-
-    @Override
-
-    public void check(VirtualSensor virtualSensor) {
-        if (checker != null) {
-            checker.check(virtualSensor);
-        }
-    }
 }

@@ -85,9 +85,15 @@ public class SchedulingManager implements Scheduling, TaskCallback {
             }
 
             try {
-                callback.callback(items);
+                callback.callback(items);                
             } catch (Exception ex) {
                 Logger.getLogger(SchedulingManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            for (SchedulerItem item : items) {
+                if (item.isRemovable()) {
+                    storage.update(item);
+                }
             }
         }
     }
@@ -96,6 +102,7 @@ public class SchedulingManager implements Scheduling, TaskCallback {
         SchedulerItem storedItem = storage.getItemByObjectId(item.getObjectId());
         if (storedItem != null) {
             storedItem.updateTimeToNextUpdate(item.getTimeToNextUpdate());
+            storedItem.updateIntervalInMillis(item.getIntervalInMillis());
             storage.update(storedItem);
         } else {
             storage.save(item);

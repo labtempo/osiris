@@ -74,7 +74,7 @@ public class VirtualSensorJpa implements VirtualSensorDao {
         List<VirtualSensor> virtualSensors = data.getQuery(criteriaQuery);
         return virtualSensors;
     }
-    
+
     @Override
     public void save(VirtualSensor o) {
         data.save(o);

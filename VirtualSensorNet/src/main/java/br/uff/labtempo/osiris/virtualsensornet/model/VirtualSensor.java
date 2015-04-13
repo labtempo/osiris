@@ -34,6 +34,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
@@ -55,6 +57,9 @@ public abstract class VirtualSensor<T> extends Model implements IVirtualSensor<T
     @Enumerated(EnumType.STRING)
     private VirtualSensorType virtualSensorType;
 
+    @JoinTable(name = "virtualsensor_fields",
+            joinColumns = @JoinColumn(name = "virtualsensor_id"),
+            inverseJoinColumns = @JoinColumn(name = "field_id"))
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH}, fetch = FetchType.EAGER)
     private List<Field> fields;
 
@@ -140,12 +145,16 @@ public abstract class VirtualSensor<T> extends Model implements IVirtualSensor<T
         this.creationPrecisionInNano = valuesWrapper.getCreationPrecisionInNano();
         this.acquisitionTimestampInMillis = valuesWrapper.getAcquisitionTimestampInMillis();
         this.storageTimestampInMillis = getStorageTimestamp();
-        
-        this.creationInterval = valuesWrapper.getCreationInterval();
-        this.creationIntervalTimeUnit = valuesWrapper.getCreationIntervalTimeUnit();
+
+        setCreationInterval(valuesWrapper.getCreationInterval(), valuesWrapper.getCreationIntervalTimeUnit());
         update();
-        
         return true;
+    }
+
+    @Override
+    public void setCreationInterval(long creationInterval, TimeUnit timeUnit) {
+        this.creationInterval = creationInterval;
+        this.creationIntervalTimeUnit = timeUnit;
     }
 
     @Override

@@ -253,7 +253,7 @@ public class FunctionController extends Controller {
 
         //update request params
         if (!function.getRequestParams().equals(requestFunctionParams)) {
-             if (countUse > 0) {
+            if (countUse > 0) {
                 throw new BadRequestException("Function is in using by one or more Blendings. It cannot be deleted!");
             }
             function.setRequestParams(requestFunctionParams);
@@ -272,7 +272,7 @@ public class FunctionController extends Controller {
         //commit changes
         if (isUpdated) {
             //persist changes
-            functionDao.update(function);            
+            functionDao.update(function);
         }
         return isUpdated;
     }

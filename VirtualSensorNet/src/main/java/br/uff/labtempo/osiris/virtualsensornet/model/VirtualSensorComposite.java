@@ -66,7 +66,7 @@ public class VirtualSensorComposite extends VirtualSensor<CompositeVsnTo> implem
         }
     }
 
-    @Override    
+    @Override
     public boolean setFieldsValues(FieldValuesWrapper valuesWrapper) {
         boolean isError = false;
         boolean isWorking = false;
@@ -162,7 +162,7 @@ public class VirtualSensorComposite extends VirtualSensor<CompositeVsnTo> implem
         for (Field field : fields) {
             VirtualSensor sensor = field.getVirtualSensor();
             int aggregates = field.getAggregates().size();
-            compositeVsnTo.addField(field.getId(), field.getReferenceName(), field.getDataTypeId(), field.getConverterId(), field.isStored(), sensor.getId(), aggregates);
+            compositeVsnTo.addBoundField(field.getId(), field.getReferenceName(), field.getDataTypeId(), field.getConverterId(), field.isStored(), sensor.getId(), aggregates);
         }
         return compositeVsnTo;
     }

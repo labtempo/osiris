@@ -149,6 +149,7 @@ public class CollectorController extends Controller {
         try {
             NetworkDao networkDao = factory.getNetworkDao();
             networkDao.update(network);
+            Collector collector1 = collector;
             cdao.delete(collector);
             return true;
         } catch (Exception e) {

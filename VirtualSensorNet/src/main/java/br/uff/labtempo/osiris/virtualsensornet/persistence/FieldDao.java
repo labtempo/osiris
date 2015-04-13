@@ -21,6 +21,7 @@ import br.uff.labtempo.osiris.virtualsensornet.model.Field;
  *
  * @author Felipe
  */
-public interface FieldDao extends Dao<Field>{
+public interface FieldDao extends Dao<Field> {
+
     Field getById(long id);
 }

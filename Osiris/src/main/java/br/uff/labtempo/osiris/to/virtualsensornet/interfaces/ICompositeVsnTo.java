@@ -28,12 +28,17 @@ public interface ICompositeVsnTo {
 
     String getLabel();
 
-    List<? extends FieldTo> getFields();
+    List<? extends FieldTo> getBoundFields();
 
     void bindToField(long id);
 
     void bindToField(FieldTo fieldTo);
 
-    void addField(long id, String name, long dataTypeId, long converterId, boolean initialized, long sourceId, int aggregates);
+    void addBoundField(long id, String name, long dataTypeId, long converterId, boolean initialized, long sourceId, int aggregates);
+
+    //edit
+    void setLabel(String label);
+
+    void removeBoundFields();
 
 }

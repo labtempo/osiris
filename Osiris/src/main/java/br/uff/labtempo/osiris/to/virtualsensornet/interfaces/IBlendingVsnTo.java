@@ -18,6 +18,7 @@ package br.uff.labtempo.osiris.to.virtualsensornet.interfaces;
 import br.uff.labtempo.osiris.to.common.data.FieldTo;
 import br.uff.labtempo.osiris.to.common.definitions.FunctionOperation;
 import br.uff.labtempo.osiris.to.virtualsensornet.BlendingBondVsnTo;
+import br.uff.labtempo.osiris.to.virtualsensornet.FunctionVsnTo;
 import java.util.List;
 
 /**
@@ -30,8 +31,7 @@ public interface IBlendingVsnTo {
 
     String getLabel();
 
-    //edit
-    void setLabel(String label);
+    List<? extends FieldTo> getFields();
 
     void createField(String name, long dataTypeId, long converterId);
 
@@ -43,35 +43,35 @@ public interface IBlendingVsnTo {
 
     void createField(long id, String name, long dataTypeId);
 
-    List<? extends FieldTo> getFields();
-
-    //edit
-    void setFunction(long functionId);
-
     long getFunctionId();
-
-    //edit
-    void setCallMode(FunctionOperation operation);
 
     FunctionOperation getCallMode();
 
-    //edit
-    void setCallIntervalInMillis(int interval);
+    long getCallIntervalInMillis();
 
-    int getCallIntervalInMillis();
+    void addResponseParam(long fieldId, String paramName);
+
+    void addRequestParam(long fieldId, String paramName);
+
+    List<BlendingBondVsnTo> getResponseParams();
+
+    List<BlendingBondVsnTo> getRequestParams();
 
     //edit
-    void addResponseParam(long fieldId, String resultParamName);
+    void setLabel(String label);
 
-    //edit
-    void addRequestParam(long fieldId, String requestParamName);
+    void setFunction(long functionId);
+
+    void setFunction(FunctionVsnTo function);
+
+    void setCallIntervalInMillis(long interval);
+
+    void setCallMode(FunctionOperation operation);
 
     void removeResponseParam(long fieldId);
 
     void removeRequestParam(long fieldId);
 
-    List<BlendingBondVsnTo> getResponseParams();
-
-    List<BlendingBondVsnTo> getRequestParams();
+    void removeFields();
 
 }

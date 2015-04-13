@@ -114,6 +114,11 @@ public class SchedulingManagerTest {
         public boolean isRemovable() {
             return true;
         }
+
+        @Override
+        public void updateIntervalInMillis(long intervalInMillis) {
+            System.out.println("Atualização do intervalo");
+        }
     }
 
     class Storage implements SchedulingStorage {

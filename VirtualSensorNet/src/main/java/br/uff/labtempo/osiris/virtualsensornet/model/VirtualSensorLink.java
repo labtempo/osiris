@@ -111,7 +111,7 @@ public class VirtualSensorLink extends VirtualSensor<LinkVsnTo> implements ILink
         List<Field> sensorCoFields = sensorWrapper.getValues();
         List<Field> current = getFields();
 
-        synchronized (current) {            
+        synchronized (current) {
             //update field values            
             if (setValuesByReferenceName(getFields(), sensorCoFields)) {
                 super.setFieldsValues(sensorWrapper);
@@ -135,7 +135,7 @@ public class VirtualSensorLink extends VirtualSensor<LinkVsnTo> implements ILink
 
     @Override
     public LinkVsnTo getUniqueTransferObject() {
-        LinkVsnTo linkVsnTo = new LinkVsnTo(getId(), sensorId, collectorId, networkId);
+        LinkVsnTo linkVsnTo = new LinkVsnTo(getId(), getLabel(), sensorId, collectorId, networkId);
         List<Field> fields = getFields();
         for (Field field : fields) {
             VirtualSensor sensor = field.getVirtualSensor();
@@ -166,7 +166,7 @@ public class VirtualSensorLink extends VirtualSensor<LinkVsnTo> implements ILink
 
         return true;
     }
-    
+
     private boolean setValuesByReferenceName(List<Field> current, List<Field> newest) {
         boolean isUpdated = false;
         for (Field field : current) {

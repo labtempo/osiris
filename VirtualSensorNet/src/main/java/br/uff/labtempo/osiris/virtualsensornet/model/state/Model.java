@@ -51,7 +51,8 @@ public abstract class Model implements IModel {
     public void reactivate() {
         modelState.reactivate(this);
     }
-@Override
+
+    @Override
     public final void update() {
         if (modelState == ModelState.INACTIVE) {
             modelState.reactivate(this);

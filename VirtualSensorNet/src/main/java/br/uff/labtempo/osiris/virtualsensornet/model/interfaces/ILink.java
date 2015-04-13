@@ -26,11 +26,11 @@ public interface ILink {
     String getNetworkId();
 
     String getSensorId();
-    
+
     void setCollectorId(String collectorId);
 
     void setNetworkId(String networkId);
 
     void setSensorId(String sensorId);
-    
+
 }

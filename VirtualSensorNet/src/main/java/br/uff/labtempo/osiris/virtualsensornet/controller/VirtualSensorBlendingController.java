@@ -15,6 +15,7 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.controller;
 
+import br.uff.labtempo.omcp.client.OmcpClient;
 import br.uff.labtempo.omcp.common.Request;
 import br.uff.labtempo.omcp.common.Response;
 import br.uff.labtempo.omcp.common.exceptions.BadRequestException;
@@ -28,12 +29,16 @@ import br.uff.labtempo.osiris.to.common.data.FieldTo;
 import br.uff.labtempo.osiris.to.common.definitions.FunctionOperation;
 import br.uff.labtempo.osiris.to.common.definitions.Path;
 import br.uff.labtempo.osiris.to.common.definitions.ValueType;
+import br.uff.labtempo.osiris.to.function.ParameterizedRequestFn;
+import br.uff.labtempo.osiris.to.function.RequestFnTo;
 import br.uff.labtempo.osiris.to.function.ResponseFnTo;
-import br.uff.labtempo.osiris.to.function.SingleValueFnTo;
 import br.uff.labtempo.osiris.to.function.ValueFnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.BlendingBondVsnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.BlendingVsnTo;
-import br.uff.labtempo.osiris.virtualsensornet.model.util.aggregates.AggregatesChecker;
+import br.uff.labtempo.osiris.utils.scheduling.Scheduler;
+import br.uff.labtempo.osiris.utils.scheduling.SchedulerItem;
+import br.uff.labtempo.osiris.utils.scheduling.SchedulingCallback;
+import br.uff.labtempo.osiris.virtualsensornet.controller.util.AggregatesChecker;
 import br.uff.labtempo.osiris.virtualsensornet.controller.internal.AggregatesCheckerController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.internal.FieldController;
 import br.uff.labtempo.osiris.virtualsensornet.model.BlendingBond;
@@ -43,10 +48,13 @@ import br.uff.labtempo.osiris.virtualsensornet.model.Field;
 import br.uff.labtempo.osiris.virtualsensornet.model.Function;
 import br.uff.labtempo.osiris.virtualsensornet.model.FunctionParam;
 import br.uff.labtempo.osiris.virtualsensornet.model.FunctionType;
+import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensorBlending;
 import br.uff.labtempo.osiris.virtualsensornet.model.state.ModelState;
-import br.uff.labtempo.osiris.virtualsensornet.model.util.aggregates.AggregatesCheckerWrapper;
-import br.uff.labtempo.osiris.virtualsensornet.model.util.AnnouncerWrapper;
+import br.uff.labtempo.osiris.virtualsensornet.controller.util.AggregatesCheckerWrapper;
+import br.uff.labtempo.osiris.virtualsensornet.controller.util.AnnouncerWrapper;
+import br.uff.labtempo.osiris.virtualsensornet.controller.util.OmcpClientWrapper;
+import br.uff.labtempo.osiris.virtualsensornet.controller.util.SchedulerWrapper;
 import br.uff.labtempo.osiris.virtualsensornet.model.util.BlendingValuesWrapper;
 import br.uff.labtempo.osiris.virtualsensornet.model.util.FieldListManager;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.BlendingDao;
@@ -54,26 +62,34 @@ import br.uff.labtempo.osiris.virtualsensornet.persistence.ConverterDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DataTypeDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.FunctionDao;
+import br.uff.labtempo.osiris.virtualsensornet.persistence.SchedulerDao;
 import br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer.AnnouncerAgent;
+import br.uff.labtempo.osiris.virtualsensornet.thirdparty.scheduler.ModelSchedulerItem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public class VirtualSensorBlendingController extends Controller {
+public class VirtualSensorBlendingController extends Controller implements SchedulingCallback {
 
     private final DaoFactory factory;
     private final AggregatesChecker checker;
     private AnnouncerAgent announcer;
+    private Scheduler scheduler;
+    private OmcpClient client;
 
     public VirtualSensorBlendingController(DaoFactory factory, AnnouncerAgent announcer, AggregatesChecker checker) {
         this.factory = factory;
         this.checker = new AggregatesCheckerWrapper(checker);
         this.announcer = new AnnouncerWrapper(announcer);
+        this.scheduler = new SchedulerWrapper(null);
+        this.client = new OmcpClientWrapper(null);
     }
 
     public VirtualSensorBlendingController(DaoFactory factory, AggregatesCheckerController checkerController) {
@@ -186,6 +202,12 @@ public class VirtualSensorBlendingController extends Controller {
     }
 
     public BlendingVsnTo get(long id) throws NotFoundException, InternalServerErrorException {
+        VirtualSensorBlending blending = getById(id);
+        BlendingVsnTo to = blending.getUniqueTransferObject();
+        return to;
+    }
+
+    private VirtualSensorBlending getById(long id) throws NotFoundException, InternalServerErrorException {
         BlendingDao blendingDao;
         try {
             blendingDao = factory.getPersistentBlendingDao();
@@ -197,8 +219,7 @@ public class VirtualSensorBlendingController extends Controller {
         if (blending == null) {
             throw new NotFoundException("Blending not found!");
         }
-        BlendingVsnTo to = blending.getUniqueTransferObject();
-        return to;
+        return blending;
     }
 
     public List<BlendingVsnTo> getAll() throws NotFoundException, InternalServerErrorException {
@@ -341,6 +362,7 @@ public class VirtualSensorBlendingController extends Controller {
             throw new BadRequestException("Params cannot be null!");
         }
 
+        boolean hasFunction = false;
         if (functionId != 0) {
             //get DAO
             if (blending.getFunction() == null || blending.getFunction().getId() != functionId) {
@@ -380,12 +402,13 @@ public class VirtualSensorBlendingController extends Controller {
                 throw new NotFoundException("Incorrect response's params for Function!");
             }
             //check fields
-            List<BlendingBond> requestBonds = getFieldsByBond(requestParams, function.getRequestParams(), false);
-            List<BlendingBond> responseBonds = getFieldsByBond(responseParams, function.getResponseParams(), true);
+            List<BlendingBond> requestBonds = createRequestBlendingBonds(requestParams, function.getRequestParams());
+            List<BlendingBond> responseBonds = createResponseBlendingBonds(responseParams, function.getResponseParams(), blending);
 
             blending.setRequestFields(requestBonds);
             blending.setResponseFields(responseBonds);
 
+            hasFunction = true;
             isUpdated = true;
         } else {
             blending.removeFunction();
@@ -399,6 +422,13 @@ public class VirtualSensorBlendingController extends Controller {
             FieldController fieldSubController = new FieldController(factory);
             for (Field removed : removedFields) {
                 fieldSubController.delete(removed);
+            }
+            //insert to scheduler
+            if (hasFunction) {
+                //TODO: create update scheduler item
+                insertToScheduler(blending);
+            } else {
+                removeFromScheduler(blending);
             }
         }
         return isUpdated;
@@ -458,50 +488,73 @@ public class VirtualSensorBlendingController extends Controller {
         return list;
     }
 
-    private List<BlendingBond> getFieldsByBond(List<BlendingBondVsnTo> bondVsnTos, List<FunctionParam> functionParams, boolean isResponse) throws InternalServerErrorException, BadRequestException {
+    private List<BlendingBond> createResponseBlendingBonds(List<BlendingBondVsnTo> bondVsnTos, List<FunctionParam> functionParams, VirtualSensorBlending blending) throws InternalServerErrorException, BadRequestException {
+        List<BlendingBond> blendingBonds = new ArrayList<>();
+        for (BlendingBondVsnTo bondVsnTo : bondVsnTos) {
+            List<Field> tempFields = blending.getFields();
+            Field field = null;
+            for (Field tempField : tempFields) {
+                long id = bondVsnTo.getFieldId();
+                if (tempField.getId() == id) {
+                    field = tempField;
+                }
+            }
+            BlendingBond bb = createBlendingBonds(functionParams, bondVsnTo, field, true);
+            blendingBonds.add(bb);
+        }
+        return blendingBonds;
+    }
+
+    private List<BlendingBond> createRequestBlendingBonds(List<BlendingBondVsnTo> bondVsnTos, List<FunctionParam> functionParams) throws InternalServerErrorException, BadRequestException {
         FieldController fieldController = new FieldController(factory);
         List<BlendingBond> blendingBonds = new ArrayList<>();
         for (BlendingBondVsnTo bondVsnTo : bondVsnTos) {
             Field field = fieldController.getById(bondVsnTo.getFieldId());
-            if (field == null) {
-                throw new BadRequestException("Declared Field for Function not found!");
-            }
-
-            //datatype switch
-            DataType fieldDataType;
-            if (isResponse) {
-                fieldDataType = field.getInputDataType();
-            } else {
-                fieldDataType = field.getDataType();
-            }
-
-            FunctionType functionType = null;
-            for (FunctionParam functionParam : functionParams) {
-                ValueType typeA = functionParam.getType().getType();
-                ValueType typeB = fieldDataType.getValueType();
-                if (typeA == typeB) {
-                    functionType = functionParam.getType();
-                    break;
-                }
-            }
-
-            //evaluation of types
-            if (functionType == null) {
-                throw new BadRequestException("Function type and Field type are not compatible!");
-            }
-
-            //evaluation of units
-            if (functionType.hasUnit()) {
-                if (!fieldDataType.getUnit().equalsIgnoreCase(functionType.getUnit())) {
-                    throw new BadRequestException("Function unit and Field unit are not compatible!");
-                }
-            }
-
-            BlendingBond bb = new BlendingBond(bondVsnTo.getParamName(), field);
+            BlendingBond bb = createBlendingBonds(functionParams, bondVsnTo, field, false);
             blendingBonds.add(bb);
-
         }
         return blendingBonds;
+    }
+
+    private BlendingBond createBlendingBonds(List<FunctionParam> functionParams, BlendingBondVsnTo bondVsnTo, Field field, boolean isResponse) throws BadRequestException {
+        //check field exist
+        if (field == null) {
+            throw new BadRequestException("Declared Field for Function not found!");
+        }
+
+        //datatype switch 
+        DataType fieldDataType;
+        if (isResponse) {
+            fieldDataType = field.getInputDataType();
+        } else {
+            fieldDataType = field.getDataType();
+        }
+
+        //check if the "function param type" is compatible with "field data type"
+        FunctionType functionType = null;
+        for (FunctionParam functionParam : functionParams) {
+            ValueType typeA = functionParam.getType().getType();
+            ValueType typeB = fieldDataType.getValueType();
+            if (typeA == typeB) {
+                functionType = functionParam.getType();
+                break;
+            }
+        }
+
+        //evaluation of function param type
+        if (functionType == null) {
+            throw new BadRequestException("Function type and Field type are not compatible!");
+        }
+
+        //evaluation of units
+        if (functionType.hasUnit()) {
+            if (!fieldDataType.getUnit().equalsIgnoreCase(functionType.getUnit())) {
+                throw new BadRequestException("Function unit and Field unit are not compatible!");
+            }
+        }
+
+        BlendingBond bb = new BlendingBond(bondVsnTo.getParamName(), field);
+        return bb;
     }
 
     private boolean checkFunctionParams(List<BlendingBondVsnTo> bondVsnTos, List<FunctionParam> params) {
@@ -517,5 +570,66 @@ public class VirtualSensorBlendingController extends Controller {
             }
         }
         return true;
+    }
+
+    //scheduler callback
+    @Override
+    public void callback(List<? extends SchedulerItem> items) throws Exception {
+        if (items != null && items.size() > 0) {
+            for (SchedulerItem item : items) {
+                ModelSchedulerItem msi = (ModelSchedulerItem) item;
+                long sensorId = item.getObjectId();
+                VirtualSensor vs = getById(sensorId);
+                msi.setTime(vs);
+                callFunction((VirtualSensorBlending) vs);
+            }
+        }
+    }
+
+    public void setSchedulerAgent(Scheduler scheduler) {
+        this.scheduler = scheduler;
+    }
+
+    private void insertToScheduler(VirtualSensorBlending blending) {
+        SchedulerItem item = new ModelSchedulerItem(blending);
+        scheduler.schedule(item);
+    }
+
+    private void removeFromScheduler(VirtualSensorBlending blending) {
+        SchedulerDao schedulerDao = factory.getSchedulerDao();
+        SchedulerItem item = schedulerDao.getItemByObjectId(blending.getId());
+        if (item != null) {
+            schedulerDao.delete(item);
+        }
+    }
+
+    private void callFunction(VirtualSensorBlending blending) {
+        FunctionOperation operation = blending.getCallMode();
+        Function function = blending.getFunction();
+        String address = function.getAddress();
+        RequestFnTo requestFnTo = blending.getFunctionRequest();
+
+        switch (operation) {
+            case ASYNCHRONOUS:
+                client.doPost(address, requestFnTo);
+                break;
+            case SYNCHRONOUS:
+                ParameterizedRequestFn requestFn = new ParameterizedRequestFn(address, requestFnTo);
+                Response response = client.doGet(requestFn.toString());
+
+                if (response != null) {
+                    ResponseFnTo responseFnTo = response.getContent(ResponseFnTo.class
+                    );
+
+                    try {
+                        insertValue(blending.getId(), responseFnTo);
+                    } catch (InternalServerErrorException | NotFoundException ex) {
+                        Logger.getLogger(VirtualSensorBlendingController.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                break;
+            default:
+                break;
+        }
     }
 }

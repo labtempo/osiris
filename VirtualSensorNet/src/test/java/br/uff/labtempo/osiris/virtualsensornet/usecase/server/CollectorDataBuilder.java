@@ -52,21 +52,21 @@ public class CollectorDataBuilder {
         SampleCoTo sample = new SampleCoTo(getNetwork(), getCollector(), getSensor());
         return sample;
     }
-    
-    private void generateNewValue(){
+
+    private void generateNewValue() {
         this.value = gerador.nextInt(3);
     }
 
     SensorCoTo getSensor() {
-        
+
         generateNewValue();
-        
+
         String id = sensorId;
-        
-        if(id == null){
+
+        if (id == null) {
             id = String.valueOf(index++);
         }
-        
+
         SensorCoTo sensorTo = new SensorCoTo(id);
 
         sensorTo.addInfo("chave", "valor");

@@ -37,7 +37,7 @@ public class FieldListManager {
         this.newerFields = newerFields;
     }
 
-    public boolean doAddRemove(List<Field> fields) {        
+    public boolean doAddRemove(List<Field> fields) {
         UpdateFieldListHelper helper = new UpdateFieldListHelper();
         return process(helper, fields);
     }

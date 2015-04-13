@@ -67,8 +67,6 @@ public class Revision implements Serializable {
         return items;
     }
 
-    
-
     private List<RevisionItem> createRevisionItems(List<Field> fields) {
         List<RevisionItem> revisionItems = new ArrayList<>();
         for (Field field : fields) {
@@ -79,10 +77,10 @@ public class Revision implements Serializable {
         }
         return revisionItems;
     }
-    
+
     public long getCreationTimestampInMillis() {
         return creationTimestampInMillis;
-    }    
+    }
 
     public long getStorageTimestampInMillis() {
         return storageTimestampInMillis;
@@ -95,5 +93,5 @@ public class Revision implements Serializable {
     public long getAcquisitionTimestampInMillis() {
         return acquisitionTimestampInMillis;
     }
-    
+
 }

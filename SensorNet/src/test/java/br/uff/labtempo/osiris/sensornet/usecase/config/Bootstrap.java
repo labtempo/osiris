@@ -19,14 +19,9 @@ import br.uff.labtempo.osiris.sensornet.controller.CollectorController;
 import br.uff.labtempo.osiris.sensornet.controller.NetworkController;
 import br.uff.labtempo.osiris.sensornet.controller.NotifyController;
 import br.uff.labtempo.osiris.sensornet.controller.SensorController;
-import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistence;
-import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistenceCommitBySecond;
-import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistenceAutoCommitted;
 import br.uff.labtempo.osiris.sensornet.persistence.jpa.JpaDaoFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 
 
 
@@ -45,8 +40,8 @@ public class Bootstrap implements AutoCloseable {
     
     static{
         try {
-            String persistenceUnitName = "postgres";
-            //String persistenceUnitName = "hsqldb";
+            //String persistenceUnitName = "postgres";
+            String persistenceUnitName = "hsqldb";//error in the delete
             factory = PersistenceProvider.getInstance(persistenceUnitName);
             notifyController = new NotifyController(factory);
             sensorController = new SensorController(factory);

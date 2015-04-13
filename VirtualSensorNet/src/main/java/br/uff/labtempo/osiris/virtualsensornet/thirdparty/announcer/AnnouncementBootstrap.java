@@ -40,8 +40,8 @@ public class AnnouncementBootstrap implements AutoCloseable {
     public void close() throws Exception {
         manager.close();
     }
-    
-    public Announcer getAnnouncer(){
+
+    public Announcer getAnnouncer() {
         return manager.getAnnouncer();
     }
 }

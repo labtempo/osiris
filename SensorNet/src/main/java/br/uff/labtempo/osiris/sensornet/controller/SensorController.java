@@ -177,13 +177,16 @@ public class SensorController extends Controller {
         }
         Collector collector = sensor.getCollector();
         Network network = sensor.getNetwork();
+        //remove from collector->network and set null to both        
         network.removeSensor(sensor);
         collector.removeSensor(sensor);
 
         try {
-            NetworkDao networkDao = factory.getNetworkDao();
-            networkDao.update(network);
+            //sdao.update(sensor);
             sdao.delete(sensor);
+            //NetworkDao networkDao = factory.getNetworkDao();
+            //networkDao.update(network);
+            
             return true;
         } catch (Exception e) {
             throw new InternalServerErrorException("Sensor couldn't removed!");

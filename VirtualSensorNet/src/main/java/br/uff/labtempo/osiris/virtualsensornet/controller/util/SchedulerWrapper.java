@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Felipe Santos <feliperalph at hotmail.com>.
+ * Copyright 2015 Felipe Santos <fralph at ic.uff.br>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package br.uff.labtempo.osiris.virtualsensornet.model.util.aggregates;
+package br.uff.labtempo.osiris.virtualsensornet.controller.util;
 
-import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
+import br.uff.labtempo.osiris.utils.scheduling.Scheduler;
+import br.uff.labtempo.osiris.utils.scheduling.SchedulerItem;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public interface AggregatesChecker {
+public class SchedulerWrapper implements Scheduler {
 
-    void check(VirtualSensor virtualSensor);
-    
+    private Scheduler scheduler;
+
+    public SchedulerWrapper(Scheduler scheduler) {
+        this.scheduler = scheduler;
+    }
+
+    @Override
+    public void schedule(SchedulerItem item) {
+        if (scheduler == null) {
+            return;
+        }
+        scheduler.schedule(item);
+    }
 }

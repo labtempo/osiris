@@ -24,11 +24,11 @@ import java.util.Objects;
  */
 public class ConverterVsnTo implements IConverterVsnTo {
 
-    private long id;
-    private final String displayName;
-    private final String expression;
-    private final long inputDataTypeId;
-    private final long outputDataTypeId;
+    private final long id;
+    private String displayName;
+    private String expression;
+    private long inputDataTypeId;
+    private long outputDataTypeId;
     private long usedBy;
 
     public ConverterVsnTo(String displayName, String expression, long inputDataTypeId, long outputDataTypeId) {
@@ -42,7 +42,7 @@ public class ConverterVsnTo implements IConverterVsnTo {
         this.inputDataTypeId = inputDataTypeId;
         this.outputDataTypeId = outputDataTypeId;
     }
-    
+
     public void setUsedBy(long usedBy) {
         this.usedBy = usedBy;
     }
@@ -75,6 +75,26 @@ public class ConverterVsnTo implements IConverterVsnTo {
     @Override
     public long getUsedBy() {
         return usedBy;
+    }
+
+    @Override
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    @Override
+    public void setExpression(String expression) {
+        this.expression = expression;
+    }
+
+    @Override
+    public void setInputDataTypeId(long inputDataTypeId) {
+        this.inputDataTypeId = inputDataTypeId;
+    }
+
+    @Override
+    public void setOutputDataTypeId(long outputDataTypeId) {
+        this.outputDataTypeId = outputDataTypeId;
     }
 
     @Override

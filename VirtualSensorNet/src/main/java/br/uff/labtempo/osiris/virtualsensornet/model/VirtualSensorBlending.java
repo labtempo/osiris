@@ -17,12 +17,16 @@ package br.uff.labtempo.osiris.virtualsensornet.model;
 
 import br.uff.labtempo.osiris.virtualsensornet.model.interfaces.IBlending;
 import br.uff.labtempo.osiris.to.common.definitions.FunctionOperation;
+import br.uff.labtempo.osiris.to.function.RequestFnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.BlendingVsnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorType;
 import br.uff.labtempo.osiris.virtualsensornet.model.util.BlendingValuesWrapper;
 import br.uff.labtempo.osiris.virtualsensornet.model.util.FieldListManager;
 import br.uff.labtempo.osiris.virtualsensornet.model.util.field.FieldValuesWrapper;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -50,7 +54,6 @@ public class VirtualSensorBlending extends VirtualSensor<BlendingVsnTo> implemen
 
     @Enumerated(EnumType.STRING)
     private FunctionOperation callMode;
-    private long callIntervalInMillis;
 
     //updateable
     @Embedded
@@ -82,7 +85,7 @@ public class VirtualSensorBlending extends VirtualSensor<BlendingVsnTo> implemen
 
     @Override
     public long getCallIntervalInMillis() {
-        return callIntervalInMillis;
+        return super.getCreationInterval();
     }
 
     @Override
@@ -127,11 +130,10 @@ public class VirtualSensorBlending extends VirtualSensor<BlendingVsnTo> implemen
     //changeable
     @Override
     public void removeFunction() {
-        function = null;
-        callMode = null;
-        callIntervalInMillis = 0;
-        requestFields = null;
-        responseFields = null;
+        setFunction(null, null);
+        setCallIntervalInMillis(0);
+        setRequestFields(null);
+        setResponseFields(null);
         update();
     }
 
@@ -145,7 +147,7 @@ public class VirtualSensorBlending extends VirtualSensor<BlendingVsnTo> implemen
     //changeable
     @Override
     public void setCallIntervalInMillis(long callIntervalInMillis) {
-        this.callIntervalInMillis = callIntervalInMillis;
+        setCreationInterval(callIntervalInMillis, TimeUnit.MILLISECONDS);
         update();
     }
 
@@ -202,7 +204,32 @@ public class VirtualSensorBlending extends VirtualSensor<BlendingVsnTo> implemen
 
     @Override
     public BlendingVsnTo getUniqueTransferObject() {
+        //TODO: adicionar function aqui
         BlendingVsnTo blendingVsnTo = new BlendingVsnTo(getId(), getLabel());
+
+        //adding function infos
+        if (function != null) {
+            blendingVsnTo.setFunction(function.getId());
+            blendingVsnTo.setCallMode(callMode);
+            blendingVsnTo.setCallIntervalInMillis(getCallIntervalInMillis());
+
+            //adding request fields
+            for (BlendingBond requestField : requestFields) {
+                Field field = requestField.getField();
+                String paramName = requestField.getName();
+                long paramFieldId = field.getId();
+                blendingVsnTo.addRequestParam(paramFieldId, paramName);
+            }
+            //adding response fields
+            for (BlendingBond responseField : responseFields) {
+                Field field = responseField.getField();
+                String paramName = responseField.getName();
+                long paramFieldId = field.getId();
+                blendingVsnTo.addRequestParam(paramFieldId, paramName);
+            }
+        }
+
+        //adding fields
         List<Field> fields = getFields();
         for (Field field : fields) {
             VirtualSensor sensor = field.getVirtualSensor();
@@ -212,4 +239,45 @@ public class VirtualSensorBlending extends VirtualSensor<BlendingVsnTo> implemen
         return blendingVsnTo;
     }
 
+    @Override
+    public RequestFnTo getFunctionRequest() {
+
+        //grouping values by name
+        RequestFnTo requestFnTo = new RequestFnTo();
+        Map<String, List<String>> map = new HashMap<>();
+        for (BlendingBond requestField : requestFields) {
+            Field field = requestField.getField();
+            String paramName = requestField.getName();
+            String paramValue = field.getValue();
+            List<String> values;
+            if (map.containsKey(paramName)) {
+                values = map.get(paramName);
+            } else {
+                values = new ArrayList<>();
+                map.put(paramName, values);
+            }
+            values.add(paramValue);
+        }
+
+        //assigning the values to the function's param name
+        List<FunctionParam> requestParams = function.getRequestParams();
+        for (FunctionParam requestParam : requestParams) {
+            String paramName = requestParam.getName();
+            FunctionType functionParam = requestParam.getType();
+            boolean isCollection = functionParam.isCollection();
+            List<String> values = map.get(paramName);
+
+            if (values == null) {
+                continue;
+            }
+
+            if (isCollection) {
+                requestFnTo.addValue(paramName, values);
+            } else {
+                String value = values.get(0);
+                requestFnTo.addValue(paramName, value);
+            }
+        }
+        return requestFnTo;
+    }
 }

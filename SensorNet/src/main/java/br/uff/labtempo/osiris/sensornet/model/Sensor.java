@@ -183,18 +183,18 @@ public class Sensor extends Model {
         return revision.getStorageTimestampInMillis();
     }
 
-    @Override
-    public int hashCode() {
-        int hash = 5;
-        hash = 29 * hash + Objects.hashCode(this.id);
-        hash = 29 * hash + Objects.hashCode(this.network);
-        hash = 29 * hash + Objects.hashCode(this.collector);
-        hash = 29 * hash + (int) (this.captureTimestampInMillis ^ (this.captureTimestampInMillis >>> 32));
-        hash = 29 * hash + this.capturePrecisionInNano;
-        hash = 29 * hash + (int) (this.acquisitionTimestampInMillis ^ (this.acquisitionTimestampInMillis >>> 32));
-        hash = 29 * hash + (int) (this.storageTimestampInMillis ^ (this.storageTimestampInMillis >>> 32));
-        return hash;
-    }
+//    @Override
+//    public int hashCode() {
+//        int hash = 5;
+//        hash = 29 * hash + Objects.hashCode(this.id);
+//        hash = 29 * hash + Objects.hashCode(this.network);
+//        hash = 29 * hash + Objects.hashCode(this.collector);
+//        hash = 29 * hash + (int) (this.captureTimestampInMillis ^ (this.captureTimestampInMillis >>> 32));
+//        hash = 29 * hash + this.capturePrecisionInNano;
+//        hash = 29 * hash + (int) (this.acquisitionTimestampInMillis ^ (this.acquisitionTimestampInMillis >>> 32));
+//        hash = 29 * hash + (int) (this.storageTimestampInMillis ^ (this.storageTimestampInMillis >>> 32));
+//        return hash;
+//    };
 
     @Override
     public boolean equals(Object obj) {

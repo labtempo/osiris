@@ -67,7 +67,7 @@ public class DataTypeController extends Controller {
                     DataTypeVsnTo to = request.getContent(DataTypeVsnTo.class);
                     long id = create(to);
                     // /datatype/{id}
-                    String uri = Path.SEPARATOR.toString() +Path.NAMING_RESOURCE_DATATYPE.toString() + Path.SEPARATOR + String.valueOf(id);
+                    String uri = Path.SEPARATOR.toString() + Path.NAMING_RESOURCE_DATATYPE.toString() + Path.SEPARATOR + String.valueOf(id);
                     response = new ResponseBuilder().created(uri).build();
                     return response;
                 default:

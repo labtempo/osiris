@@ -20,6 +20,7 @@ import br.uff.labtempo.osiris.sensornet.model.state.Model;
 import br.uff.labtempo.osiris.sensornet.model.util.ModelUtil;
 import br.uff.labtempo.osiris.to.sensornet.NetworkSnTo;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -90,6 +91,8 @@ public class Network extends Model {
     public void removeCollector(Collector collector) {
         collectors.remove(collector);
         collector.setNetwork(null);
+        removeSensors(collector.getSensors());
+
     }
 
     /**
@@ -120,8 +123,24 @@ public class Network extends Model {
     }
 
     public void removeSensor(Sensor sensor) {
-        sensors.remove(sensor);
-        sensor.setNetwork(null);
+        Sensor tempSensor = null;
+        for (Sensor s : sensors) {
+            if (sensor.getPersistenceId() == s.getPersistenceId()) {
+                tempSensor = s;
+                break;
+            }
+        }
+        if (tempSensor != null) {
+            sensors.remove(tempSensor);
+            sensor.setNetwork(null);
+        }
+    }
+
+    public void removeSensors(Sensor[] sensors) {
+        for (Sensor sensor : sensors) {
+            this.sensors.remove(sensor);
+            sensor.setNetwork(null);
+        }
     }
 
     public NetworkSnTo getTransferObject() {
@@ -164,7 +183,6 @@ public class Network extends Model {
 //    public int hashCode() {
 //        return id.hashCode();
 //    }
-
     @Override
     public int hashCode() {
         int hash = 7;

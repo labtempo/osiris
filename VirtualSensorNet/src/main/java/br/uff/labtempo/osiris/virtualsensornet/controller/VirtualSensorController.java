@@ -77,7 +77,7 @@ public class VirtualSensorController extends Controller {
                     Response response = new ResponseBuilder().ok(to, contentType).build();
                     return response;
                 case PUT:
-                    update(0,null);
+                    update(0, null);
                 case DELETE:
                     delete(0);
                 default:

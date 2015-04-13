@@ -33,6 +33,6 @@ public interface FieldValuesWrapper<T> {
     int getCreationPrecisionInNano();
 
     long getCreationInterval();
-    
+
     List<T> getValues();
 }

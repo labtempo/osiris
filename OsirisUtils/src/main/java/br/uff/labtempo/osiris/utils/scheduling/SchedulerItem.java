@@ -26,9 +26,11 @@ public interface SchedulerItem {
     long getObjectId();
 
     void updateTimeToNextUpdate(long timeToNextUpdate);
-    
+
+    void updateIntervalInMillis(long intervalInMillis);
+
     long getIntervalInMillis();
-    
+
     boolean isRemovable();
-    
+
 }

@@ -67,6 +67,11 @@ public class ModelSchedulerItem implements Serializable, SchedulerItem {
         this.timeToNextUpdate = estimatedTimeToNextUpdate;
     }
 
+    @Override
+    public void updateIntervalInMillis(long intervalInMillis) {
+        this.intervalInMillis = intervalInMillis;
+    }
+
     public long getId() {
         return id;
     }

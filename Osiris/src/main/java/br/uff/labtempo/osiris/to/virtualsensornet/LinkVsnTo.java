@@ -15,9 +15,11 @@
  */
 package br.uff.labtempo.osiris.to.virtualsensornet;
 
+import br.uff.labtempo.omcp.common.utils.DateUtil;
 import br.uff.labtempo.osiris.to.common.data.FieldTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.interfaces.ILinkVsnTo;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -28,17 +30,16 @@ import java.util.Objects;
  */
 public class LinkVsnTo implements ILinkVsnTo {
 
-    private long id;
-    private final String sensorId;
-    private final String collectorId;
-    private final String networkId;
+    private final long id;
+    private String label;
+    private String sensorId;
+    private String collectorId;
+    private String networkId;
     private List<Map<String, String>> fields;
 
-    //helper attributes
-    private transient List<? extends FieldTo> helperFieldToList;
-
-    public LinkVsnTo(long id, String sensorId, String collectorId, String networkId) {
+    public LinkVsnTo(long id, String label, String sensorId, String collectorId, String networkId) {
         this.id = id;
+        this.label = label;
         this.sensorId = sensorId;
         this.collectorId = collectorId;
         this.networkId = networkId;
@@ -46,8 +47,14 @@ public class LinkVsnTo implements ILinkVsnTo {
         this.fields = new ArrayList<>();
     }
 
-    public LinkVsnTo(String sensorId, String collectorId, String networkId) {
-        this(0, sensorId, collectorId, networkId);
+    public LinkVsnTo(String label, String sensorId, String collectorId, String networkId) {
+        this(0, label, sensorId, collectorId, networkId);
+    }
+    
+    public LinkVsnTo(String sensorId, String collectorId, String networkId) {        
+        this(0, "", sensorId, collectorId, networkId);
+        DateUtil dateUtil = new DateUtil();
+        this.label = "link-"+dateUtil.generate(Calendar.getInstance());
     }
 
     @Override
@@ -83,8 +90,23 @@ public class LinkVsnTo implements ILinkVsnTo {
     }
 
     @Override
+    public void removeFields() {
+        fields.clear();
+    }
+
+    @Override
     public long getId() {
         return id;
+    }
+
+    @Override
+    public String getLabel() {
+        return label;
+    }
+
+    @Override
+    public void setLabel(String label) {
+        this.label = label;
     }
 
     @Override
@@ -93,8 +115,18 @@ public class LinkVsnTo implements ILinkVsnTo {
     }
 
     @Override
+    public void setSensorId(String sensorId) {
+        this.sensorId = sensorId;
+    }
+
+    @Override
     public String getCollectorId() {
         return collectorId;
+    }
+
+    @Override
+    public void setCollectorId(String collectorId) {
+        this.collectorId = collectorId;
     }
 
     @Override
@@ -103,15 +135,16 @@ public class LinkVsnTo implements ILinkVsnTo {
     }
 
     @Override
+    public void setNetworkId(String networkId) {
+        this.networkId = networkId;
+    }
+
+    @Override
     public List<? extends FieldTo> getFields() {
-        if (helperFieldToList != null) {
-            return helperFieldToList;
-        }
         List<InternalFieldTo> fieldTos = new ArrayList<>();
         for (Map<String, String> field : fields) {
             fieldTos.add(new InternalFieldTo(field));
         }
-        helperFieldToList = fieldTos;
         return fieldTos;
     }
 

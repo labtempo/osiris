@@ -142,8 +142,6 @@ public class DataType implements Serializable {
         return true;
     }
 
-   
-
     public DataTypeVsnTo getTransferObject(long usedBy) {
         DataTypeVsnTo to = new DataTypeVsnTo(id, displayName, type, unit, symbol);
         to.setUsedBy(usedBy);

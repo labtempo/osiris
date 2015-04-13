@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package br.uff.labtempo.osiris.virtualsensornet.model.util;
+package br.uff.labtempo.osiris.virtualsensornet.controller.util;
 
 import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorVsnTo;
 import br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer.AnnouncerAgent;

@@ -26,6 +26,8 @@ public interface ILinkVsnTo {
 
     long getId();
 
+    String getLabel();
+
     String getSensorId();
 
     String getNetworkId();
@@ -43,4 +45,15 @@ public interface ILinkVsnTo {
     void createField(String name, long dataTypeId);
 
     void createField(long id, String name, long dataTypeId);
+
+    //edit
+    void setLabel(String label);
+
+    void setSensorId(String sensorId);
+
+    void setNetworkId(String NetworkId);
+
+    void setCollectorId(String collectorId);
+
+    void removeFields();
 }

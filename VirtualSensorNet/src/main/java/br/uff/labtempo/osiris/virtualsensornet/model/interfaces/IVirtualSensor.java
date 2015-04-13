@@ -48,9 +48,11 @@ public interface IVirtualSensor<T> extends IModel {
     long getCreationInterval();
 
     List<Field> getFields();
-    
+
     boolean setFieldsValues(FieldValuesWrapper valuesWrapper);
-    
+
+    void setCreationInterval(long creationInterval, TimeUnit timeUnit);
+
     boolean updateFields(FieldListManager listManager);
 
     VirtualSensorType getVirtualSensorType();

@@ -15,10 +15,12 @@
  */
 package br.uff.labtempo.osiris.to.virtualsensornet;
 
+import br.uff.labtempo.omcp.common.utils.DateUtil;
 import br.uff.labtempo.osiris.to.common.data.FieldTo;
 import br.uff.labtempo.osiris.to.common.definitions.FunctionOperation;
 import br.uff.labtempo.osiris.to.virtualsensornet.interfaces.IBlendingVsnTo;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
@@ -32,18 +34,14 @@ public class BlendingVsnTo implements IBlendingVsnTo {
     //lista de parametros(fields) com base na function
     //tempo de ativação
 
-    private long id;
+    private final long id;
     private String label;
     private long functionId;
     private String callMode;
-    private int callIntervalInMillis;
+    private long callIntervalInMillis;
     private List<Map<String, String>> fields;
     private List<Map<String, String>> requestParams;
     private List<Map<String, String>> responseParams;
-
-    //helper attributes
-    private transient List<? extends FieldTo> helperFieldToList;
-    private transient FunctionOperation helperFunctionOperation;
 
     public BlendingVsnTo(long id, String label) {
         this.id = id;
@@ -55,6 +53,12 @@ public class BlendingVsnTo implements IBlendingVsnTo {
 
     public BlendingVsnTo(String label) {
         this(0, label);
+    }
+
+    public BlendingVsnTo() {
+        this("");
+        DateUtil dateUtil = new DateUtil();
+        this.label = "blending-" + dateUtil.generate(Calendar.getInstance());
     }
 
     @Override
@@ -69,7 +73,7 @@ public class BlendingVsnTo implements IBlendingVsnTo {
 
     @Override
     public void setLabel(String label) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.label = label;
     }
 
     @Override
@@ -105,15 +109,17 @@ public class BlendingVsnTo implements IBlendingVsnTo {
     }
 
     @Override
+    public void removeFields() {
+        fields.clear();
+    }
+
+    @Override
     public List<? extends FieldTo> getFields() {
-        if (helperFieldToList == null) {
-            List<InternalFieldTo> fieldTos = new ArrayList<>();
-            for (Map<String, String> field : fields) {
-                fieldTos.add(new InternalFieldTo(field));
-            }
-            helperFieldToList = fieldTos;
+        List<InternalFieldTo> fieldTos = new ArrayList<>();
+        for (Map<String, String> field : fields) {
+            fieldTos.add(new InternalFieldTo(field));
         }
-        return helperFieldToList;
+        return fieldTos;
     }
 
     //edit
@@ -123,31 +129,32 @@ public class BlendingVsnTo implements IBlendingVsnTo {
     }
 
     @Override
+    public void setFunction(FunctionVsnTo function) {
+        this.functionId = function.getId();
+    }
+
+    @Override
     public long getFunctionId() {
         return functionId;
     }
 
     @Override
     public void setCallMode(FunctionOperation operation) {
-        this.helperFunctionOperation = operation;
         this.callMode = operation.toString();
     }
 
     @Override
     public FunctionOperation getCallMode() {
-        if (helperFunctionOperation == null) {
-            helperFunctionOperation = FunctionOperation.getByString(callMode);
-        }
-        return helperFunctionOperation;
+        return FunctionOperation.getByString(callMode);
     }
 
     @Override
-    public void setCallIntervalInMillis(int callIntervalInMillis) {
+    public void setCallIntervalInMillis(long callIntervalInMillis) {
         this.callIntervalInMillis = callIntervalInMillis;
     }
 
     @Override
-    public int getCallIntervalInMillis() {
+    public long getCallIntervalInMillis() {
         return callIntervalInMillis;
     }
 

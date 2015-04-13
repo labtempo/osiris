@@ -34,7 +34,7 @@ public class DataManager {
     public DataManager(JpaDaoFactory factory) {
         this.factory = factory;
     }
-   
+
     public void save(Object o) {
         EntityManager EM = getEntityManager();
         EntityTransaction et = EM.getTransaction();
@@ -45,7 +45,8 @@ public class DataManager {
 
     public <T> T get(Class<T> entityType, Object key) {
         EntityManager EM = getEntityManager();
-        return EM.find(entityType, key);
+        T object = EM.find(entityType, key);
+        return object;
     }
 
     public <T> T getReference(Class<T> entityType, Object key) {
@@ -60,14 +61,14 @@ public class DataManager {
         EM.merge(o);
         et.commit();
     }
-    
+
     public void delete(Object o) {
         EntityManager EM = getEntityManager();
         EntityTransaction et = EM.getTransaction();
         et.begin();
         EM.remove(o);
         et.commit();
-    }   
+    }
 
     public CriteriaBuilder getCriteriaBuilder() {
         EntityManager EM = getEntityManager();
@@ -96,8 +97,8 @@ public class DataManager {
         EntityManager EM = getEntityManager();
         return EM.createNativeQuery(sql, klass);
     }
-    
-    private EntityManager getEntityManager(){
+
+    private EntityManager getEntityManager() {
         return factory.getEntityManager();
     }
 }

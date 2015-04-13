@@ -22,5 +22,5 @@ import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public interface SchedulerDao extends SchedulingStorage{
+public interface SchedulerDao extends SchedulingStorage {
 }

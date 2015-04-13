@@ -32,9 +32,8 @@ import br.uff.labtempo.osiris.virtualsensornet.model.DataConverter;
 import br.uff.labtempo.osiris.virtualsensornet.model.DataType;
 import br.uff.labtempo.osiris.virtualsensornet.model.Field;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensorLink;
-import br.uff.labtempo.osiris.virtualsensornet.model.util.AnnouncerWrapper;
+import br.uff.labtempo.osiris.virtualsensornet.controller.util.AnnouncerWrapper;
 import br.uff.labtempo.osiris.virtualsensornet.model.util.FieldListManager;
-import br.uff.labtempo.osiris.virtualsensornet.model.util.field.UpgradeFieldListHelper;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.ConverterDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DataTypeDao;
@@ -156,9 +155,11 @@ public class VirtualSensorLinkController extends Controller {
         String sensorId;
         String collectorId;
         String networkId;
+        String label;
         List<? extends FieldTo> fieldsTo;
 
         try {
+            label = linkTo.getLabel().trim();
             sensorId = linkTo.getSensorId().trim();
             collectorId = linkTo.getCollectorId().trim();
             networkId = linkTo.getNetworkId().trim();
@@ -244,8 +245,8 @@ public class VirtualSensorLinkController extends Controller {
         //remove initialized fields
         FieldController fieldSubController = new FieldController(factory);
         List<Field> currentFields = sensorLink.getFields();
-        List<Field> temList = new ArrayList<>(currentFields);
-        for (Field field : temList) {
+        List<Field> removedFields = new ArrayList<>(currentFields);
+        for (Field field : removedFields) {
             fieldSubController.deleteIgnoringInitialization(currentFields, field);
             //detaches sensor from field
             field.setVirtualSensor(null);
@@ -262,8 +263,8 @@ public class VirtualSensorLinkController extends Controller {
          */
         try {
             lDao.update(sensorLink);
-            for (Field currentField : currentFields) {
-                fieldSubController.delete(currentField);
+            for (Field removedField : removedFields) {
+                fieldSubController.delete(removedField);
             }
             lDao.delete(sensorLink);
             return true;

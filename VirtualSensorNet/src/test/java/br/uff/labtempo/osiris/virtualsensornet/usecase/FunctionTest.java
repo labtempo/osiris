@@ -106,7 +106,7 @@ public class FunctionTest {
         int expectedCountOperations = 1;
         int expectedCountRequestParams = 1;
         int expectedCountResponseParams = 1;
-        
+
         Assert.assertEquals(expectedName, vsnTo.getName());
         Assert.assertEquals(expectedDescription, vsnTo.getDescription());
         Assert.assertEquals(expectedAddress, vsnTo.getAddress());

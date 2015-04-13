@@ -15,11 +15,18 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.persistence.jpa;
 
+import br.uff.labtempo.osiris.virtualsensornet.model.DataType;
+import br.uff.labtempo.osiris.virtualsensornet.model.Field;
+import br.uff.labtempo.osiris.virtualsensornet.model.Field_;
 import br.uff.labtempo.osiris.virtualsensornet.model.Function;
+import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensorBlending;
+import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensorBlending_;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.FunctionDao;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 /**
@@ -56,10 +63,21 @@ public class FunctionJpa implements FunctionDao {
 
     @Override
     public long countUse(Function function) {
-        //TODO: implementar count
-        return 0;
+        CriteriaBuilder cb = data.getCriteriaBuilder();
+        CriteriaQuery<Long> criteriaQuery = cb.createQuery(Long.class);
+        Root<VirtualSensorBlending> root = criteriaQuery.from(VirtualSensorBlending.class);
+
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(cb.equal(root.<Function>get(VirtualSensorBlending_.function), function));
+        criteriaQuery.where(predicates.toArray(new Predicate[]{}));
+
+        criteriaQuery.select(cb.count(root));
+
+        long totalUse = data.getQuerySingle(criteriaQuery);
+
+        return totalUse;
     }
-    
+
     @Override
     public void save(Function o) {
         data.save(o);

@@ -16,7 +16,6 @@
 package br.uff.labtempo.osiris.to.virtualsensornet;
 
 import br.uff.labtempo.osiris.to.virtualsensornet.interfaces.IVirtualSensorVsnTo;
-import br.uff.labtempo.osiris.to.common.data.ValueTo;
 import br.uff.labtempo.osiris.to.common.definitions.State;
 import br.uff.labtempo.osiris.to.common.definitions.ValueType;
 import java.math.BigInteger;

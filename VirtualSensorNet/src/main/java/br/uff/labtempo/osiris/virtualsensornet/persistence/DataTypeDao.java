@@ -22,11 +22,17 @@ import java.util.List;
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public interface DataTypeDao extends Dao<DataType>{
+public interface DataTypeDao extends Dao<DataType> {
+
     public List<DataType> getAll();
+
     public List<DataType> getAllDeleted();
+
     public DataType getById(long id);
+
     public long countDirectUseInFields(DataType dataType);
+
     public long countIndirectUseInFields(DataType dataType);
+
     public long countUseInConverters(DataType dataType);
 }

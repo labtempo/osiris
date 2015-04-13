@@ -24,6 +24,7 @@ import javax.persistence.Embeddable;
  */
 @Embeddable
 public class BlendingBond implements Serializable {
+
     private String name;
     private Field field;
 

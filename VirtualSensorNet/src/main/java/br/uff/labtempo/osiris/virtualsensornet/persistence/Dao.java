@@ -20,6 +20,7 @@ package br.uff.labtempo.osiris.virtualsensornet.persistence;
  * @author Felipe Santos <fralph at ic.uff.br>
  */
 interface Dao<T> {
+
     public void save(T o);
 
     public void update(T o);

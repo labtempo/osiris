@@ -25,6 +25,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.script.ScriptException;
@@ -51,6 +53,9 @@ public class Field implements Serializable {
     @ManyToOne
     private VirtualSensor virtualSensor;
 
+    @JoinTable(name = "field_aggregates",
+            joinColumns = @JoinColumn(name = "field_id"),
+            inverseJoinColumns = @JoinColumn(name = "virtualsensor_id"))
     @ManyToMany
     private List<VirtualSensor> aggregates;
 

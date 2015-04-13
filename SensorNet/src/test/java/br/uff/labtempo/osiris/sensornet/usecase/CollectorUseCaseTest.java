@@ -30,8 +30,6 @@ import br.uff.labtempo.osiris.to.sensornet.CollectorSnTo;
 import br.uff.labtempo.osiris.to.sensornet.NetworkSnTo;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import static junit.framework.Assert.*;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -107,8 +105,6 @@ public class CollectorUseCaseTest {
         sampleCoTo = builder.generateSample();
         notifycontroller.analyzeSample(sampleCoTo);
         
-        
-        
         CollectorSnTo cst = controller.getById("network", "collectorGet1");
         assertNotNull(cst);
         String expectedId = "collectorGet1";
@@ -129,7 +125,7 @@ public class CollectorUseCaseTest {
     //updaters
     @Test
     public void testUpdateCollector_Info_Valid_ShouldPass() throws NotFoundException, InternalServerErrorException {
-        CollectorDataBuilder builder = new CollectorDataBuilder("network", "collectorUpdate");
+        CollectorDataBuilder builder = new CollectorDataBuilder("networkUpdate", "collectorUpdate");
         SampleCoTo sampleCoTo = builder.generateSample();
 
         NetworkCoTo nct = sampleCoTo.getNetwork();
@@ -145,7 +141,7 @@ public class CollectorUseCaseTest {
         notifycontroller.analyzeSample(sampleCoTo);
         notifycontroller.analyzeSample(sampleCoTo1);
 
-        CollectorSnTo cst = controller.getById("network", "collectorUpdate");
+        CollectorSnTo cst = controller.getById("networkUpdate", "collectorUpdate");
         assertNotNull(cst);
         String expectedDescription = "sala do laboratorio da pos";
         String expectedTopology = "barra";
@@ -156,7 +152,7 @@ public class CollectorUseCaseTest {
 
     @Test
     public void testUpdateCollector_UpdatingInterval_Valid_ShouldPass() throws NotFoundException, InternalServerErrorException {
-        CollectorDataBuilder builder = new CollectorDataBuilder("network", "collectorUpdatingInterval");
+        CollectorDataBuilder builder = new CollectorDataBuilder("networkUpdatingInterval", "collectorUpdatingInterval");
         SampleCoTo sampleCoTo = builder.generateSample();
 
         NetworkCoTo nct = sampleCoTo.getNetwork();
@@ -172,7 +168,7 @@ public class CollectorUseCaseTest {
         notifycontroller.analyzeSample(sampleCoTo);
         notifycontroller.analyzeSample(sampleCoTo1);
 
-        CollectorSnTo cst = controller.getById("network", "collectorUpdatingInterval");
+        CollectorSnTo cst = controller.getById("networkUpdatingInterval", "collectorUpdatingInterval");
         assertNotNull(cst);
         long expectedInterval = 50;
         TimeUnit expectedIntervalUnit = TimeUnit.SECONDS;
@@ -183,11 +179,11 @@ public class CollectorUseCaseTest {
     //remove
     @Test(expected = NotFoundException.class)
     public void testDeleteCollector_Valid_ShouldThrowException() throws NotFoundException, InternalServerErrorException {
-        CollectorDataBuilder builder = new CollectorDataBuilder("network", "collectorDelete");
+        CollectorDataBuilder builder = new CollectorDataBuilder("networkDelete", "collectorDelete");
         SampleCoTo sampleCoTo = builder.generateSample();
         notifycontroller.analyzeSample(sampleCoTo);
 
-        CollectorSnTo cst = controller.getById("network", "collectorDelete");
+        CollectorSnTo cst = controller.getById("networkDelete", "collectorDelete");
 
         assertNotNull(cst);
 
@@ -198,15 +194,15 @@ public class CollectorUseCaseTest {
 
         assertTrue(isDeleted);
 
-        controller.getById("network", "collectorDelete");
+        controller.getById("networkDelete", "collectorDelete");
     }
 
     @Test
     public void testDeleteCollector_AndCheckSensorToRemovedToo_ShouldPass() throws NotFoundException, InternalServerErrorException {
-        CollectorDataBuilder builder = new CollectorDataBuilder("network", "collectorDelete01");
+        CollectorDataBuilder builder = new CollectorDataBuilder("networkDelete01", "collectorDelete01");
         SampleCoTo sampleCoTo = builder.generateSample();
         notifycontroller.analyzeSample(sampleCoTo);
-        CollectorSnTo cst = controller.getById("network", "collectorDelete01");
+        CollectorSnTo cst = controller.getById("networkDelete01", "collectorDelete01");
 
         assertNotNull(cst);
         assertTrue(cst.getTotalSensors() > 0);
@@ -224,7 +220,7 @@ public class CollectorUseCaseTest {
 
         assertTrue(isDeleted);
 
-        networkSnTo = networkController.getById(cst.getNetworkId());
+        networkSnTo = networkController.getById(networkId);
 
         long expectedNetworkTotalSensors = networkTotalSensors - collectorTotalSensors;
 

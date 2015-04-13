@@ -18,14 +18,9 @@ package br.uff.labtempo.osiris.virtualsensornet.thirdparty.scheduler;
 import br.uff.labtempo.osiris.utils.scheduling.SchedulerItem;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
 import java.io.Serializable;
-import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.MapsId;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 /**
@@ -49,10 +44,7 @@ public class ModelSchedulerItem implements Serializable, SchedulerItem {
 
     public ModelSchedulerItem(VirtualSensor virtualSensor) {
         this.virtualSensorId = virtualSensor.getId();
-
-        Calendar lastModifiedDate = virtualSensor.getLastModifiedDate();
-        this.intervalInMillis = TimeUnit.MILLISECONDS.convert(virtualSensor.getCreationInterval(), virtualSensor.getCreationIntervalTimeUnit());
-        this.timeToNextUpdate = virtualSensor.getCreationTimestampInMillis() + intervalInMillis;
+        setTime(virtualSensor);
     }
 
     @Override
@@ -70,12 +62,18 @@ public class ModelSchedulerItem implements Serializable, SchedulerItem {
         this.timeToNextUpdate = estimatedTimeToNextUpdate;
     }
 
+    @Override
+    public void updateIntervalInMillis(long intervalInMillis) {
+        this.intervalInMillis = intervalInMillis;
+    }
+
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setTime(VirtualSensor virtualSensor) {
+        this.intervalInMillis = TimeUnit.MILLISECONDS.convert(virtualSensor.getCreationInterval(), virtualSensor.getCreationIntervalTimeUnit());
+        this.timeToNextUpdate = virtualSensor.getCreationTimestampInMillis() + intervalInMillis;
     }
 
     @Override

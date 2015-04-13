@@ -64,7 +64,7 @@ public class CompositeJpa implements CompositeDao {
     public void update(VirtualSensorComposite o) {
         data.update((VirtualSensor) o);
     }
-    
+
     @Override
     public void update(VirtualSensor sensor) {
         data.update(sensor);

@@ -308,11 +308,11 @@ public class SensorUseCaseTest {
     //remove
     @Test
     public void testDeleteSensor_Valid_ShouldPass() throws NotFoundException, InternalServerErrorException {
-        CollectorDataBuilder builder = new CollectorDataBuilder("network", "collector", "sensorDeleteSensor");
+        CollectorDataBuilder builder = new CollectorDataBuilder("networkDeleteSensor", "collectorDeleteSensor", "sensorDeleteSensor");
         SampleCoTo sampleCoTo = builder.generateSample();
         notifycontroller.analyzeSample(sampleCoTo);
 
-        SensorSnTo sst = controller.getById("network", "collector", "sensorDeleteSensor");
+        SensorSnTo sst = controller.getById("networkDeleteSensor", "collectorDeleteSensor", "sensorDeleteSensor");
         assertNotNull(sst);
 
         String networkId = sst.getNetworkId();

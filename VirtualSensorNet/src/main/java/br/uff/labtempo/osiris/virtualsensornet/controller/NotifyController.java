@@ -31,12 +31,12 @@ import br.uff.labtempo.osiris.to.common.definitions.Path;
 import br.uff.labtempo.osiris.to.sensornet.SensorSnTo;
 import br.uff.labtempo.osiris.utils.requestpool.RequestHandler;
 import br.uff.labtempo.osiris.utils.requestpool.RequestPool;
-import br.uff.labtempo.osiris.virtualsensornet.model.util.aggregates.AggregatesChecker;
+import br.uff.labtempo.osiris.virtualsensornet.controller.util.AggregatesChecker;
 import br.uff.labtempo.osiris.virtualsensornet.controller.internal.AggregatesCheckerController;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensorLink;
 import br.uff.labtempo.osiris.virtualsensornet.model.state.ModelState;
-import br.uff.labtempo.osiris.virtualsensornet.model.util.aggregates.AggregatesCheckerWrapper;
-import br.uff.labtempo.osiris.virtualsensornet.model.util.AnnouncerWrapper;
+import br.uff.labtempo.osiris.virtualsensornet.controller.util.AggregatesCheckerWrapper;
+import br.uff.labtempo.osiris.virtualsensornet.controller.util.AnnouncerWrapper;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.virtualsensornet.model.util.LinkValuesWrapper;
 import br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer.AnnouncerAgent;
@@ -53,7 +53,6 @@ public class NotifyController extends Controller implements RequestHandler {
     private final DaoFactory factory;
     private final AggregatesChecker checker;
     private AnnouncerAgent announcer;
-    private Scheduler scheduler;
     private RequestPool requestPool;
 
     public NotifyController(DaoFactory factory, AnnouncerAgent announcer, RequestPool requestPool, AggregatesChecker checkerController) {
@@ -73,7 +72,7 @@ public class NotifyController extends Controller implements RequestHandler {
     public NotifyController(DaoFactory factory, AggregatesCheckerController checkerController) {
         this(factory, null, null, checkerController);
     }
-    
+
     public NotifyController(DaoFactory factory) {
         this(factory, null, null, null);
     }
@@ -166,7 +165,7 @@ public class NotifyController extends Controller implements RequestHandler {
                     announcer.notifyReactivation(link.getTransferObject());
                 }
                 announcer.broadcastIt(link.getTransferObject());
-                
+
                 //check aggregates
                 checker.check(link);
             }
@@ -177,7 +176,4 @@ public class NotifyController extends Controller implements RequestHandler {
         this.announcer = announcer;
     }
 
-    public void setSchedulerAgent(Scheduler scheduler) {
-        this.scheduler = scheduler;
-    }
 }

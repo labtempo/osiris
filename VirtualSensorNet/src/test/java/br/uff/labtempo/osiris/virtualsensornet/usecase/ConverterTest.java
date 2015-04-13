@@ -141,7 +141,7 @@ public class ConverterTest {
         Assert.assertEquals(to, vsnTo);
         Assert.assertEquals(id, vsnTo.getId());
     }
-    
+
     @Test
     public void TestGetConverter_CountUseByFields_ShouldPass() throws NotFoundException, MethodNotAllowedException, BadRequestException, InternalServerErrorException {
         long cc1 = controller.create(new ConverterVsnTo("celsiusToFahrenheit", "value = value * 9/5 + 32;", dt1, dt2));
@@ -150,7 +150,7 @@ public class ConverterTest {
         to.createField("temperature", dt2, cc1);
         to.createField("temperature", dt1);
         linkcontroller.create(to);
-        
+
         to = new LinkVsnTo("sensor", "collector", "network");
         to.createField("temperature", dt2, cc1);
         to.createField("temperature", dt1);
@@ -158,7 +158,7 @@ public class ConverterTest {
 
         ConverterVsnTo vsnTo = controller.get(cc1);
         long expectedAmount = 2;
-        Assert.assertEquals(expectedAmount, vsnTo.getUsedBy());        
+        Assert.assertEquals(expectedAmount, vsnTo.getUsedBy());
     }
 
     @Test(expected = NotFoundException.class)

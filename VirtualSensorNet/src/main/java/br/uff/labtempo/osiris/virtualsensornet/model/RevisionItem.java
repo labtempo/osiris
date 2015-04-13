@@ -49,7 +49,7 @@ public class RevisionItem implements Serializable {
         this.field = field;
         this.fieldValue = field.getValue();
         this.revision = revision;
-        
+
         field.setStored();
     }
 

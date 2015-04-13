@@ -26,7 +26,7 @@ import java.util.List;
 public interface CompositeDao extends Dao<VirtualSensorComposite> {
 
     void update(VirtualSensor sensor);
-    
+
     VirtualSensorComposite getById(long id);
 
     VirtualSensorComposite get(VirtualSensorComposite sensorComposite);

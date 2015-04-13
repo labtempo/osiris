@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public class LinkValuesWrapper implements FieldValuesWrapper<Field>{
+public class LinkValuesWrapper implements FieldValuesWrapper<Field> {
 
     private final String id;
     private final String networkId;
@@ -92,8 +92,8 @@ public class LinkValuesWrapper implements FieldValuesWrapper<Field>{
     @Override
     public long getAcquisitionTimestampInMillis() {
         return acquisitionTimestampInMillis;
-    }    
-  
+    }
+
     @Override
     public long getCreationInterval() {
         return captureInterval;
