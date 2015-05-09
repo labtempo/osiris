@@ -21,8 +21,12 @@ import br.uff.labtempo.osiris.to.virtualsensornet.FunctionVsnTo;
 import br.uff.labtempo.osiris.virtualsensornet.model.util.FunctionUtils;
 import java.io.Serializable;
 import java.util.List;
+import javax.persistence.CollectionTable;
+import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -41,11 +45,15 @@ public class Function implements Serializable {
     private String name;
     private String description;
     private String address;
-    @Embedded
+    
+    @ElementCollection
     private List<FunctionParam> requestParams;
-    @Embedded
+    
+    @ElementCollection
     private List<FunctionParam> responseParams;
-    @Embedded
+    
+    @Enumerated(EnumType.STRING)
+    @ElementCollection
     private List<FunctionOperation> operations;
 
     protected Function() {

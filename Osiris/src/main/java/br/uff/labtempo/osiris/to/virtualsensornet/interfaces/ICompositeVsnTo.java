@@ -34,7 +34,7 @@ public interface ICompositeVsnTo {
 
     void bindToField(FieldTo fieldTo);
 
-    void addBoundField(long id, String name, long dataTypeId, long converterId, boolean initialized, long sourceId, int aggregates);
+    void addBoundField(long id, String name, long dataTypeId, long converterId, boolean initialized, long sourceId, int aggregates, int dependents);
 
     //edit
     void setLabel(String label);

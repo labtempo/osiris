@@ -31,7 +31,9 @@ public interface DaoFactory {
 
     NetworkDao getNetworkDao();
 
-    SchedulerDao getSchedulerDao();
+    RevisionDao getRevisionDao();
+
+    SchedulerDao getPersistentSchedulerDao();
 
     BatchPersistence getBatchPersistence();
 

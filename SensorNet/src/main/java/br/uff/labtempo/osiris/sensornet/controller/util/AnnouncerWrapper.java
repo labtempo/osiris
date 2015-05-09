@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package br.uff.labtempo.osiris.sensornet.model.util;
+package br.uff.labtempo.osiris.sensornet.controller.util;
 
+import br.uff.labtempo.osiris.sensornet.model.util.ConsumableInfo;
 import br.uff.labtempo.osiris.sensornet.thirdparty.announcer.AnnouncerAgent;
 import br.uff.labtempo.osiris.to.sensornet.CollectorSnTo;
 import br.uff.labtempo.osiris.to.sensornet.NetworkSnTo;

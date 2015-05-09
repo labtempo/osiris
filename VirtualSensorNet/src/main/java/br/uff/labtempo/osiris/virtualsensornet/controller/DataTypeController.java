@@ -74,7 +74,7 @@ public class DataTypeController extends Controller {
                     throw new MethodNotAllowedException("Action not allowed for this resource!");
             }
         } else if (match(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_DATATYPE_BY_ID.toString())) {
-            Map<String, String> map = extract(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_DATATYPE_BY_ID.toString());
+            Map<String, String> map = extractParams(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_DATATYPE_BY_ID.toString());
             String urlId = map.get(Path.ID1.toString());
             switch (request.getMethod()) {
                 case GET:

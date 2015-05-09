@@ -25,10 +25,15 @@ import java.util.Map;
  */
 public class RequestFnTo {
 
+    private String responseTo;
     private List<Map<String, ? extends Object>> values;
 
-    public RequestFnTo() {
+    public RequestFnTo(String responseTo) {
         this.values = new ArrayList<>();
+    }
+
+    public RequestFnTo() {
+        this("");
     }
 
     public void addValue(String name, String value) {
@@ -45,4 +50,11 @@ public class RequestFnTo {
         return Converters.mapToValues(values);
     }
 
+    public String getResponseTo() {
+        return responseTo;
+    }
+
+    public void setResponseTo(String responseTo) {
+        this.responseTo = responseTo;
+    }
 }

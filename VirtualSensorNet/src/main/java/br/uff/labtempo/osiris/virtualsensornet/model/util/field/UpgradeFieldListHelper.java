@@ -111,7 +111,7 @@ public class UpgradeFieldListHelper implements FieldListHelper {
             throw new RuntimeException("You cannot to delete a initialized Field!");
         }
         //cannot delete Field it has aggregates
-        if (deleted.hasAggregates()) {
+        if (deleted.hasDependents()) {
             throw new RuntimeException("You cannot to delete Field because it has aggregates!");
         }
         isChanged = true;
@@ -128,7 +128,7 @@ public class UpgradeFieldListHelper implements FieldListHelper {
                 throw new RuntimeException("You cannot to change DataType of a initialized Field!");
             }
             //cannot change datatype if field has aggregates
-            if (current.hasAggregates()) {
+            if (current.hasDependents()) {
                 throw new RuntimeException("You cannot to change DataType because Field has aggregates!");
             }
 

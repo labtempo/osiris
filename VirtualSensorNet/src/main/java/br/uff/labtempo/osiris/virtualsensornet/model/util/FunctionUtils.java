@@ -17,9 +17,7 @@ package br.uff.labtempo.osiris.virtualsensornet.model.util;
 
 import br.uff.labtempo.osiris.to.common.definitions.ValueType;
 import br.uff.labtempo.osiris.to.function.ParamFnTo;
-import br.uff.labtempo.osiris.to.function.ParamTypeFnTo;
 import br.uff.labtempo.osiris.virtualsensornet.model.FunctionParam;
-import br.uff.labtempo.osiris.virtualsensornet.model.FunctionType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,18 +38,12 @@ public class FunctionUtils {
 
     public FunctionParam convertTo(ParamFnTo fnTo) {
         String name = fnTo.getName();
-        ParamTypeFnTo paramTypeFnTo = fnTo.getType();
-        FunctionType functionType = convertTo(paramTypeFnTo);
+        String unit = fnTo.getUnit();
+        ValueType type = fnTo.getType();
+        boolean isCollection = fnTo.isCollection();
+        FunctionType functionType = new FunctionType(type, unit, isCollection);
         FunctionParam functionParam = new FunctionParam(name, functionType);
         return functionParam;
-    }
-
-    public FunctionType convertTo(ParamTypeFnTo paramTypeFnTo) {
-        String unit = paramTypeFnTo.getUnit();
-        ValueType type = paramTypeFnTo.getType();
-        boolean isCollection = paramTypeFnTo.isCollection();
-        FunctionType functionType = new FunctionType(type, unit, isCollection);
-        return functionType;
     }
 
     public List<ParamFnTo> convertFrom(List<FunctionParam> paramFnTos) {
@@ -64,18 +56,12 @@ public class FunctionUtils {
     }
 
     public ParamFnTo convertFrom(FunctionParam functionParam) {
-        String name = functionParam.getName();
         FunctionType functionType = functionParam.getType();
-        ParamTypeFnTo paramTypeFnTo = convertFrom(functionType);
-        ParamFnTo paramFnTo = new ParamFnTo(name, paramTypeFnTo);
-        return paramFnTo;
-    }
-
-    public ParamTypeFnTo convertFrom(FunctionType functionType) {
+        String name = functionParam.getName();
         String unit = functionType.getUnit();
         ValueType type = functionType.getType();
         boolean isCollection = functionType.isCollection();
-        ParamTypeFnTo paramTypeFnTo = new ParamTypeFnTo(unit, type, isCollection);
-        return paramTypeFnTo;
+        ParamFnTo paramFnTo = new ParamFnTo(name, unit, type, isCollection);
+        return paramFnTo;
     }
 }

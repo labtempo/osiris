@@ -34,28 +34,28 @@ public class Collector implements AutoCloseable{
         DataBuilder db;
 
         db = new DataBuilder("labtempo", "labpos");
-        for (int i = 0; i < 20; i++) {            
+        for (int i = 0; i < 2; i++) {            
             client.doNofity(getUri()+"labtempo/labpos/",db.generateSample());
         }
 
-        db = new DataBuilder("labtempo", "datacenter1");
-        for (int i = 0; i < 20; i++) {
-            client.doNofity(getUri()+"labtempo/datacenter1",db.generateSample());
-        }
-        db = new DataBuilder("labtempo", "datacenter2");
-        for (int i = 0; i < 20; i++) {
-            client.doNofity(getUri()+"labtempo/datacenter2",db.generateSample());
-        }
-
-        db = new DataBuilder("posgradS", "lab1");
-        for (int i = 0; i < 20; i++) {
-            client.doNofity(getUri()+"posgradS/lab1",db.generateSample());
-        }
-
-        db = new DataBuilder("posgradS", "lab2");
-        for (int i = 0; i < 20; i++) {
-            client.doNofity(getUri()+"posgradS/lab2",db.generateSample());
-        }
+//        db = new DataBuilder("labtempo", "datacenter1");
+//        for (int i = 0; i < 20; i++) {
+//            client.doNofity(getUri()+"labtempo/datacenter1",db.generateSample());
+//        }
+//        db = new DataBuilder("labtempo", "datacenter2");
+//        for (int i = 0; i < 20; i++) {
+//            client.doNofity(getUri()+"labtempo/datacenter2",db.generateSample());
+//        }
+//
+//        db = new DataBuilder("posgradS", "lab1");
+//        for (int i = 0; i < 20; i++) {
+//            client.doNofity(getUri()+"posgradS/lab1",db.generateSample());
+//        }
+//
+//        db = new DataBuilder("posgradS", "lab2");
+//        for (int i = 0; i < 20; i++) {
+//            client.doNofity(getUri()+"posgradS/lab2",db.generateSample());
+//        }
     }
     
     @Override

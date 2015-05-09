@@ -100,12 +100,15 @@ public abstract class Controller implements RequestHandler {
 
     protected boolean match(String resource, String customRegex) {
         if (resource != null) {
+            if(resource.contains("?")){
+                resource = resource.split("\\?")[0];
+            }
             return resource.matches(createRegex(customRegex));
         }
         return false;
     }
 
-    protected Map<String, String> extract(String path, String customRegex) {
+    protected Map<String, String> extractParams(String path, String customRegex) {
         Pattern datePatt = Pattern.compile(createRegex(customRegex));
         Matcher m = datePatt.matcher(path);
 

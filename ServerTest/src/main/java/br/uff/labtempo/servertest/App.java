@@ -17,7 +17,7 @@ package br.uff.labtempo.servertest;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import service.Service;
+import service.ServiceNotification;
 
 /**
  * Hello world!
@@ -41,10 +41,10 @@ public class App {
                     try {
                         server.close();
                     } catch (Exception ex) {
-                        Logger.getLogger(Service.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(ServiceNotification.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(Service.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(ServiceNotification.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         };

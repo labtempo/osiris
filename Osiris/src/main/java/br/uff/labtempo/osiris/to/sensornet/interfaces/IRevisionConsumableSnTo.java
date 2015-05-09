@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Felipe.
+ * Copyright 2015 Felipe Santos <fralph at ic.uff.br>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package br.uff.labtempo.osiris.virtualsensornet.model;
+package br.uff.labtempo.osiris.to.sensornet.interfaces;
 
 /**
  *
- * @author Felipe
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
-public interface Aggregatable {
+public interface IRevisionConsumableSnTo {
 
-    boolean isAggregated();
+    String getName();
 
-    VirtualSensor getVirtualSensor();
+    int getValue();
+
 }

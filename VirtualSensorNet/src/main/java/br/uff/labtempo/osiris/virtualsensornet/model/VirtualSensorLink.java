@@ -140,7 +140,8 @@ public class VirtualSensorLink extends VirtualSensor<LinkVsnTo> implements ILink
         for (Field field : fields) {
             VirtualSensor sensor = field.getVirtualSensor();
             int aggregates = field.getAggregates().size();
-            linkVsnTo.createField(field.getId(), field.getReferenceName(), field.getDataTypeId(), field.getConverterId(), field.isStored(), sensor.getId(), aggregates);
+            int dependents = field.getDependents().size();
+            linkVsnTo.createField(field.getId(), field.getReferenceName(), field.getDataTypeId(), field.getConverterId(), field.isStored(), sensor.getId(), aggregates, dependents);
         }
         return linkVsnTo;
     }

@@ -78,7 +78,7 @@ public class FunctionController extends Controller {
                     throw new MethodNotAllowedException("Action not allowed for this resource!");
             }
         } else if (match(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_FUNCTION_BY_ID.toString())) {
-            Map<String, String> map = extract(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_FUNCTION_BY_ID.toString());
+            Map<String, String> map = extractParams(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_FUNCTION_BY_ID.toString());
             String urlId = map.get(Path.ID1.toString());
             switch (request.getMethod()) {
                 case GET:
@@ -277,7 +277,7 @@ public class FunctionController extends Controller {
         return isUpdated;
     }
 
-    public boolean delete(long id) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, BadRequestException {
+    public boolean delete(long id) throws NotFoundException, InternalServerErrorException, BadRequestException {
         FunctionDao functionDao;
         try {
             functionDao = factory.getFunctionDao();

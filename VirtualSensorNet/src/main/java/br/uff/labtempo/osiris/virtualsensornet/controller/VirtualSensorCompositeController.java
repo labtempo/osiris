@@ -91,7 +91,7 @@ public class VirtualSensorCompositeController extends Controller {
                     throw new MethodNotAllowedException("Action not allowed for this resource!");
             }
         } else if (match(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_COMPOSITE_BY_ID.toString())) {
-            Map<String, String> map = extract(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_COMPOSITE_BY_ID.toString());
+            Map<String, String> map = extractParams(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_COMPOSITE_BY_ID.toString());
             String urlId = map.get(Path.ID1.toString());
             switch (request.getMethod()) {
                 case GET:
@@ -296,7 +296,7 @@ public class VirtualSensorCompositeController extends Controller {
 
         //adding aggregates to added fields
         for (Field inserted : toInsert) {
-            inserted.addAggregate(composite);
+            inserted.addDependent(composite);
         }
 
         //commit changes
@@ -305,7 +305,7 @@ public class VirtualSensorCompositeController extends Controller {
             cd.update(composite);
             //persists removed fields, removing aggregates 
             for (Field removed : toRemove) {
-                removed.removeAggregate(composite);
+                removed.removeDependent(composite);
                 fd.update(removed);
             }
         }

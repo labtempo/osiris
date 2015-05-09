@@ -15,9 +15,13 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.model;
 
+import br.uff.labtempo.osiris.virtualsensornet.model.util.FunctionType;
+import br.uff.labtempo.osiris.to.common.definitions.ValueType;
 import java.io.Serializable;
 import java.util.Objects;
 import javax.persistence.Embeddable;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 
 /**
  *
@@ -27,22 +31,29 @@ import javax.persistence.Embeddable;
 public class FunctionParam implements Serializable {
 
     private String name;
-    private FunctionType type;
+    @Enumerated(EnumType.STRING)
+    private ValueType type;
+    private String unit;
+    private boolean isCollection;
 
     protected FunctionParam() {
     }
 
-    public FunctionParam(String name, FunctionType type) {
+    public FunctionParam(String name, FunctionType functionType) {
         this.name = name;
-        this.type = type;
+        this.type = functionType.getType();
+        this.unit = functionType.getUnit();
+        this.isCollection = functionType.isCollection();
     }
 
     public String getName() {
+
         return name;
     }
 
     public FunctionType getType() {
-        return type;
+        FunctionType functionType = new FunctionType(type, unit, isCollection);
+        return functionType;
     }
 
     public void setName(String name) {

@@ -16,6 +16,7 @@
 package br.uff.labtempo.osiris.virtualsensornet.persistence.jpa;
 
 import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistence;
+import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensorBlending;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.BlendingDao;
 import java.util.List;
@@ -57,17 +58,17 @@ public class BlendingJpaPersistent implements BlendingDao {
 
     @Override
     public void save(VirtualSensorBlending o) {
-        persistence.save(o);
+        persistence.save((VirtualSensor) o);
     }
 
     @Override
     public void delete(VirtualSensorBlending o) {
-        persistence.delete(o);
+        persistence.delete((VirtualSensor) o);
     }
 
     @Override
     public void update(VirtualSensorBlending o) {
-        persistence.update(o);
+        persistence.update((VirtualSensor) o);
     }
 
 }

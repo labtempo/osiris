@@ -34,13 +34,13 @@ public class DataManager {
     public DataManager(JpaDaoFactory factory) {
         this.factory = factory;
     }
-   
+
     public void save(Object o) {
         EntityManager EM = getEntityManager();
         EntityTransaction et = EM.getTransaction();
         et.begin();
         EM.persist(o);
-        et.commit();        
+        et.commit();
     }
 
     public <T> T get(Class<T> entityType, Object key) {
@@ -51,7 +51,7 @@ public class DataManager {
 
     public <T> T getReference(Class<T> entityType, Object key) {
         EntityManager EM = getEntityManager();
-        T ref =  EM.getReference(entityType, key);
+        T ref = EM.getReference(entityType, key);
         return ref;
     }
 
@@ -63,7 +63,7 @@ public class DataManager {
         et.commit();
         //EM.close();
     }
-    
+
     public void delete(Object o) {
         EntityManager EM = getEntityManager();
         EntityTransaction et = EM.getTransaction();
@@ -71,7 +71,7 @@ public class DataManager {
         EM.remove(EM.contains(o) ? o : EM.merge(o));
         et.commit();
         //EM.close();
-    }   
+    }
 
     public CriteriaBuilder getCriteriaBuilder() {
         EntityManager EM = getEntityManager();
@@ -92,7 +92,7 @@ public class DataManager {
         List<T> list = tquery.getResultList();
         if (list == null || list.isEmpty()) {
             return null;
-        } 
+        }
         return (T) list.get(0);
         //return (T) tquery.getSingleResult();
     }
@@ -102,9 +102,15 @@ public class DataManager {
         Query query = EM.createNativeQuery(sql, klass);
         return query;
     }
-    
-    
-    private EntityManager getEntityManager(){
+
+    public synchronized <T> List<T> getQuery(CriteriaQuery<T> query, int limit) {
+        EntityManager EM = getEntityManager();
+        TypedQuery<T> tquery = EM.createQuery(query);
+        List<T> result = tquery.setMaxResults(limit).getResultList();
+        return result;
+    }
+
+    private EntityManager getEntityManager() {
         return factory.getEntityManager();
     }
 }

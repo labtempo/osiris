@@ -67,7 +67,7 @@ public class SensorController extends Controller {
         String sensorId = null;
         //One sensor
         if (match(request.getResource(), UNIQUE)) {
-            Map<String, String> map = extract(request.getResource(), UNIQUE);
+            Map<String, String> map = extractParams(request.getResource(), UNIQUE);
             networkId = map.get(Path.ID1.toString());
             collectorId = map.get(Path.ID2.toString());
             sensorId = map.get(Path.ID3.toString());
@@ -88,7 +88,7 @@ public class SensorController extends Controller {
         }
         //All of Collector
         if (match(request.getResource(), ALL_OF_COLLECTOR)) {
-            Map<String, String> map = extract(request.getResource(), ALL_OF_COLLECTOR);
+            Map<String, String> map = extractParams(request.getResource(), ALL_OF_COLLECTOR);
             networkId = map.get(Path.ID1.toString());
             collectorId = map.get(Path.ID2.toString());
 
@@ -103,7 +103,7 @@ public class SensorController extends Controller {
                     throw new MethodNotAllowedException("Action not allowed for this resource!");
             }
         } else if (match(request.getResource(), ALL_OF_NETWORK)) {
-            Map<String, String> map = extract(request.getResource(), ALL_OF_NETWORK);
+            Map<String, String> map = extractParams(request.getResource(), ALL_OF_NETWORK);
             networkId = map.get(Path.ID1.toString());
 
             switch (request.getMethod()) {

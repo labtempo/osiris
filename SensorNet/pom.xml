@@ -9,6 +9,31 @@
 
     <name>SensorNet</name>
     <url>http://maven.apache.org</url>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>manual</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses> 
+    
+    <developers>
+        <developer>
+            <id>println</id>
+            <name>Felipe Santos</name>
+            <email>fralph@ic.uff.br</email>                    
+            <url>https://github.com/println</url>                    
+        </developer>
+    </developers>
+    
+    <scm>
+        <url>https://github.com/labtempo/osiris</url>
+        <connection>scm:git:https://github.com/labtempo/osiris.git</connection>
+        <developerConnection>scm:git:https://github.com/labtempo/osiris.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+    
     <build>
         <plugins>
             <plugin>
@@ -70,12 +95,34 @@
                 </dependencies>
             </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
     </build>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <netbeans.hint.license>apache20</netbeans.hint.license>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
     </properties>
-
+      
+    <profiles>
+        <profile>
+            <id>development</id>
+            <properties>
+                <hibernate.hbm2ddl.auto>create-drop</hibernate.hbm2ddl.auto>
+            </properties>
+        </profile>
+        <profile>
+            <id>production</id>
+            <properties>
+                <hibernate.hbm2ddl.auto>update</hibernate.hbm2ddl.auto>
+            </properties>
+        </profile>
+    </profiles>
+    
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -103,7 +150,7 @@
             <artifactId>hibernate-entitymanager</artifactId>
             <version>4.3.6.Final</version>
         </dependency>
-<!--        <dependency>
+        <!--        <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-c3p0</artifactId>
             <version>4.3.8.Final</version>

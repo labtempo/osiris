@@ -15,11 +15,13 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.model;
 
+import br.uff.labtempo.osiris.virtualsensornet.model.util.FunctionType;
 import br.uff.labtempo.osiris.virtualsensornet.model.interfaces.IBlending;
 import br.uff.labtempo.osiris.to.common.definitions.FunctionOperation;
 import br.uff.labtempo.osiris.to.function.RequestFnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.BlendingVsnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorType;
+import br.uff.labtempo.osiris.virtualsensornet.model.state.ModelState;
 import br.uff.labtempo.osiris.virtualsensornet.model.util.BlendingValuesWrapper;
 import br.uff.labtempo.osiris.virtualsensornet.model.util.FieldListManager;
 import br.uff.labtempo.osiris.virtualsensornet.model.util.field.FieldValuesWrapper;
@@ -28,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import javax.persistence.Embedded;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -46,7 +48,7 @@ import javax.persistence.ManyToOne;
  * Delete to remove BlendingVSensor from virtualsensornet
  */
 @Entity
-public class VirtualSensorBlending extends VirtualSensor<BlendingVsnTo> implements Aggregatable, IBlending {
+public class VirtualSensorBlending extends VirtualSensor<BlendingVsnTo> implements Dependent, IBlending {
 
     //changeable
     @ManyToOne
@@ -56,9 +58,10 @@ public class VirtualSensorBlending extends VirtualSensor<BlendingVsnTo> implemen
     private FunctionOperation callMode;
 
     //updateable
-    @Embedded
+    @ElementCollection
     private List<BlendingBond> requestFields;
-    @Embedded
+
+    @ElementCollection
     private List<BlendingBond> responseFields;
 
     private boolean isAggregated;
@@ -100,9 +103,51 @@ public class VirtualSensorBlending extends VirtualSensor<BlendingVsnTo> implemen
 
     //updateable
     @Override
-    public void setRequestFields(List<BlendingBond> requestFields) {
+    public List<Field> setRequestFields(List<BlendingBond> requestFields) {
+        //group old fields in blending bonds 
+        if (requestFields == null) {
+            requestFields = new ArrayList<>();
+        }
+
+        List<Field> oldFields = null;
+        if (this.requestFields != null) {
+            oldFields = new ArrayList<>();
+            for (BlendingBond requestField : requestFields) {
+                Field field = requestField.getField();
+                field.removeDependent(this);
+                oldFields.add(field);
+            }
+        }
+
+        //set new fields by blending bonds
         this.requestFields = requestFields;
+        List<Field> newFields = new ArrayList<>();
+        for (BlendingBond requestField : requestFields) {
+            Field field = requestField.getField();
+            VirtualSensor sensor = field.getVirtualSensor();
+            if (sensor.getId() != this.getId()) {
+                field.addDependent(this);
+            }
+            newFields.add(field);
+        }
         update();
+
+        //separate exculded fields from new fields
+        if (oldFields == null) {
+            return null;
+        } else {
+            //return excluded fields only to update
+            List<Field> tempFields = new ArrayList<>(oldFields);
+            for (Field tempField : tempFields) {
+                for (Field newField : newFields) {
+                    if (newField.getId() == tempField.getId()) {
+                        oldFields.remove(tempField);
+                        break;
+                    }
+                }
+            }
+            return oldFields;
+        }
     }
 
     //updateable
@@ -110,6 +155,30 @@ public class VirtualSensorBlending extends VirtualSensor<BlendingVsnTo> implemen
     public void setResponseFields(List<BlendingBond> responseFields) {
         this.responseFields = responseFields;
         update();
+    }
+
+    @Override
+    public List<Field> removeRequestFields() {
+        if (requestFields != null) {
+            List<Field> fields = new ArrayList<>();
+            for (BlendingBond requestField : requestFields) {
+                Field field = requestField.getField();
+                field.removeDependent(this);
+                fields.add(field);
+            }
+            requestFields.clear();
+            update();
+            return fields;
+        }
+        return null;
+    }
+
+    @Override
+    public void removeResponseFields() {
+        if (responseFields != null) {
+            responseFields.clear();
+            update();
+        }
     }
 
     //changeable
@@ -130,6 +199,7 @@ public class VirtualSensorBlending extends VirtualSensor<BlendingVsnTo> implemen
     //changeable
     @Override
     public void removeFunction() {
+        //TODO: desativar function remover campos bounds
         setFunction(null, null);
         setCallIntervalInMillis(0);
         setRequestFields(null);
@@ -234,9 +304,61 @@ public class VirtualSensorBlending extends VirtualSensor<BlendingVsnTo> implemen
         for (Field field : fields) {
             VirtualSensor sensor = field.getVirtualSensor();
             int aggregates = field.getAggregates().size();
-            blendingVsnTo.createField(field.getId(), field.getReferenceName(), field.getDataTypeId(), field.getConverterId(), field.isStored(), sensor.getId(), aggregates);
+            int dependents = field.getDependents().size();
+            blendingVsnTo.createField(field.getId(), field.getReferenceName(), field.getDataTypeId(), field.getConverterId(), field.isStored(), sensor.getId(), aggregates, dependents);
         }
         return blendingVsnTo;
+    }
+
+    @Override
+    public boolean canRequest() {
+        if (function == null || requestFields == null || responseFields == null) {
+            if (getModelState() != ModelState.INACTIVE) {
+                deactivate();
+            }
+            return false;
+        }
+
+        boolean hasError = false;
+        boolean canRequest = false;
+        for (BlendingBond requestField : requestFields) {
+            Field field = requestField.getField();
+            if (isUsableField(field)) {
+                canRequest = true;
+            } else {
+                hasError = true;
+            }
+        }
+
+        if (!canRequest && getModelState() != ModelState.INACTIVE) {
+            deactivate();
+        } else if (canRequest && hasError && getModelState() != ModelState.MALFUNCTION && getModelState() != ModelState.INACTIVE) {
+            malfunction();
+        } else if (!hasError) {
+            switch (getModelState()) {
+                case INACTIVE:
+                    reactivate();
+                    break;
+                case MALFUNCTION:
+                    update();
+                    break;
+            }
+        }
+
+        if (getModelState() != ModelState.INACTIVE) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isUsableField(Field field) {
+        if (field.hasValue()) {
+            VirtualSensor vs = field.getVirtualSensor();
+            if (vs.getModelState() != ModelState.INACTIVE) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -247,16 +369,18 @@ public class VirtualSensorBlending extends VirtualSensor<BlendingVsnTo> implemen
         Map<String, List<String>> map = new HashMap<>();
         for (BlendingBond requestField : requestFields) {
             Field field = requestField.getField();
-            String paramName = requestField.getName();
-            String paramValue = field.getValue();
-            List<String> values;
-            if (map.containsKey(paramName)) {
-                values = map.get(paramName);
-            } else {
-                values = new ArrayList<>();
-                map.put(paramName, values);
+            if (isUsableField(field)) {
+                String paramName = requestField.getName();
+                String paramValue = field.getValue();
+                List<String> values;
+                if (map.containsKey(paramName)) {
+                    values = map.get(paramName);
+                } else {
+                    values = new ArrayList<>();
+                    map.put(paramName, values);
+                }
+                values.add(paramValue);
             }
-            values.add(paramValue);
         }
 
         //assigning the values to the function's param name

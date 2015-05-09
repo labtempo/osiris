@@ -35,7 +35,7 @@ public class DataManager {
         this.factory = factory;
     }
 
-    public void save(Object o) {
+    public synchronized void save(Object o) {
         EntityManager EM = getEntityManager();
         EntityTransaction et = EM.getTransaction();
         et.begin();
@@ -43,18 +43,18 @@ public class DataManager {
         et.commit();
     }
 
-    public <T> T get(Class<T> entityType, Object key) {
+    public synchronized <T> T get(Class<T> entityType, Object key) {
         EntityManager EM = getEntityManager();
         T object = EM.find(entityType, key);
         return object;
     }
 
-    public <T> T getReference(Class<T> entityType, Object key) {
+    public synchronized <T> T getReference(Class<T> entityType, Object key) {
         EntityManager EM = getEntityManager();
         return EM.getReference(entityType, key);
     }
 
-    public void update(Object o) {
+    public synchronized void update(Object o) {
         EntityManager EM = getEntityManager();
         EntityTransaction et = EM.getTransaction();
         et.begin();
@@ -62,7 +62,7 @@ public class DataManager {
         et.commit();
     }
 
-    public void delete(Object o) {
+    public synchronized void delete(Object o) {
         EntityManager EM = getEntityManager();
         EntityTransaction et = EM.getTransaction();
         et.begin();
@@ -70,19 +70,26 @@ public class DataManager {
         et.commit();
     }
 
-    public CriteriaBuilder getCriteriaBuilder() {
+    public synchronized CriteriaBuilder getCriteriaBuilder() {
         EntityManager EM = getEntityManager();
         return EM.getCriteriaBuilder();
     }
 
-    public <T> List<T> getQuery(CriteriaQuery<T> query) {
+    public synchronized <T> List<T> getQuery(CriteriaQuery<T> query) {
         EntityManager EM = getEntityManager();
         TypedQuery<T> tquery = EM.createQuery(query);
         List<T> result = tquery.getResultList();
         return result;
     }
+    
+    public synchronized <T> List<T> getQuery(CriteriaQuery<T> query, int limit) {
+        EntityManager EM = getEntityManager();
+        TypedQuery<T> tquery = EM.createQuery(query);
+        List<T> result = tquery.setMaxResults(limit).getResultList();
+        return result;
+    }
 
-    public <T> T getQuerySingle(CriteriaQuery<T> query) {
+    public synchronized <T> T getQuerySingle(CriteriaQuery<T> query) {
         EntityManager EM = getEntityManager();
         TypedQuery<T> tquery = EM.createQuery(query);
         List<T> list = tquery.getResultList();

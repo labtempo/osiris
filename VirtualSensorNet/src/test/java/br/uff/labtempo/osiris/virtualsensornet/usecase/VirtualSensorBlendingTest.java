@@ -23,7 +23,6 @@ import br.uff.labtempo.osiris.to.common.definitions.FunctionOperation;
 import br.uff.labtempo.osiris.to.common.definitions.ValueType;
 import br.uff.labtempo.osiris.to.function.InterfaceFnTo;
 import br.uff.labtempo.osiris.to.function.ParamFnTo;
-import br.uff.labtempo.osiris.to.function.ParamTypeFnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.BlendingVsnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.ConverterVsnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.DataTypeVsnTo;
@@ -84,13 +83,11 @@ public class VirtualSensorBlendingTest {
         List<FunctionOperation> operations = new ArrayList<>();
         List<ParamFnTo> requestParams = new ArrayList<>();
         List<ParamFnTo> responseParams = new ArrayList<>();
-        ParamTypeFnTo inputType = new ParamTypeFnTo("celsius", ValueType.NUMBER);
-        ParamTypeFnTo outputType = new ParamTypeFnTo("kelvin", ValueType.NUMBER);
 
         operations.add(FunctionOperation.SYNCHRONOUS);
 
-        requestParams.add(new ParamFnTo("in", inputType));
-        responseParams.add(new ParamFnTo("out", outputType));
+        requestParams.add(new ParamFnTo("in", "celsius", ValueType.NUMBER));
+        responseParams.add(new ParamFnTo("out", "kelvin", ValueType.NUMBER));
 
         InterfaceFnTo to = new InterfaceFnTo("temperature conversor", "convert celsius to kelvin", "omcp://converter.function.osiris", operations, requestParams, responseParams);
         fn1 = fc.create(to);
@@ -183,6 +180,48 @@ public class VirtualSensorBlendingTest {
         to.addResponseParam(fldId2, "out"); //ParamTypeFnTo outputType = kelvin
 
         boolean expectedResult = controller.update(id, to);
+        Assert.assertTrue(expectedResult);
+    }
+    
+     @Test
+    public void TestDeleteBlending_Valid_ShouldPass() throws NotFoundException, BadRequestException, InternalServerErrorException {
+        BlendingVsnTo to = new BlendingVsnTo("TestDeleteBlending_Valid_ShouldPass");
+        to.createField("temperature", dt2, cc1);
+        to.createField("temperature", dt1);
+
+        long id = controller.create(to);
+        BlendingVsnTo vsnTo = controller.get(id);
+        
+        boolean expectedResult = controller.delete(id);
+        
+        Assert.assertTrue(expectedResult);
+    }
+    
+    @Test
+    public void TestDeleteUpdatedBlending_Valid_ShouldPass() throws BadRequestException, NotFoundException, InternalServerErrorException {
+ 
+        BlendingVsnTo to = new BlendingVsnTo("TestDeleteUpdatedBlending_Valid_ShouldPass");
+
+        to.createField("temperature", dt1);//celsius
+        to.createField("temperature", dt2, cc4);//fahrenheit <- kelvinToFahrenheit
+
+        long id = controller.create(to);
+
+        to = controller.get(id);
+
+        long fldId1 = to.getFields().get(0).getId();
+        long fldId2 = to.getFields().get(1).getId();
+
+        to.setFunction(fn1);
+        to.setCallMode(FunctionOperation.SYNCHRONOUS);
+        to.setCallIntervalInMillis(2000);
+        to.addRequestParam(fldId1, "in"); //ParamTypeFnTo inputType = celsius
+        to.addResponseParam(fldId2, "out"); //ParamTypeFnTo outputType = kelvin
+
+        boolean expectedResult = controller.update(id, to);
+        
+        expectedResult = controller.delete(id);
+        
         Assert.assertTrue(expectedResult);
     }
 }

@@ -137,13 +137,15 @@ public class NotifyController extends Controller implements RequestHandler {
                     lDao.update(link);
                     announcer.notifyDeactivation(link.getTransferObject());
                     announcer.broadcastIt(link.getTransferObject());
-                }
-                if (ModelState.MALFUNCTION.equals(modelState)) {
+                } else if (ModelState.MALFUNCTION.equals(modelState)) {
                     link.malfunction();
                     lDao.update(link);
-                    announcer.notifyDeactivation(link.getTransferObject());
+                    announcer.notifyMalfunction(link.getTransferObject());
                     announcer.broadcastIt(link.getTransferObject());
                 }
+
+                //check aggregates
+                checker.check(link);
             }
         }
     }

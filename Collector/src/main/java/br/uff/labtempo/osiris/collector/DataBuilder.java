@@ -35,15 +35,17 @@ public class DataBuilder {
     private float value;
 
     DataBuilder(String networkId, String collectorId) {
-        Random gerador = new Random();
+        
 
-        this.value = gerador.nextFloat();
+        
         this.networkId = networkId;
         this.collectorId = collectorId;
         
     }
 
     public SampleCoTo generateSample() {
+        Random gerador = new Random();
+        this.value = gerador.nextInt(7);
         SampleCoTo sample = new SampleCoTo(getNetwork(), getCollector(), getSensor());
         return sample;
     }

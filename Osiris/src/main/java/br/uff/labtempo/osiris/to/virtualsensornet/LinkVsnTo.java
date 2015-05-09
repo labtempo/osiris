@@ -50,11 +50,11 @@ public class LinkVsnTo implements ILinkVsnTo {
     public LinkVsnTo(String label, String sensorId, String collectorId, String networkId) {
         this(0, label, sensorId, collectorId, networkId);
     }
-    
-    public LinkVsnTo(String sensorId, String collectorId, String networkId) {        
+
+    public LinkVsnTo(String sensorId, String collectorId, String networkId) {
         this(0, "", sensorId, collectorId, networkId);
         DateUtil dateUtil = new DateUtil();
-        this.label = "link-"+dateUtil.generate(Calendar.getInstance());
+        this.label = "link-" + dateUtil.generate(Calendar.getInstance());
     }
 
     @Override
@@ -70,8 +70,8 @@ public class LinkVsnTo implements ILinkVsnTo {
     }
 
     @Override
-    public void createField(long id, String name, long dataTypeId, long converterId, boolean initialized, long sourceId, int aggregates) {
-        InternalFieldTo fieldTo = new InternalFieldTo(id, name, dataTypeId, converterId, initialized, sourceId, aggregates);
+    public void createField(long id, String name, long dataTypeId, long converterId, boolean initialized, long sourceId, int aggregates, int dependents) {
+        InternalFieldTo fieldTo = new InternalFieldTo(id, name, dataTypeId, converterId, initialized, sourceId, aggregates, dependents);
         createField(fieldTo);
     }
 
@@ -196,8 +196,8 @@ public class LinkVsnTo implements ILinkVsnTo {
             super(id, name, dataTypeId, converterId);
         }
 
-        InternalFieldTo(long id, String name, long dataTypeId, long converterId, boolean initialized, long sourceId, int aggregates) {
-            super(id, name, dataTypeId, converterId, initialized, sourceId, aggregates);
+        InternalFieldTo(long id, String name, long dataTypeId, long converterId, boolean initialized, long sourceId, int aggregates, int dependents) {
+            super(id, name, dataTypeId, converterId, initialized, sourceId, aggregates, dependents);
         }
 
         @Override

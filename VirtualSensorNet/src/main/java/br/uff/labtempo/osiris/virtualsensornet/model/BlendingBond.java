@@ -17,6 +17,7 @@ package br.uff.labtempo.osiris.virtualsensornet.model;
 
 import java.io.Serializable;
 import javax.persistence.Embeddable;
+import javax.persistence.ManyToOne;
 
 /**
  *
@@ -26,6 +27,7 @@ import javax.persistence.Embeddable;
 public class BlendingBond implements Serializable {
 
     private String name;
+    @ManyToOne
     private Field field;
 
     protected BlendingBond() {
@@ -42,5 +44,9 @@ public class BlendingBond implements Serializable {
 
     public Field getField() {
         return field;
+    }
+    
+    public void canRequest(){
+        
     }
 }

@@ -114,12 +114,40 @@ public class ValueFnToTest {
 
         String uri = "omcp://sum.function/";
         
-        ParameterizedRequestFn requestFn = new ParameterizedRequestFn(uri, requestFnTo);
+        ParameterizedRequestFn requestFn = new ParameterizedRequestFn(requestFnTo);
 
-        String result = requestFn.getRequestUri();
+        String result = requestFn.getRequestUri(uri);
         String expectedUri = "omcp://sum.function/?1=1&2=1&3=1&4=[1,2,3,4]&5=[1,2,3,4]";
         Assert.assertEquals(expectedUri, result);
 
+    }
+    
+    @Test
+    public void testEncodingAndDecodingParameterizedRequestFn_ShouldPass() {
+        List<String> list = new ArrayList<>();
+        list.add("[],a");
+        list.add("[],b");
+        list.add("[],c");
+
+        RequestFnTo requestFnTo = new RequestFnTo();
+        requestFnTo.addValue("1", "[],a");
+        requestFnTo.addValue("2", "[],b");
+        requestFnTo.addValue("3", "[],c");
+        requestFnTo.addValue("4", list);
+        requestFnTo.addValue("5", list);
+
+        String uri = "omcp://sum.function/";
+        
+        ParameterizedRequestFn requestFn = new ParameterizedRequestFn(requestFnTo);
+
+        String result = requestFn.getRequestUri(uri);
+        String expectedUri = "omcp://sum.function/?1=%5B%5D%2Ca&2=%5B%5D%2Cb&3=%5B%5D%2Cc&4=[%5B%5D%2Ca,%5B%5D%2Cb,%5B%5D%2Cc]&5=[%5B%5D%2Ca,%5B%5D%2Cb,%5B%5D%2Cc]";
+        Assert.assertEquals(expectedUri, result);
+        
+        
+        requestFn = new ParameterizedRequestFn(result);
+        result = requestFn.getRequestUri(uri);
+        Assert.assertEquals(expectedUri, result);
     }
 
 }

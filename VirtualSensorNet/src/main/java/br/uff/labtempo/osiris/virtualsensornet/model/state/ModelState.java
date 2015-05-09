@@ -141,16 +141,17 @@ public enum ModelState {
 
                 @Override
                 public void reactivate(Model model) {
-                    throw new RuntimeException("Cannot reactive a active item!");
+                    change(model, ModelState.REACTIVATED);
                 }
 
                 @Override
                 public void update(Model model) {
+                    change(model, ModelState.UPDATED);
                 }
 
                 @Override
                 public void malfunction(Model model) {
-                    change(model, ModelState.MALFUNCTION);
+                    throw new RuntimeException("Cannot set a malfnction item two times!");
                 }
             };
 

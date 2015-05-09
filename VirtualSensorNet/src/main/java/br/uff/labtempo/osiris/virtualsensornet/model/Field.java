@@ -59,6 +59,12 @@ public class Field implements Serializable {
     @ManyToMany
     private List<VirtualSensor> aggregates;
 
+    @JoinTable(name = "field_dependents",
+            joinColumns = @JoinColumn(name = "field_id"),
+            inverseJoinColumns = @JoinColumn(name = "virtualsensor_id"))
+    @ManyToMany
+    private List<VirtualSensor> dependents;
+
     private boolean isStored;
 
     public Field(String referenceName, DataType dataType) {
@@ -70,6 +76,7 @@ public class Field implements Serializable {
         this.referenceName = referenceName;
         this.dataType = dataType;
         this.aggregates = new ArrayList<>();
+        this.dependents = new ArrayList<>();
 
         if (referenceName == null || dataType == null) {
             throw new RuntimeException("Arguments cannot be null!");
@@ -80,12 +87,22 @@ public class Field implements Serializable {
         virtualSensor = vsensor;
     }
 
-    public void addAggregate(Aggregatable aggregatable) {
-        aggregates.add(aggregatable.getVirtualSensor());
+    public void addDependent(Dependent dependent) {
+        if (dependent.isAggregated()) {
+            aggregates.add(dependent.getVirtualSensor());
+        } else {
+            dependents.add(dependent.getVirtualSensor());
+        }
+
     }
 
-    public boolean removeAggregate(Aggregatable aggregatable) {
-        boolean isRemoved = aggregates.remove(aggregatable.getVirtualSensor());
+    public boolean removeDependent(Dependent dependent) {
+        boolean isRemoved;
+        if (dependent.isAggregated()) {
+             isRemoved = aggregates.remove(dependent.getVirtualSensor());
+        } else {
+             isRemoved = dependents.remove(dependent.getVirtualSensor());
+        }
         return isRemoved;
     }
 
@@ -157,6 +174,10 @@ public class Field implements Serializable {
     public List<VirtualSensor> getAggregates() {
         return aggregates;
     }
+    
+    public List<VirtualSensor> getDependents() {
+        return dependents;
+    }
 
     public void setStored() {
         this.isStored = true;
@@ -169,12 +190,24 @@ public class Field implements Serializable {
     public boolean isStored() {
         return isStored;
     }
+    
+    public boolean hasValue(){
+        if(currentValue != null){
+            return true;
+        }
+        return false;
+    }
 
-    public boolean hasAggregates() {
-        if (aggregates.isEmpty()) {
+    public boolean hasDependents() {
+        if (aggregates.isEmpty() && dependents.isEmpty()) {
             return false;
         }
         return true;
+    }
+    
+    public int countDependents() {
+        int total = aggregates.size() + dependents.size();
+        return total;
     }
 
     public void setReferenceName(String referenceName) {

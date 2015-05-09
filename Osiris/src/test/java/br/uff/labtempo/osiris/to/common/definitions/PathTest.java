@@ -120,8 +120,8 @@ public class PathTest {
 
     @Test
     public void testResourceVirtualSensorNetVirtualSensorByIdHistoryAll_Equal_ShouldPass() {
-        String expected = SEPARATOR.toString() + NAMING_RESOURCE_VIRTUALSENSOR + SEPARATOR + ID1 + SEPARATOR + NAMING_RESOURCE_HISTORY + SEPARATOR;
-        assertEquals(expected, RESOURCE_VIRTUALSENSORNET_VIRTUALSENSOR_HISTORY_BY_ID.toString());
+        String expected = SEPARATOR.toString() + NAMING_RESOURCE_VIRTUALSENSOR + SEPARATOR + ID1 + SEPARATOR + NAMING_RESOURCE_REVISIONS + SEPARATOR;
+        assertEquals(expected, RESOURCE_VIRTUALSENSORNET_VIRTUALSENSOR_REVISIONS_BY_ID.toString());
     }
 
     @Test

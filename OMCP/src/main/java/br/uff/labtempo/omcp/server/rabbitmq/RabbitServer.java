@@ -50,9 +50,24 @@ public class RabbitServer implements OmcpServer, RabbitListener {
         this.MODULE_NAME = moduleName;
         this.MODULE_DESCRIPTION = moduleName + "-java/0.1";
         this.HOST = "omcp://" + moduleName + "/";
-        this.socket = new RabbitServerSocket(DOMAIN + moduleName, host, user, password);
+        this.socket = new RabbitServerSocket(DOMAIN + reverseDottedName(moduleName), host, user, password);
         this.socket.setListener(this);
         this.running = true;
+    }
+    
+    private String reverseDottedName(String name){
+        if(name.contains(".")){
+            String names[] = name.split("\\.");
+            StringBuilder sb = new StringBuilder();
+            for (int i = names.length-1; i >= 0; i--) {
+                if(sb.length() > 0){
+                    sb.append(".");
+                }
+                sb.append(names[i]);
+            }
+            return sb.toString();
+        }
+        return name;
     }
 
     public void start() {

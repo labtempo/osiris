@@ -32,9 +32,8 @@ import java.util.concurrent.TimeUnit;
 public class VirtualSensorVsnTo implements IVirtualSensorVsnTo {
 
     private long id;
-
+    private String label;
     private String state;
-
     private long creationTimestampInMillis;
     private int creationPrecisionInNano;
     private long acquisitionTimestampInMillis;
@@ -54,8 +53,9 @@ public class VirtualSensorVsnTo implements IVirtualSensorVsnTo {
     private transient VirtualSensorType helperVirtualSensorType;
     private transient List<ValueVsnTo> helperValueToList;
 
-    public VirtualSensorVsnTo(long id, State state, long creationTimestampInMillis, int creationPrecisionInNano, long creationInterval, TimeUnit creationIntervalTimeUnit, long acquisitionTimestampInMillis, long storageTimestampInMillis, Calendar lastModified, VirtualSensorType sensorType) {
+    public VirtualSensorVsnTo(long id, String label, State state, long creationTimestampInMillis, int creationPrecisionInNano, long creationInterval, TimeUnit creationIntervalTimeUnit, long acquisitionTimestampInMillis, long storageTimestampInMillis, Calendar lastModified, VirtualSensorType sensorType) {
         this.id = id;
+        this.label = label;
         this.state = state.toString();
         this.creationTimestampInMillis = creationTimestampInMillis;
         this.creationPrecisionInNano = creationPrecisionInNano;
@@ -76,6 +76,11 @@ public class VirtualSensorVsnTo implements IVirtualSensorVsnTo {
     @Override
     public long getId() {
         return id;
+    }
+
+    @Override
+    public String getLabel() {
+        return label;
     }
 
     @Override

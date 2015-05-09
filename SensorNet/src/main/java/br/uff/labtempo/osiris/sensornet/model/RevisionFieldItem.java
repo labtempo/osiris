@@ -15,6 +15,9 @@
  */
 package br.uff.labtempo.osiris.sensornet.model;
 
+import br.uff.labtempo.osiris.to.sensornet.RevisionValueSnTo;
+import br.uff.labtempo.osiris.to.sensornet.RevisionSnTo;
+import br.uff.labtempo.osiris.to.virtualsensornet.RevisionFieldVsnTo;
 import java.io.Serializable;
 import javax.persistence.Cacheable;
 import javax.persistence.Entity;
@@ -57,5 +60,10 @@ public class RevisionFieldItem implements Serializable {
 
     public String getValue() {
         return fieldValue;
+    }
+    
+    public RevisionValueSnTo getTransferObject() {
+        RevisionValueSnTo revisionFieldSnTo = new RevisionValueSnTo(field.getName(), field.getUnit(),fieldValue);
+        return revisionFieldSnTo;
     }
 }

@@ -23,6 +23,11 @@
             <version>7.0</version>
             <type>jar</type>
         </dependency>
+        <dependency> 
+            <groupId>com.joestelmach</groupId>
+            <artifactId>natty</artifactId>
+            <version>0.10.1</version>
+        </dependency>
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

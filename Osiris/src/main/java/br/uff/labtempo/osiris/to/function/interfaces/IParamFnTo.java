@@ -15,7 +15,7 @@
  */
 package br.uff.labtempo.osiris.to.function.interfaces;
 
-import br.uff.labtempo.osiris.to.function.ParamTypeFnTo;
+import br.uff.labtempo.osiris.to.common.definitions.ValueType;
 import java.util.Map;
 
 /**
@@ -26,8 +26,12 @@ public interface IParamFnTo {
 
     String getName();
 
-    ParamTypeFnTo getType();
+    String getUnit();
+
+    ValueType getType();
+
+    boolean isCollection();
 
     Map<String, String> toMap();
-    
+
 }

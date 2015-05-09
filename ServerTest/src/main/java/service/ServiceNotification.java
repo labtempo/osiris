@@ -16,7 +16,6 @@
 package service;
 
 import br.uff.labtempo.omcp.service.OmcpService;
-import br.uff.labtempo.omcp.service.rabbitmq.RabbitPersistentService;
 import br.uff.labtempo.omcp.service.rabbitmq.RabbitService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,18 +24,13 @@ import java.util.logging.Logger;
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public class Service {
+public class ServiceNotification {
 
     static OmcpService service;
 
     public static void main(String[] args) throws Exception {
         service = new RabbitService("192.168.0.7", "admin", "admin");
-        //service.addReference("omcp://notification.messagegroup/#");
-        
-        service.addReference("omcp://update.messagegroup/sensornet/#");
-        service.addReference("omcp://update.messagegroup/virtualsensornet/#");
-
-        //shutdown();
+        service.addReference("omcp://notification.messagegroup/#");
         service.start();
 
     }
@@ -49,10 +43,10 @@ public class Service {
                     try {
                         service.close();
                     } catch (Exception ex) {
-                        Logger.getLogger(Service.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(ServiceNotification.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(Service.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(ServiceNotification.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         };

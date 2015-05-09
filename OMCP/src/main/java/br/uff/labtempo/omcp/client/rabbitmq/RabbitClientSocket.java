@@ -108,9 +108,9 @@ final class RabbitClientSocket {
         String corrId = java.util.UUID.randomUUID().toString();
         QueueingConsumer consumer;
         String basicConsumeName;
-
+        String replyQueueName;
         try {
-            String replyQueueName = RabbitUtil.declareTemporaryQueue(channel).getQueue();
+            replyQueueName = RabbitUtil.declareTemporaryQueue(channel).getQueue();
             consumer = new QueueingConsumer(channel);
             basicConsumeName = channel.basicConsume(replyQueueName, false, consumer);
 
@@ -138,17 +138,18 @@ final class RabbitClientSocket {
             throw new RequestException("Could not make rpc!", ex);
         }
 
-        return waitForResponse(consumer, corrId, basicConsumeName);
+        return waitForResponse(consumer, corrId, basicConsumeName, replyQueueName);
     }
 
     //mensagem consumida, esperando resposta: apenas o servidor pode dar timeout neste ponto.
-    private String waitForResponse(QueueingConsumer consumer, String corrId, String basicConsumeName) throws RequestException {
+    private String waitForResponse(QueueingConsumer consumer, String corrId, String basicConsumeName, String replyQueueName) throws RequestException {
         String response = null;
         while (true) {
             try {
                 QueueingConsumer.Delivery delivery = consumer.nextDelivery();
                 if (delivery.getProperties().getCorrelationId().equals(corrId)) {
                     response = new String(delivery.getBody());
+                    channel.queueDelete(replyQueueName);//remove temporary queue
                     break;
                 }
             } catch (ConsumerCancelledException ex) {

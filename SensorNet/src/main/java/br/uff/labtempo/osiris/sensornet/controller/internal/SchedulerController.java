@@ -16,16 +16,10 @@
 package br.uff.labtempo.osiris.sensornet.controller.internal;
 
 import br.uff.labtempo.osiris.sensornet.model.Collector;
-import br.uff.labtempo.osiris.sensornet.model.Collector_;
 import br.uff.labtempo.osiris.sensornet.model.Network;
-import br.uff.labtempo.osiris.sensornet.model.Network_;
 import br.uff.labtempo.osiris.sensornet.model.Sensor;
-import br.uff.labtempo.osiris.sensornet.model.Sensor_;
-import br.uff.labtempo.osiris.sensornet.model.state.ModelState;
-import br.uff.labtempo.osiris.sensornet.model.util.AnnouncerWrapper;
-import br.uff.labtempo.osiris.sensornet.persistence.CollectorDao;
+import br.uff.labtempo.osiris.sensornet.controller.util.AnnouncerWrapper;
 import br.uff.labtempo.osiris.sensornet.persistence.DaoFactory;
-import br.uff.labtempo.osiris.sensornet.persistence.NetworkDao;
 import br.uff.labtempo.osiris.sensornet.persistence.SensorDao;
 import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistence;
 import br.uff.labtempo.osiris.sensornet.thirdparty.announcer.AnnouncerAgent;
@@ -34,13 +28,7 @@ import br.uff.labtempo.osiris.utils.scheduling.SchedulingCallback;
 import br.uff.labtempo.osiris.to.sensornet.CollectorSnTo;
 import br.uff.labtempo.osiris.to.sensornet.NetworkSnTo;
 import br.uff.labtempo.osiris.to.sensornet.SensorSnTo;
-import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
 
 /**
@@ -63,7 +51,6 @@ public class SchedulerController implements SchedulingCallback {
         this(factory, null);
     }
 
-    @Transactional
     @Override
     public void callback(List<? extends SchedulerItem> items) {
         if (items != null && items.size() > 0) {

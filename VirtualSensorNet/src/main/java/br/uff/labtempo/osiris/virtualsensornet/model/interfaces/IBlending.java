@@ -19,6 +19,7 @@ import br.uff.labtempo.osiris.to.common.definitions.FunctionOperation;
 import br.uff.labtempo.osiris.to.function.RequestFnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.BlendingVsnTo;
 import br.uff.labtempo.osiris.virtualsensornet.model.BlendingBond;
+import br.uff.labtempo.osiris.virtualsensornet.model.Field;
 import br.uff.labtempo.osiris.virtualsensornet.model.Function;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
 import java.util.List;
@@ -61,11 +62,17 @@ public interface IBlending {
     void setFunction(Function function);
 
     //updateable
-    void setRequestFields(List<BlendingBond> requestFields);
+    List<Field> setRequestFields(List<BlendingBond> requestFields);
 
     //updateable
     void setResponseFields(List<BlendingBond> responseFields);
 
+    List<Field> removeRequestFields();
+
+    void removeResponseFields();
+
     RequestFnTo getFunctionRequest();
+    
+    boolean canRequest();
 
 }

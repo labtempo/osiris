@@ -47,7 +47,7 @@ public class ControllerTest {
 
                 String requestPath = "/23s/controller/ds3/";
 
-                Map<String, String> map = extract(requestPath, path);
+                Map<String, String> map = extractParams(requestPath, path);
 
                 assertTrue(map.containsKey(":aid"));
                 assertTrue(map.containsKey(":bid"));
@@ -74,7 +74,7 @@ public class ControllerTest {
 
                 String requestPath = "/23s/controller/ds3?chave=valor&chave2=valor2";
 
-                Map<String, String> map = extract(requestPath, path);
+                Map<String, String> map = extractParams(requestPath, path);
 
                 assertTrue(map.containsKey(":aid"));
                 assertTrue(map.containsKey(":bid"));
@@ -104,7 +104,7 @@ public class ControllerTest {
 
                 String requestPath = "/23s/controller/ds3/?chave=valor";
 
-                Map<String, String> map = extract(requestPath, path);
+                Map<String, String> map = extractParams(requestPath, path);
 
                 assertTrue(map.containsKey(":aid"));
                 assertTrue(map.containsKey(":bid"));
@@ -121,7 +121,7 @@ public class ControllerTest {
         c.process(null);
 
     }
-    
+
     @Test
     public void testAmbiguousInput() throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException {
         Controller c = new Controller() {
@@ -132,17 +132,22 @@ public class ControllerTest {
                 String path = "/:aid/controller/";
 
                 String requestPath = "/23s/controller/215/nkjg";
-                
                 assertFalse(match(requestPath, path));
-                
                 requestPath = "/23s/controller/215/nkjg/?chave=valor";
-                
+                assertFalse(match(requestPath, path));
+
+                path = "/:aid/controller/:bid";
                 assertFalse(match(requestPath, path));
                 
+                path = "/controller/";
+                requestPath = "/controller/?chave=valor";
+                assertTrue(match(requestPath, path));
+                requestPath = "/controller?chave=valor";
+                assertTrue(match(requestPath, path));
                 
-                path = "/:aid/controller/:bid";
-                
-                assertFalse(match(requestPath, path)); 
+                 path = "/";
+                requestPath = "/?chave=valor";
+                assertTrue(match(requestPath, path));
 
                 return null;
             }

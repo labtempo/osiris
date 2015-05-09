@@ -25,6 +25,8 @@ public interface DaoFactory {
 
     VirtualSensorDao getVirtualSensorDao();
 
+    RevisionDao getRevisionDao();
+
     LinkDao getLinkDao();
 
     LinkDao getPersistentLinkDao();
@@ -38,6 +40,8 @@ public interface DaoFactory {
     BlendingDao getPersistentBlendingDao();
 
     FieldDao getFieldDao();
+
+    FieldDao getPersistentFieldDao();
 
     ConverterDao getConverterDao();
 

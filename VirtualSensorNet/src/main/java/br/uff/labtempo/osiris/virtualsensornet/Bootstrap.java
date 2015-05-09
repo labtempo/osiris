@@ -24,7 +24,9 @@ import br.uff.labtempo.osiris.utils.requestpool.RequestPool;
 import br.uff.labtempo.osiris.virtualsensornet.controller.internal.AnnouncementController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.ConverterController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.DataTypeController;
+import br.uff.labtempo.osiris.virtualsensornet.controller.FunctionController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.NotifyController;
+import br.uff.labtempo.osiris.virtualsensornet.controller.RevisionController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.VirtualSensorBlendingController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.VirtualSensorCompositeController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.VirtualSensorController;
@@ -45,7 +47,8 @@ public class Bootstrap implements AutoCloseable {
 
     private JpaDaoFactory factory;
     private OmcpServer omcpServer;
-    private final OmcpClient omcpClient;
+    private final OmcpClient omcpClientAnnouncer;
+    private final OmcpClient omcpClientBlending;
     private final SchedulerBootstrap schedulerBootstrap;
     private final AnnouncementBootstrap announcementBootstrap;
     private final AggregatesCheckerController checkerController;
@@ -79,12 +82,15 @@ public class Bootstrap implements AutoCloseable {
 
             DataTypeController dtc = new DataTypeController(factory);
             ConverterController cc = new ConverterController(factory);
+            FunctionController fc = new FunctionController(factory);            
+            RevisionController rc = new RevisionController(factory);
 
             //scheduling
             schedulerBootstrap = new SchedulerBootstrap(factory.getSchedulerDao(), vsbc);
             //announcement
-            omcpClient = new OmcpClientBuilder().host(ip).user(user, pass).source(moduleName).build();
-            announcementBootstrap = new AnnouncementBootstrap(omcpClient);
+            omcpClientAnnouncer = new OmcpClientBuilder().host(ip).user(user, pass).source(moduleName).build();
+            omcpClientBlending = new OmcpClientBuilder().host(ip).user(user, pass).source(moduleName).build();
+            announcementBootstrap = new AnnouncementBootstrap(omcpClientAnnouncer);
             AnnouncementController announcementController = new AnnouncementController(announcementBootstrap.getAnnouncer());
 
             //setting extra components to the controllers
@@ -92,7 +98,9 @@ public class Bootstrap implements AutoCloseable {
             vslc.setAnnouncerAgent(announcementController);
             vscc.setAnnouncerAgent(announcementController);
             vsbc.setAnnouncerAgent(announcementController);
+            checkerController.setAnnouncerAgent(announcementController);
             vsbc.setSchedulerAgent(schedulerBootstrap.getScheduler());
+            vsbc.setClient(omcpClientBlending);
 
             //chain of responsibility
             nc.setNext(vsc);
@@ -101,6 +109,8 @@ public class Bootstrap implements AutoCloseable {
             vscc.setNext(vsbc);
             vsbc.setNext(dtc);
             dtc.setNext(cc);
+            cc.setNext(fc);
+            fc.setNext(rc);
 
             omcpServer = new RabbitServer(moduleName, ip, user, pass);
             omcpServer.setHandler(nc);
@@ -143,7 +153,11 @@ public class Bootstrap implements AutoCloseable {
         } catch (Exception e) {
         }
         try {
-            omcpClient.close();
+            omcpClientAnnouncer.close();
+        } catch (Exception e) {
+        }
+        try {
+            omcpClientBlending.close();
         } catch (Exception e) {
         }
         try {

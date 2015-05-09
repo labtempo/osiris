@@ -13,30 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package client;
+package client.vsn;
 
 import br.uff.labtempo.omcp.client.OmcpClient;
 import br.uff.labtempo.omcp.client.OmcpClientBuilder;
 import br.uff.labtempo.omcp.common.Response;
 import br.uff.labtempo.omcp.common.utils.ResponsePacket;
+import br.uff.labtempo.osiris.to.virtualsensornet.BlendingVsnTo;
+import br.uff.labtempo.osiris.to.virtualsensornet.LinkVsnTo;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public class Client {
+public class VsnGetLink {
 
     public static void main(String[] args) throws Exception {
         try (OmcpClient connection = new OmcpClientBuilder().host("192.168.0.7").user("admin", "admin").source("generico").build()) {
-            Response  r = connection.doGet("omcp://sensornet/labtempo/collectors/datacenter/sensors/50/?chave=valor&chave2=valor2");
-            System.out.println(new ResponsePacket().generate(r));
-             r = connection.doGet("omcp://sensornet/labtempo/collectors/datacenter/sensors/50/");  
-//            connection.doNofity("omcp://teste/","teste");
-//            connection.doNofity("omcp://test.ex/sensor/","teste");
-//            connection.doNofity("omcp://test.ex/collector1/sample","teste");
-//            connection.doNofity("omcp://test.ex/collector/","teste");
-//            connection.doNofity("omcp://test.ex/collector/01","teste");
-            System.out.println(new ResponsePacket().generate(r));
+            Response r = connection.doGet("omcp://virtualsensornet/link/1");
+            LinkVsnTo to = r.getContent(LinkVsnTo.class);
+            System.out.println("GOT(link): " + to.getId());
         }
     }
 }

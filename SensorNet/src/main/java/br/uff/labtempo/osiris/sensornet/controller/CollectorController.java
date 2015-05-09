@@ -65,7 +65,7 @@ public class CollectorController extends Controller {
         String collectorId;
 
         if (match(request.getResource(), ALL)) {
-            Map<String, String> map = extract(request.getResource(), ALL);
+            Map<String, String> map = extractParams(request.getResource(), ALL);
             networkId = map.get(Path.ID1.toString());
             switch (request.getMethod()) {
                 case GET:
@@ -78,7 +78,7 @@ public class CollectorController extends Controller {
                     throw new MethodNotAllowedException("Action not allowed for this resource!");
             }
         } else if (match(request.getResource(), UNIQUE)) {
-            Map<String, String> map = extract(request.getResource(), UNIQUE);
+            Map<String, String> map = extractParams(request.getResource(), UNIQUE);
             networkId = map.get(Path.ID1.toString());
             collectorId = map.get(Path.ID2.toString());
 

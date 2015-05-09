@@ -74,6 +74,7 @@ public class AggregatesCheckerController implements AggregatesChecker {
             @Override
             public void run() {
 
+                //notify changes one time only, by grouping composites into an set 
                 Set<VirtualSensor> aggregatables = new HashSet<>();
                 for (Field field : fields) {
                     aggregatables.addAll(field.getAggregates());
@@ -88,9 +89,13 @@ public class AggregatesCheckerController implements AggregatesChecker {
                             VirtualSensorComposite composite = (VirtualSensorComposite) virtualSensor;
                             composite.setFieldsValues(null);
                             compositeDao.save(composite);
-                            //notify sensor if its state is equals "reactivated"
+                            //notify sensor if its state is equals "reactivated", "malfunction" or "inactive"
                             if (ModelState.REACTIVATED.equals(composite.getModelState())) {
                                 announcer.notifyReactivation(composite.getTransferObject());
+                            } else if (ModelState.MALFUNCTION.equals(composite.getModelState())) {
+                                announcer.notifyMalfunction(composite.getTransferObject());
+                            } else if (ModelState.INACTIVE.equals(composite.getModelState())) {
+                                announcer.notifyDeactivation(composite.getTransferObject());
                             }
                             announcer.broadcastIt(composite.getTransferObject());
                         }

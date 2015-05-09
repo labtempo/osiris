@@ -18,6 +18,7 @@ package br.uff.labtempo.osiris.sensornet.persistence.jpa;
 import br.uff.labtempo.osiris.sensornet.persistence.CollectorDao;
 import br.uff.labtempo.osiris.sensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.sensornet.persistence.NetworkDao;
+import br.uff.labtempo.osiris.sensornet.persistence.RevisionDao;
 import br.uff.labtempo.osiris.sensornet.persistence.SchedulerDao;
 import br.uff.labtempo.osiris.sensornet.persistence.SensorDao;
 import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistence;
@@ -95,7 +96,12 @@ public class JpaDaoFactory implements DaoFactory, AutoCloseable {
     }
 
     @Override
-    public SchedulerDao getSchedulerDao() {
+    public RevisionDao getRevisionDao() {
+        return new RevisionJpa(getDataManager());
+    }
+
+    @Override
+    public SchedulerDao getPersistentSchedulerDao() {
         return new SchedulerJpa(batchPersistence);
     }
 

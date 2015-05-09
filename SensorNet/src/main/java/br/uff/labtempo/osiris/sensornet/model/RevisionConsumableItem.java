@@ -15,6 +15,8 @@
  */
 package br.uff.labtempo.osiris.sensornet.model;
 
+import br.uff.labtempo.osiris.to.sensornet.RevisionConsumableSnTo;
+import br.uff.labtempo.osiris.to.sensornet.RevisionValueSnTo;
 import java.io.Serializable;
 import javax.persistence.Cacheable;
 import javax.persistence.Entity;
@@ -57,5 +59,10 @@ public class RevisionConsumableItem implements Serializable {
 
     public int getValue() {
         return consumableValue;
+    }
+
+    public RevisionConsumableSnTo getTransferObject() {
+        RevisionConsumableSnTo revisionFieldSnTo = new RevisionConsumableSnTo(consumable.getName(), consumableValue);
+        return revisionFieldSnTo;
     }
 }

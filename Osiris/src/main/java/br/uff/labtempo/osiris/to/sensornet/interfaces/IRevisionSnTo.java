@@ -13,29 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package br.uff.labtempo.osiris.sensornet.model.util;
+package br.uff.labtempo.osiris.to.sensornet.interfaces;
 
-import br.uff.labtempo.osiris.sensornet.model.Sensor;
-import br.uff.labtempo.osiris.sensornet.thirdparty.scheduler.SchedulerAgent;
+import br.uff.labtempo.osiris.to.sensornet.RevisionConsumableSnTo;
+import br.uff.labtempo.osiris.to.sensornet.RevisionValueSnTo;
+import java.util.List;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public class SchedulerAgentWrapper implements SchedulerAgent {
+public interface IRevisionSnTo {
 
-    SchedulerAgent scheduler;
+    void addRevisionValue(RevisionValueSnTo revisionValue);
+    void addRevisionConsumable(RevisionConsumableSnTo revisionConsumable);
 
-    public SchedulerAgentWrapper(SchedulerAgent scheduler) {
-        this.scheduler = scheduler;
-    }
+    long getAcquisitionTimestampInMillis();
 
-    @Override
-    public void schedule(Sensor sensor) {
-        if (scheduler == null) {
-            return;
-        }
-        scheduler.schedule(sensor);
-    }
+    int getCapturePrecisionInNano();
+
+    long getCaptureTimestampInMillis();
+
+    List<RevisionValueSnTo> getIRevisionValues();
+
+    List<RevisionConsumableSnTo> getIRevisionConsumables();
+
+    long getStorageTimestampInMillis();
 
 }

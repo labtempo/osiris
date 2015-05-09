@@ -91,7 +91,7 @@ public class SchedulingManager implements Scheduling, TaskCallback {
             }
             
             for (SchedulerItem item : items) {
-                if (item.isRemovable()) {
+                if (!item.isRemovable()) {
                     storage.update(item);
                 }
             }

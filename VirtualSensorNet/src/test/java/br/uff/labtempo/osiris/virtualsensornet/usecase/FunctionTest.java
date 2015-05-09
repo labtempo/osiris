@@ -22,7 +22,6 @@ import br.uff.labtempo.osiris.to.common.definitions.FunctionOperation;
 import br.uff.labtempo.osiris.to.common.definitions.ValueType;
 import br.uff.labtempo.osiris.to.function.InterfaceFnTo;
 import br.uff.labtempo.osiris.to.function.ParamFnTo;
-import br.uff.labtempo.osiris.to.function.ParamTypeFnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.FunctionVsnTo;
 import br.uff.labtempo.osiris.virtualsensornet.controller.FunctionController;
 import br.uff.labtempo.osiris.virtualsensornet.controller.VirtualSensorBlendingController;
@@ -81,13 +80,11 @@ public class FunctionTest {
         List<FunctionOperation> operations = new ArrayList<>();
         List<ParamFnTo> requestParams = new ArrayList<>();
         List<ParamFnTo> responseParams = new ArrayList<>();
-        ParamTypeFnTo inputType = new ParamTypeFnTo("celsius", ValueType.NUMBER);
-        ParamTypeFnTo outputType = new ParamTypeFnTo("kelvin", ValueType.NUMBER);
 
         operations.add(FunctionOperation.SYNCHRONOUS);
 
-        requestParams.add(new ParamFnTo("in1", inputType));
-        responseParams.add(new ParamFnTo("out1", outputType));
+        requestParams.add(new ParamFnTo("in1", "celsius", ValueType.NUMBER));
+        responseParams.add(new ParamFnTo("out1", "kelvin", ValueType.NUMBER));
 
         InterfaceFnTo to = new InterfaceFnTo("temperature conversor", "convert celsius to kelvin", "omcp://converter.function.osiris", operations, requestParams, responseParams);
         long id = controller.create(to);
@@ -117,9 +114,25 @@ public class FunctionTest {
 
     }
 
-//    @Test(expected = BadRequestException.class)
-//    public void TestCreateDataType_DataTypeWithNullUnit_ShouldThrowException() throws BadRequestException, InternalServerErrorException {
-//        DataTypeVsnTo to = new DataTypeVsnTo("test", ValueType.LOGIC, null, "Â°C");
-//        controller.create(to);
-//    }
+    @Test
+    public void testDeleteFunction_ShouldPass() throws BadRequestException, InternalServerErrorException, NotFoundException {
+
+        List<FunctionOperation> operations = new ArrayList<>();
+        List<ParamFnTo> requestParams = new ArrayList<>();
+        List<ParamFnTo> responseParams = new ArrayList<>();
+
+        operations.add(FunctionOperation.SYNCHRONOUS);
+
+        requestParams.add(new ParamFnTo("in1", "celsius", ValueType.NUMBER));
+        responseParams.add(new ParamFnTo("out1", "kelvin", ValueType.NUMBER));
+
+        InterfaceFnTo to = new InterfaceFnTo("testDeleteFunction1", "convert celsius to kelvin", "omcp://converter.function.osiris", operations, requestParams, responseParams);
+        long id = controller.create(to);
+
+        FunctionVsnTo vsnTo = controller.get(id);
+
+        boolean expectedResult = controller.delete(id);
+
+        Assert.assertTrue(expectedResult);
+    }
 }

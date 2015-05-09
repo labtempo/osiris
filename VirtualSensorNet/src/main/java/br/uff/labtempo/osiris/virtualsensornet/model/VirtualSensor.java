@@ -74,7 +74,7 @@ public abstract class VirtualSensor<T> extends Model implements IVirtualSensor<T
     private TimeUnit creationIntervalTimeUnit;
 
     @OneToMany(mappedBy = "virtualSensor", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    @OrderBy("timestamp DESC")
+    //@OrderBy("timestamp DESC")
     private List<Revision> revisions;
 
     protected VirtualSensor() {
@@ -167,7 +167,7 @@ public abstract class VirtualSensor<T> extends Model implements IVirtualSensor<T
 
     @Override
     public synchronized VirtualSensorVsnTo getTransferObject() {
-        VirtualSensorVsnTo sensorVsnTo = new VirtualSensorVsnTo(id, getModelState().getState(), creationTimestampInMillis, creationPrecisionInNano, creationInterval, creationIntervalTimeUnit, acquisitionTimestampInMillis, storageTimestampInMillis, getLastModifiedDate(), virtualSensorType);
+        VirtualSensorVsnTo sensorVsnTo = new VirtualSensorVsnTo(id, label, getModelState().getState(), creationTimestampInMillis, creationPrecisionInNano, creationInterval, creationIntervalTimeUnit, acquisitionTimestampInMillis, storageTimestampInMillis, getLastModifiedDate(), virtualSensorType);
 
         for (Field field : fields) {
             sensorVsnTo.addValue(field.getId(), field.getReferenceName(), field.getValueType(), field.getValue(), field.getUnit(), field.getSymbol());

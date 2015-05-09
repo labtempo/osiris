@@ -30,6 +30,8 @@ import java.util.concurrent.TimeUnit;
 public interface IVirtualSensorVsnTo {
 
     long getId();
+    
+    String getLabel();
 
     long getCreationTimestampInMillis();
 

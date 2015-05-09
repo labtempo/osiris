@@ -25,6 +25,7 @@ import br.uff.labtempo.osiris.virtualsensornet.persistence.DataTypeDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.FieldDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.FunctionDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.LinkDao;
+import br.uff.labtempo.osiris.virtualsensornet.persistence.RevisionDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.SchedulerDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.VirtualSensorDao;
 import javax.persistence.EntityManager;
@@ -83,6 +84,11 @@ public class JpaDaoFactory implements DaoFactory, AutoCloseable {
     }
 
     @Override
+    public RevisionDao getRevisionDao() {
+        return new RevisionJpa(getDataManager());
+    }
+
+    @Override
     public LinkDao getLinkDao() {
         return new LinkJpa(getDataManager());
     }
@@ -113,8 +119,13 @@ public class JpaDaoFactory implements DaoFactory, AutoCloseable {
     }
 
     @Override
-    public FieldDao getFieldDao() {
+    public FieldDao getPersistentFieldDao() {
         return new FieldJpaPersistent(batchPersistence);
+    }
+
+    @Override
+    public FieldDao getFieldDao() {
+        return new FieldJpa(getDataManager());
     }
 
     @Override

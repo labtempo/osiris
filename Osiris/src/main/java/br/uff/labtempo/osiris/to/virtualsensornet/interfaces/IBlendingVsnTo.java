@@ -37,7 +37,7 @@ public interface IBlendingVsnTo {
 
     void createField(long id, String name, long dataTypeId, long converterId);
 
-    void createField(long id, String name, long dataTypeId, long converterId, boolean initialized, long sourceId, int aggregates);
+    void createField(long id, String name, long dataTypeId, long converterId, boolean initialized, long sourceId, int aggregates, int dependents);
 
     void createField(String name, long dataTypeId);
 

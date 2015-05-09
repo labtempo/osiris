@@ -89,8 +89,8 @@ public class BlendingVsnTo implements IBlendingVsnTo {
     }
 
     @Override
-    public void createField(long id, String name, long dataTypeId, long converterId, boolean initialized, long sourceId, int aggregates) {
-        InternalFieldTo fieldTo = new InternalFieldTo(id, name, dataTypeId, converterId, initialized, sourceId, aggregates);
+    public void createField(long id, String name, long dataTypeId, long converterId, boolean initialized, long sourceId, int aggregates, int dependents) {
+        InternalFieldTo fieldTo = new InternalFieldTo(id, name, dataTypeId, converterId, initialized, sourceId, aggregates, dependents);
         createField(fieldTo);
     }
 
@@ -226,8 +226,8 @@ public class BlendingVsnTo implements IBlendingVsnTo {
             super(id, name, dataTypeId, converterId);
         }
 
-        InternalFieldTo(long id, String name, long dataTypeId, long converterId, boolean initialized, long sourceId, int aggregates) {
-            super(id, name, dataTypeId, converterId, initialized, sourceId, aggregates);
+        InternalFieldTo(long id, String name, long dataTypeId, long converterId, boolean initialized, long sourceId, int aggregates, int dependents) {
+            super(id, name, dataTypeId, converterId, initialized, sourceId, aggregates, dependents);
         }
 
         @Override

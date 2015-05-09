@@ -17,7 +17,7 @@ package br.uff.labtempo.osiris.virtualsensornet.controller.internal;
 
 import br.uff.labtempo.omcp.common.exceptions.BadRequestException;
 import br.uff.labtempo.omcp.common.exceptions.InternalServerErrorException;
-import br.uff.labtempo.osiris.virtualsensornet.model.Aggregatable;
+import br.uff.labtempo.osiris.virtualsensornet.model.Dependent;
 import br.uff.labtempo.osiris.virtualsensornet.model.Field;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.FieldDao;
@@ -38,7 +38,7 @@ public class FieldController {
 
     public Field getById(long id) throws InternalServerErrorException {
         try {
-            FieldDao fd = factory.getFieldDao();
+            FieldDao fd = factory.getPersistentFieldDao();
             return fd.getById(id);
         } catch (Exception e) {
             throw new InternalServerErrorException("Data query error!");
@@ -48,7 +48,7 @@ public class FieldController {
     public List<Field> getAllByIds(List<Long> ids) throws InternalServerErrorException, BadRequestException {
         try {
             List<Field> fields = new ArrayList<>();
-            FieldDao fd = factory.getFieldDao();
+            FieldDao fd = factory.getPersistentFieldDao();
             for (long id : ids) {
                 Field field = fd.getById(id);
                 if (field == null) {
@@ -66,7 +66,7 @@ public class FieldController {
 
     public void merge(Field field) throws InternalServerErrorException {
         try {
-            FieldDao fd = factory.getFieldDao();
+            FieldDao fd = factory.getPersistentFieldDao();
             fd.update(field);
         } catch (Exception e) {
             throw new InternalServerErrorException("Data query error!");
@@ -75,21 +75,21 @@ public class FieldController {
 
     public void delete(Field field) throws InternalServerErrorException {
         try {
-            FieldDao fd = factory.getFieldDao();
+            FieldDao fd = factory.getPersistentFieldDao();
             fd.delete(field);
         } catch (Exception e) {
             throw new InternalServerErrorException("Data query error!");
         }
     }
 
-    public void removeAggregate(Field field, Aggregatable virtualSensor) {
-        field.removeAggregate(virtualSensor);
+    public void removeAggregate(Field field, Dependent virtualSensor) {
+        field.removeDependent(virtualSensor);
     }
 
     public void deleteIgnoringInitialization(List<Field> current, Field deleted) throws BadRequestException {
-        //cannot delete Field it has aggregates
-        if (deleted.hasAggregates()) {
-            throw new BadRequestException("You cannot to delete Field because it has aggregates!");
+        //cannot delete Field it has depedents
+        if (deleted.hasDependents()) {
+            throw new BadRequestException("You cannot to delete Field because it has depedents!");
         }
         current.remove(deleted);
     }

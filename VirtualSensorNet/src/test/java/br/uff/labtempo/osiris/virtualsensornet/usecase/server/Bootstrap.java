@@ -43,7 +43,7 @@ public class Bootstrap implements AutoCloseable {
     private final FunctionController functionController;
 
     public Bootstrap() throws Exception {
-        //String persistenceUnitName = "postgres";
+//        String persistenceUnitName = "postgres";
         String persistenceUnitName = "hsqldb";
 
         this.factory = PersistenceProvider.getInstance(persistenceUnitName);

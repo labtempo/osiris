@@ -110,7 +110,7 @@ public class RequestBuilder {
         this.resource = uri.getPath();
         this.module = uri.getHost();
         if (uri.getQuery() != null) {
-            this.resource += "?" + uri.getQuery();
+            this.resource += "?" + uri.getRawQuery();
         }
         if (!VERSION.contains(uri.getScheme().toUpperCase())) {
             throw new RequestException("wrong scheme!");

@@ -45,11 +45,11 @@ public class CompositeVsnTo implements ICompositeVsnTo {
     public CompositeVsnTo(String label) {
         this(0, label);
     }
-    
-    public CompositeVsnTo() {        
+
+    public CompositeVsnTo() {
         this("");
         DateUtil dateUtil = new DateUtil();
-        this.label = "composite-"+dateUtil.generate(Calendar.getInstance());
+        this.label = "composite-" + dateUtil.generate(Calendar.getInstance());
     }
 
     @Override
@@ -68,8 +68,8 @@ public class CompositeVsnTo implements ICompositeVsnTo {
     }
 
     @Override
-    public void addBoundField(long id, String name, long dataTypeId, long converterId, boolean initialized, long sourceId, int aggregates) {
-        InternalFieldTo fieldTo = new InternalFieldTo(id, name, dataTypeId, converterId, initialized, sourceId, aggregates);
+    public void addBoundField(long id, String name, long dataTypeId, long converterId, boolean initialized, long sourceId, int aggregates, int dependents) {
+        InternalFieldTo fieldTo = new InternalFieldTo(id, name, dataTypeId, converterId, initialized, sourceId, aggregates, dependents);
         createField(fieldTo);
     }
 
@@ -116,8 +116,8 @@ public class CompositeVsnTo implements ICompositeVsnTo {
             super(id, null, 0, 0);
         }
 
-        InternalFieldTo(long id, String name, long dataTypeId, long converterId, boolean initialized, long sourceId, int aggregates) {
-            super(id, name, dataTypeId, converterId, initialized, sourceId, aggregates);
+        InternalFieldTo(long id, String name, long dataTypeId, long converterId, boolean initialized, long sourceId, int aggregates, int dependents) {
+            super(id, name, dataTypeId, converterId, initialized, sourceId, aggregates, dependents);
         }
 
         @Override

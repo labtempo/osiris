@@ -15,6 +15,11 @@
  */
 package br.uff.labtempo.osiris.sensornet.model;
 
+import br.uff.labtempo.osiris.to.sensornet.RevisionConsumableSnTo;
+import br.uff.labtempo.osiris.to.sensornet.RevisionSnTo;
+import br.uff.labtempo.osiris.to.sensornet.RevisionValueSnTo;
+import br.uff.labtempo.osiris.to.virtualsensornet.RevisionFieldVsnTo;
+import br.uff.labtempo.osiris.to.virtualsensornet.RevisionVsnTo;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -121,5 +126,18 @@ public class Revision implements Serializable {
 
     public Sensor getSensor() {
         return sensor;
+    }
+
+    public RevisionSnTo getTransferObject() {
+        RevisionSnTo revisionVsnTo = new RevisionSnTo(captureTimestampInMillis, capturePrecisionInNano, acquisitionTimestampInMillis, storageTimestampInMillis);
+        for (RevisionFieldItem item : fieldItems) {
+            RevisionValueSnTo revisionFieldVsnTo = item.getTransferObject();
+            revisionVsnTo.addRevisionValue(revisionFieldVsnTo);
+        }
+        for (RevisionConsumableItem item : consumableItems) {
+            RevisionConsumableSnTo revisionFieldVsnTo = item.getTransferObject();
+            revisionVsnTo.addRevisionConsumable(revisionFieldVsnTo);
+        }
+        return revisionVsnTo;
     }
 }

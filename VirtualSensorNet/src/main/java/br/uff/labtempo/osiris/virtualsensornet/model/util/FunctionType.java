@@ -13,30 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package br.uff.labtempo.osiris.virtualsensornet.model;
+package br.uff.labtempo.osiris.virtualsensornet.model.util;
 
 import br.uff.labtempo.osiris.to.common.definitions.ValueType;
-import java.io.Serializable;
 import java.util.Objects;
-import javax.persistence.Embeddable;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-@Embeddable
-public class FunctionType implements Serializable {
+public class FunctionType {
 
-    @Enumerated(EnumType.STRING)
-    private ValueType type;
-
-    private String unit;
-    private boolean isCollection;
-
-    protected FunctionType() {
-    }
+    private final ValueType type;
+    private final String unit;
+    private final boolean isCollection;
 
     public FunctionType(ValueType type, String unit, boolean isCollection) {
         this.type = type;

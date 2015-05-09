@@ -15,13 +15,13 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.model.interfaces;
 
-import br.uff.labtempo.osiris.virtualsensornet.model.Aggregatable;
+import br.uff.labtempo.osiris.virtualsensornet.model.Dependent;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public interface IComposite extends Aggregatable {
+public interface IComposite extends Dependent {
 
     void removeFields();
 

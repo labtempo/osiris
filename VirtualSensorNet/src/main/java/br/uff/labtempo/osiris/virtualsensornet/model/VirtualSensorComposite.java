@@ -40,7 +40,7 @@ public class VirtualSensorComposite extends VirtualSensor<CompositeVsnTo> implem
         super(VirtualSensorType.COMPOSITE, label, fields, creationInterval, creationIntervalTimeUnit);
         //add as aggregate
         for (Field field : fields) {
-            field.addAggregate(this);
+            field.addDependent(this);
         }
     }
 
@@ -60,7 +60,7 @@ public class VirtualSensorComposite extends VirtualSensor<CompositeVsnTo> implem
         synchronized (fields) {
             List<Field> tempFields = new ArrayList<>(getFields());
             for (Field field : tempFields) {
-                field.removeAggregate(this);
+                field.removeDependent(this);
                 fields.remove(field);
             }
         }
@@ -68,6 +68,7 @@ public class VirtualSensorComposite extends VirtualSensor<CompositeVsnTo> implem
 
     @Override
     public boolean setFieldsValues(FieldValuesWrapper valuesWrapper) {
+        ModelState oldState = getModelState();
         boolean isError = false;
         boolean isWorking = false;
 
@@ -81,16 +82,28 @@ public class VirtualSensorComposite extends VirtualSensor<CompositeVsnTo> implem
             minorIntervalField = compareMinorUpdateIntervalSensor(minorIntervalField, field);
 
             //select operation state of the composite 
-            if (sensor.getModelState() == ModelState.INACTIVE
-                    || sensor.getModelState() == ModelState.MALFUNCTION) {
+            if (sensor.getModelState() == ModelState.INACTIVE) {
                 isError = true;
+            } else if (sensor.getModelState() == ModelState.MALFUNCTION) {
+                isError = true;
+                isWorking = true;
             } else {
                 isWorking = true;
             }
         }
 
-        final VirtualSensor latestUpdatedSensor = latestUpdatedField.getVirtualSensor();
-        final VirtualSensor minorIntervalSensor = minorIntervalField.getVirtualSensor();
+        final VirtualSensor latestUpdatedSensor;
+        if (latestUpdatedField == null) {
+            latestUpdatedSensor = this;
+        } else {
+            latestUpdatedSensor = latestUpdatedField.getVirtualSensor();
+        }
+        final VirtualSensor minorIntervalSensor;
+        if (minorIntervalField == null) {
+            minorIntervalSensor = this;
+        } else {
+            minorIntervalSensor = minorIntervalField.getVirtualSensor();
+        }
 
         //put new time values
         if (isWorking) {
@@ -126,11 +139,17 @@ public class VirtualSensorComposite extends VirtualSensor<CompositeVsnTo> implem
                     return null;
                 }
             };
-            super.setFieldsValues(valuesWrapper);
+            super.setFieldsValues(wrapper);
         }
 
         //reset operation state of the composite to reflect new state properly
         if (isWorking && !isError) {
+            if (ModelState.INACTIVE == oldState) {
+                if (ModelState.REACTIVATED != getModelState()) {
+                    super.reactivate();
+                }
+                return true;
+            }
             super.update();
             return true;
         } else if (isWorking && isError) {
@@ -162,7 +181,8 @@ public class VirtualSensorComposite extends VirtualSensor<CompositeVsnTo> implem
         for (Field field : fields) {
             VirtualSensor sensor = field.getVirtualSensor();
             int aggregates = field.getAggregates().size();
-            compositeVsnTo.addBoundField(field.getId(), field.getReferenceName(), field.getDataTypeId(), field.getConverterId(), field.isStored(), sensor.getId(), aggregates);
+            int dependents = field.getDependents().size();
+            compositeVsnTo.addBoundField(field.getId(), field.getReferenceName(), field.getDataTypeId(), field.getConverterId(), field.isStored(), sensor.getId(), aggregates, dependents);
         }
         return compositeVsnTo;
     }

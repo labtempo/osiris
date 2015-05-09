@@ -18,6 +18,7 @@ package br.uff.labtempo.osiris.virtualsensornet.controller;
 import br.uff.labtempo.omcp.client.OmcpClient;
 import br.uff.labtempo.omcp.common.Request;
 import br.uff.labtempo.omcp.common.Response;
+import br.uff.labtempo.omcp.common.StatusCode;
 import br.uff.labtempo.omcp.common.exceptions.BadRequestException;
 import br.uff.labtempo.omcp.common.exceptions.InternalServerErrorException;
 import br.uff.labtempo.omcp.common.exceptions.MethodNotAllowedException;
@@ -35,6 +36,7 @@ import br.uff.labtempo.osiris.to.function.ResponseFnTo;
 import br.uff.labtempo.osiris.to.function.ValueFnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.BlendingBondVsnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.BlendingVsnTo;
+import br.uff.labtempo.osiris.to.virtualsensornet.LinkVsnTo;
 import br.uff.labtempo.osiris.utils.scheduling.Scheduler;
 import br.uff.labtempo.osiris.utils.scheduling.SchedulerItem;
 import br.uff.labtempo.osiris.utils.scheduling.SchedulingCallback;
@@ -47,7 +49,7 @@ import br.uff.labtempo.osiris.virtualsensornet.model.DataType;
 import br.uff.labtempo.osiris.virtualsensornet.model.Field;
 import br.uff.labtempo.osiris.virtualsensornet.model.Function;
 import br.uff.labtempo.osiris.virtualsensornet.model.FunctionParam;
-import br.uff.labtempo.osiris.virtualsensornet.model.FunctionType;
+import br.uff.labtempo.osiris.virtualsensornet.model.util.FunctionType;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensorBlending;
 import br.uff.labtempo.osiris.virtualsensornet.model.state.ModelState;
@@ -132,7 +134,7 @@ public class VirtualSensorBlendingController extends Controller implements Sched
                     throw new MethodNotAllowedException("Action not allowed for this resource!");
             }
         } else if (match(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_BLENDING_BY_ID.toString())) {
-            Map<String, String> map = extract(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_BLENDING_BY_ID.toString());
+            Map<String, String> map = extractParams(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_BLENDING_BY_ID.toString());
             String urlId = map.get(Path.ID1.toString());
             switch (request.getMethod()) {
                 case GET:
@@ -190,11 +192,9 @@ public class VirtualSensorBlendingController extends Controller implements Sched
 
         blending.setFieldsValues(wrapper);
 
-        blendingDao.save(blending);
-        announcer.broadcastIt(blending.getTransferObject());
-        if (ModelState.REACTIVATED.equals(blending.getModelState())) {
-            announcer.notifyReactivation(blending.getTransferObject());
-        }
+        blendingDao.update(blending);
+
+        //broadcast        
         announcer.broadcastIt(blending.getTransferObject());
 
         //checking aggregates
@@ -275,7 +275,7 @@ public class VirtualSensorBlendingController extends Controller implements Sched
         return blending.getId();
     }
 
-    public synchronized boolean update(long id, BlendingVsnTo blendingVsnTo) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, BadRequestException {
+    public synchronized boolean update(long id, BlendingVsnTo blendingVsnTo) throws NotFoundException, InternalServerErrorException, BadRequestException {
         String label;
         List<? extends FieldTo> fieldsTo;
 
@@ -292,7 +292,7 @@ public class VirtualSensorBlendingController extends Controller implements Sched
         //get DAO
         BlendingDao blendingDao;
         try {
-            blendingDao = factory.getBlendingDao();
+            blendingDao = factory.getPersistentBlendingDao();
         } catch (Exception e) {
             throw new InternalServerErrorException("Data query error!");
         }
@@ -363,6 +363,7 @@ public class VirtualSensorBlendingController extends Controller implements Sched
         }
 
         boolean hasFunction = false;
+        List<Field> toUpdateFields = null;
         if (functionId != 0) {
             //get DAO
             if (blending.getFunction() == null || blending.getFunction().getId() != functionId) {
@@ -405,12 +406,13 @@ public class VirtualSensorBlendingController extends Controller implements Sched
             List<BlendingBond> requestBonds = createRequestBlendingBonds(requestParams, function.getRequestParams());
             List<BlendingBond> responseBonds = createResponseBlendingBonds(responseParams, function.getResponseParams(), blending);
 
-            blending.setRequestFields(requestBonds);
+            toUpdateFields = blending.setRequestFields(requestBonds);
             blending.setResponseFields(responseBonds);
 
             hasFunction = true;
             isUpdated = true;
         } else {
+            toUpdateFields = blending.setRequestFields(null);
             blending.removeFunction();
         }
 
@@ -423,6 +425,14 @@ public class VirtualSensorBlendingController extends Controller implements Sched
             for (Field removed : removedFields) {
                 fieldSubController.delete(removed);
             }
+
+            //update excluded bond fields
+            if (toUpdateFields != null) {
+                for (Field toUpdateField : toUpdateFields) {
+                    fieldSubController.merge(toUpdateField);
+                }
+            }
+
             //insert to scheduler
             if (hasFunction) {
                 //TODO: create update scheduler item
@@ -434,10 +444,10 @@ public class VirtualSensorBlendingController extends Controller implements Sched
         return isUpdated;
     }
 
-    public boolean delete(long id) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, BadRequestException {
+    public boolean delete(long id) throws NotFoundException, InternalServerErrorException, BadRequestException {
         BlendingDao blendingDao;
         try {
-            blendingDao = factory.getBlendingDao();
+            blendingDao = factory.getPersistentBlendingDao();
         } catch (Exception e) {
             throw new InternalServerErrorException("Data query error!");
         }
@@ -447,7 +457,33 @@ public class VirtualSensorBlendingController extends Controller implements Sched
             throw new NotFoundException("Selected Blending not found!");
         }
 
+        //remove fields
+        //remove initialized fields
+        FieldController fieldSubController = new FieldController(factory);
+        List<Field> currentFields = blending.getFields();
+        List<Field> removedFields = new ArrayList<>(currentFields);
+        for (Field field : removedFields) {
+            fieldSubController.deleteIgnoringInitialization(currentFields, field);
+            //detaches sensor from field
+            field.setVirtualSensor(null);
+        }
+
+        //remove request fields in bonds
+        List<Field> toUpdateFields = blending.removeRequestFields();
+        //remove response fields in bonds
+        blending.removeResponseFields();
+
         try {
+            blendingDao.update(blending);
+
+            //update dependent fields
+            for (Field field : toUpdateFields) {
+                fieldSubController.merge(field);
+            }
+
+            for (Field removedField : removedFields) {
+                fieldSubController.delete(removedField);
+            }
             blendingDao.delete(blending);
             return true;
         } catch (Exception e) {
@@ -575,13 +611,47 @@ public class VirtualSensorBlendingController extends Controller implements Sched
     //scheduler callback
     @Override
     public void callback(List<? extends SchedulerItem> items) throws Exception {
+        BlendingDao blendingDao;
+        try {
+            blendingDao = factory.getPersistentBlendingDao();
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Data query error!");
+        }
         if (items != null && items.size() > 0) {
             for (SchedulerItem item : items) {
+
                 ModelSchedulerItem msi = (ModelSchedulerItem) item;
                 long sensorId = item.getObjectId();
-                VirtualSensor vs = getById(sensorId);
-                msi.setTime(vs);
-                callFunction((VirtualSensorBlending) vs);
+                VirtualSensorBlending blending = blendingDao.getById(sensorId);
+                msi.setTime(blending);
+
+                ModelState oldModelState = blending.getModelState();
+                boolean canRequest = blending.canRequest();
+                blendingDao.update(blending);
+
+                //notify
+                switch (blending.getModelState()) {
+                    case INACTIVE:
+                        if (oldModelState != ModelState.INACTIVE) {
+                            announcer.notifyDeactivation(blending.getTransferObject());
+                            announcer.broadcastIt(blending.getTransferObject());
+                        }
+                        break;
+                    case MALFUNCTION:
+                        if (oldModelState != ModelState.MALFUNCTION) {
+                            announcer.notifyMalfunction(blending.getTransferObject());
+                        }
+                        break;
+                    case REACTIVATED:
+                        if (oldModelState != ModelState.REACTIVATED) {
+                            announcer.notifyReactivation(blending.getTransferObject());
+                        }
+                        break;
+                }
+
+                if (canRequest) {
+                    callFunction(blending);
+                }
             }
         }
     }
@@ -611,16 +681,38 @@ public class VirtualSensorBlendingController extends Controller implements Sched
 
         switch (operation) {
             case ASYNCHRONOUS:
-                client.doPost(address, requestFnTo);
+                try {
+                    //omcp://virtualsensornet/blending/{id}
+                    String module = getContext().getHost();
+                    String completePath = module + Path.NAMING_RESOURCE_BLENDING + Path.SEPARATOR + blending.getId();
+                    requestFnTo.setResponseTo(completePath);
+                    Response response = client.doPost(address, requestFnTo);
+                    if (response != null) {
+                        if (response.getStatusCode() != StatusCode.CREATED) {
+                            throw new RuntimeException(response.getErrorMessage());
+                        }
+                    }
+                } catch (Exception e) {
+                    Logger.getLogger(VirtualSensorBlendingController.class.getName()).log(Level.WARNING, "{0}:[POST]{1}", new Object[]{e.getMessage(), address});
+                }
                 break;
             case SYNCHRONOUS:
-                ParameterizedRequestFn requestFn = new ParameterizedRequestFn(address, requestFnTo);
-                Response response = client.doGet(requestFn.toString());
+                ParameterizedRequestFn requestFn = new ParameterizedRequestFn(requestFnTo);
+                Response response = null;
+                String url = requestFn.getRequestUri(address);
+                try {
+                    response = client.doGet(url);
+                } catch (Exception e) {
+                    Logger.getLogger(VirtualSensorBlendingController.class.getName()).log(Level.WARNING, "{0}:[GET]{1}", new Object[]{e.getMessage(), url});
+                }
 
                 if (response != null) {
-                    ResponseFnTo responseFnTo = response.getContent(ResponseFnTo.class
-                    );
-
+                    if (response.getStatusCode() != StatusCode.OK) {
+                        RuntimeException ex = new RuntimeException(response.getErrorMessage());
+                        Logger.getLogger(VirtualSensorBlendingController.class.getName()).log(Level.SEVERE, null, ex);
+                        break;
+                    }
+                    ResponseFnTo responseFnTo = response.getContent(ResponseFnTo.class);
                     try {
                         insertValue(blending.getId(), responseFnTo);
                     } catch (InternalServerErrorException | NotFoundException ex) {
@@ -631,5 +723,9 @@ public class VirtualSensorBlendingController extends Controller implements Sched
             default:
                 break;
         }
+    }
+
+    public void setClient(OmcpClient omcpClientBlending) {
+        client = new OmcpClientWrapper(omcpClientBlending);
     }
 }

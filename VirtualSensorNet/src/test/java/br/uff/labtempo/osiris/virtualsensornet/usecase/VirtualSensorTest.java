@@ -92,7 +92,7 @@ public class VirtualSensorTest {
 
     @Test(expected = MethodNotAllowedException.class)
     public void testCreateVirtualSensor_Invalid_ShouldThrowException() throws BadRequestException, NotFoundException, InternalServerErrorException, MethodNotAllowedException {
-        VirtualSensorVsnTo to = new VirtualSensorVsnTo(5, State.NEW, System.currentTimeMillis(), 0, 0, TimeUnit.MILLISECONDS, System.currentTimeMillis(), System.currentTimeMillis(), Calendar.getInstance(), VirtualSensorType.LINK);
+        VirtualSensorVsnTo to = new VirtualSensorVsnTo(5, "label", State.NEW, System.currentTimeMillis(), 0, 0, TimeUnit.MILLISECONDS, System.currentTimeMillis(), System.currentTimeMillis(), Calendar.getInstance(), VirtualSensorType.LINK);
         controller.create(to);
     }
 
@@ -166,7 +166,7 @@ public class VirtualSensorTest {
 
         long id = linkcontroller.create(to);
 
-        VirtualSensorVsnTo to1 = new VirtualSensorVsnTo(5, State.NEW, System.currentTimeMillis(), 0, 0, TimeUnit.MILLISECONDS, System.currentTimeMillis(), System.currentTimeMillis(), Calendar.getInstance(), VirtualSensorType.LINK);
+        VirtualSensorVsnTo to1 = new VirtualSensorVsnTo(5, "label", State.NEW, System.currentTimeMillis(), 0, 0, TimeUnit.MILLISECONDS, System.currentTimeMillis(), System.currentTimeMillis(), Calendar.getInstance(), VirtualSensorType.LINK);
 
         controller.update(id, to1);
     }

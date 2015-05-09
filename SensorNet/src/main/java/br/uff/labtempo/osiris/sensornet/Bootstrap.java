@@ -23,6 +23,7 @@ import br.uff.labtempo.osiris.sensornet.controller.internal.AnnouncementControll
 import br.uff.labtempo.osiris.sensornet.controller.CollectorController;
 import br.uff.labtempo.osiris.sensornet.controller.NetworkController;
 import br.uff.labtempo.osiris.sensornet.controller.NotifyController;
+import br.uff.labtempo.osiris.sensornet.controller.RevisionController;
 import br.uff.labtempo.osiris.sensornet.controller.internal.SchedulerController;
 import br.uff.labtempo.osiris.sensornet.controller.SensorController;
 import br.uff.labtempo.osiris.utils.requestpool.RequestPool;
@@ -62,27 +63,29 @@ public class Bootstrap implements AutoCloseable {
             EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnitName, persistenceProperties);
             factory = JpaDaoFactory.newInstance(emf);
             requestPool = new RequestPool();
-            
-            NotifyController notifyController = new NotifyController(factory,requestPool);
+
+            NotifyController notifyController = new NotifyController(factory, requestPool);
             SensorController sensorController = new SensorController(factory);
             NetworkController networkController = new NetworkController(factory);
             CollectorController collectorController = new CollectorController(factory);
-            
+            RevisionController revisionController = new RevisionController(factory);
+
             SchedulerController schedulerController = new SchedulerController(factory);
-            schedulerBootstrap = new SchedulerBootstrap(factory.getSchedulerDao(), schedulerController);
-            
+            schedulerBootstrap = new SchedulerBootstrap(factory.getPersistentSchedulerDao(), schedulerController);
+
             omcpClient = new OmcpClientBuilder().host(ip).user(user, pass).source(moduleName).build();
             announcementBootstrap = new AnnouncementBootstrap(omcpClient);
             AnnouncementController announcementController = new AnnouncementController(announcementBootstrap.getAnnouncer());
-            
+
             schedulerController.setAnnouncerAgent(announcementController);
             notifyController.setAnnouncerAgent(announcementController);
             notifyController.setSchedulerAgent(schedulerBootstrap.getScheduler());
-            
+
             notifyController.setNext(sensorController);
             sensorController.setNext(networkController);
             networkController.setNext(collectorController);
-            
+            collectorController.setNext(revisionController);
+
             omcpServer = new RabbitServer(moduleName, ip, user, pass);
             omcpServer.setHandler(notifyController);
 
@@ -148,6 +151,5 @@ public class Bootstrap implements AutoCloseable {
 
         return persistenceProperties;
     }
-    
-    
+
 }
