@@ -36,7 +36,7 @@ public enum ValueType {
         return type;
     }
     
-    public static ValueType getByCode(String type) {
+    public static ValueType getByTypeName(String type) {
         for (ValueType valueType : values()) {
             if (valueType.type.equalsIgnoreCase(type)) {
                 return valueType;

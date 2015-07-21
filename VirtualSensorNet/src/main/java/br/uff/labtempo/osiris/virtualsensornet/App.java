@@ -37,9 +37,17 @@ public class App {
     private static Bootstrap boot;
 
     public static void main(String[] args) throws Exception {
+        boolean silent = false;
+        for (String arg : args) {
+            if("silent".equalsIgnoreCase(arg)){
+                System.out.println("SILENT MODE!");
+                silent = true;
+                break;
+            }
+        }
         Properties properties = readConfig();
         shutdownHook();
-        boot = new Bootstrap(properties);
+        boot = new Bootstrap(properties, silent);
         boot.start();
     }
 

@@ -18,8 +18,6 @@ package br.uff.labtempo.osiris.sensornet.model;
 import br.uff.labtempo.osiris.to.sensornet.RevisionConsumableSnTo;
 import br.uff.labtempo.osiris.to.sensornet.RevisionSnTo;
 import br.uff.labtempo.osiris.to.sensornet.RevisionValueSnTo;
-import br.uff.labtempo.osiris.to.virtualsensornet.RevisionFieldVsnTo;
-import br.uff.labtempo.osiris.to.virtualsensornet.RevisionVsnTo;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;

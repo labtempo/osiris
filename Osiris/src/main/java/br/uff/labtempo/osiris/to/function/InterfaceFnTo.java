@@ -104,7 +104,7 @@ public class InterfaceFnTo implements IInterfaceFnTo {
     private List<FunctionOperation> revertOperations(List<String> list) {
         List<FunctionOperation> l = new ArrayList<>();
         for (String s : list) {
-            l.add(FunctionOperation.getByString(s));
+            l.add(FunctionOperation.getByMode(s));
         }
         return l;
     }

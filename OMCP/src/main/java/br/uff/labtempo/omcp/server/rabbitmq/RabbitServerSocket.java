@@ -53,11 +53,18 @@ public class RabbitServerSocket implements ServerSocket {
     protected boolean running;
 
     private final ArrayList<String> references;
+    private boolean isStarted;
+    protected boolean silent;
 
-    public RabbitServerSocket(String queueName, String host, String user, String password) {
+    public RabbitServerSocket(String queueName, String host, String user, String password, boolean silent) {
         QUEUE_NAME = queueName;
         this.comm = new RabbitComm(host, user, password);
         this.references = new ArrayList<>();
+        this.silent = silent;
+    }
+
+    public RabbitServerSocket(String queueName, String host, String user, String password) {
+        this(queueName, host, user, password, false);
     }
 
     @Override
@@ -78,8 +85,10 @@ public class RabbitServerSocket implements ServerSocket {
             declareQueue();
             bindings();
             QueueingConsumer consumer = createConsumer();
+            isStarted = true;
             startListener(consumer);
         } catch (Exception e) {
+            isStarted = false;
             System.out.println(ABORT + e.getMessage());
         } finally {
             try {
@@ -102,6 +111,11 @@ public class RabbitServerSocket implements ServerSocket {
             channel.abort();
         } catch (IOException ex) {
         }
+    }
+
+    @Override
+    public boolean isStarted() {
+        return isStarted;
     }
 
     public void purge() {
@@ -278,7 +292,9 @@ public class RabbitServerSocket implements ServerSocket {
                 if (delivery != null) {
                     AMQP.BasicProperties props = delivery.getProperties();
                     String message = new String(delivery.getBody());
-                    System.out.println(message);
+                    if (!silent) {
+                        System.out.println(message);
+                    }
 
                     if (props.getReplyTo() != null) {
                         channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);

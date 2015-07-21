@@ -145,7 +145,7 @@ public class BlendingVsnTo implements IBlendingVsnTo {
 
     @Override
     public FunctionOperation getCallMode() {
-        return FunctionOperation.getByString(callMode);
+        return FunctionOperation.getByMode(callMode);
     }
 
     @Override

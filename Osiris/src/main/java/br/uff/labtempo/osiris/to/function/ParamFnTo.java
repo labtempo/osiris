@@ -29,25 +29,25 @@ public class ParamFnTo implements IParamFnTo {
     private final String name;
     private final ValueType type;
     private final String unit;
-    private final boolean collection;
+    private final boolean isCollection;
 
     private final transient String NAME = "name";
     private final transient String TYPE = "type";
     private final transient String UNIT = "unit";
-    private final transient String COLLECTION = "collection";
+    private final transient String COLLECTION = "isCollection";
 
     protected ParamFnTo(Map<String, String> map) {
         this.name = map.get(NAME);
-        this.type = ValueType.getByCode(map.get(TYPE));
+        this.type = ValueType.getByTypeName(map.get(TYPE));
         this.unit = map.get(UNIT);
-        this.collection = Boolean.valueOf(map.get(COLLECTION));
+        this.isCollection = Boolean.valueOf(map.get(COLLECTION));
     }
 
     public ParamFnTo(String name, String unit, ValueType type, boolean collection) {
         this.name = name;
         this.unit = unit;
         this.type = type;
-        this.collection = collection;
+        this.isCollection = collection;
     }
     
     public ParamFnTo(String name, String unit, ValueType type) {
@@ -79,7 +79,7 @@ public class ParamFnTo implements IParamFnTo {
 
     @Override
     public boolean isCollection() {
-        return collection;
+        return isCollection;
     }
 
     @Override
@@ -88,7 +88,7 @@ public class ParamFnTo implements IParamFnTo {
         map.put(NAME, name);
         map.put(TYPE, type.toString());
         map.put(UNIT, unit);
-        map.put(COLLECTION, String.valueOf(collection));
+        map.put(COLLECTION, String.valueOf(isCollection));
         return map;
     }
 }

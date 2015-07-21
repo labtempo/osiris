@@ -49,6 +49,10 @@ public class Bootstrap implements AutoCloseable {
     private final AnnouncementBootstrap announcementBootstrap;
 
     public Bootstrap(Properties properties) throws Exception {
+        this(properties, false);
+    }
+
+    public Bootstrap(Properties properties, boolean silent) throws Exception {
         String ip = properties.getProperty("rabbitmq.server.ip");
         String user = properties.getProperty("rabbitmq.user.name");
         String pass = properties.getProperty("rabbitmq.user.pass");
@@ -86,7 +90,7 @@ public class Bootstrap implements AutoCloseable {
             networkController.setNext(collectorController);
             collectorController.setNext(revisionController);
 
-            omcpServer = new RabbitServer(moduleName, ip, user, pass);
+            omcpServer = new RabbitServer(moduleName, ip, user, pass, silent);
             omcpServer.setHandler(notifyController);
 
             omcpServer.addReference(Path.MESSAGEGROUP_COLLECTOR_ALL.toString());

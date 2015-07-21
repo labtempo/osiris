@@ -32,9 +32,13 @@ public final class RabbitServiceSocket extends RabbitServerSocket {
 
     private final boolean persistentService;
 
-    public RabbitServiceSocket(String queueName, String host, String user, String password, boolean persistentService) {
-        super(queueName, host, user, password);
+    public RabbitServiceSocket(String queueName, String host, String user, String password, boolean persistentService, boolean silent) {
+        super(queueName, host, user, password, silent);
         this.persistentService = persistentService;
+    }
+
+    public RabbitServiceSocket(String queueName, String host, String user, String password, boolean persistentService) {
+        this(queueName, host, user, password, persistentService, false);
     }
 
     @Override
@@ -95,12 +99,14 @@ public final class RabbitServiceSocket extends RabbitServerSocket {
                 if (delivery != null) {
                     AMQP.BasicProperties props = delivery.getProperties();
                     String message = new String(delivery.getBody());
-                    System.out.println(message);
+                    if (!silent) {
+                        System.out.println(message);
+                    }
 
                     if (props.getReplyTo() == null) {
                         try {
                             //TODO: here, if server shutdown, the message will be lost!
-                            if (eventConsumer(message)) {
+                            if (!eventConsumer(message)) {
                                 System.out.println("ERROR EVENT!");
                             }
                             channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
@@ -116,6 +122,6 @@ public final class RabbitServiceSocket extends RabbitServerSocket {
         } catch (ShutdownSignalException ex) {
             //System.out.println(ERROR);
             throw ex;
-        } 
+        }
     }
 }

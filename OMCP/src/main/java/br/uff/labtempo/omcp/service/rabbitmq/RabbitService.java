@@ -31,11 +31,15 @@ public class RabbitService implements OmcpService, RabbitListener {
     private boolean running;
     private EventHandler handler;
 
-    public RabbitService(String host, String user, String password) {
-        this.socket = new RabbitServiceSocket(null, host, user, password, false);
+    public RabbitService(String host, String user, String password, boolean silent) {
+        this.socket = new RabbitServiceSocket(null, host, user, password, false, silent);
         this.socket.setListener(this);
         this.running = true;
     }
+    
+     public RabbitService(String host, String user, String password){
+         this(host, user, password, false);
+     }
 
     @Override
     public void start() {
@@ -83,4 +87,10 @@ public class RabbitService implements OmcpService, RabbitListener {
     public void addReference(String url) {
         socket.addReference(url);
     }
+
+    @Override
+    public boolean isStarted() {
+        return socket.isStarted();
+    }
+
 }

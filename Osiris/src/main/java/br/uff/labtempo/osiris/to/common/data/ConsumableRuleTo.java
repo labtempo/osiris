@@ -40,7 +40,7 @@ public abstract class ConsumableRuleTo {
         protected ConsumableRuleTo(Map<String, String> map) {
             this.name = map.get(NAME);
             this.consumableName = map.get(CONSUMABLE_NAME);
-            this.operator = LogicalOperator.getByString(map.get(OPERATOR));
+            this.operator = LogicalOperator.getByOperatorSymbol(map.get(OPERATOR));
             this.limitValue = Integer.valueOf(map.get(LIMIT_VALUE));
             this.message = map.get(MESSAGE);
         }

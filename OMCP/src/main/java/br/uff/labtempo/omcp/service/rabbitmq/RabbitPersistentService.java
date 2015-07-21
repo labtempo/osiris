@@ -32,10 +32,14 @@ public class RabbitPersistentService implements OmcpService, RabbitListener {
     private boolean running;
     private EventHandler handler;
 
-    public RabbitPersistentService(String serviceName, String host, String user, String password) {
-        this.socket = new RabbitServiceSocket(DOMAIN + serviceName, host, user, password, true);
+    public RabbitPersistentService(String serviceName, String host, String user, String password, boolean silent) {
+        this.socket = new RabbitServiceSocket(DOMAIN + serviceName, host, user, password, true, silent);
         this.socket.setListener(this);
         this.running = true;
+    }
+
+    public RabbitPersistentService(String serviceName, String host, String user, String password) {
+        this(serviceName, host, user, password, false);
     }
 
     @Override
@@ -65,7 +69,7 @@ public class RabbitPersistentService implements OmcpService, RabbitListener {
         } catch (Exception ex) {
 
         }
-        
+
         return process;
     }
 
@@ -83,5 +87,10 @@ public class RabbitPersistentService implements OmcpService, RabbitListener {
     @Override
     public void addReference(String url) {
         socket.addReference(url);
+    }
+
+    @Override
+    public boolean isStarted() {
+        return socket.isStarted();
     }
 }

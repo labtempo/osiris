@@ -39,7 +39,7 @@ public abstract class ValueTo {
 
     protected ValueTo(Map<String, String> map) {
         this.name = map.get(NAME);
-        this.type = ValueType.getByCode(map.get(TYPE));
+        this.type = ValueType.getByTypeName(map.get(TYPE));
         this.value = map.get(VALUE);
         this.unit = map.get(UNIT);
         this.symbol = map.get(SYMBOL);

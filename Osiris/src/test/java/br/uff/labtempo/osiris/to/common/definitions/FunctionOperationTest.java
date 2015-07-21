@@ -33,7 +33,7 @@ public class FunctionOperationTest {
         
         String op = operation1.toString();
         
-        FunctionOperation operation2 = FunctionOperation.getByString(op);
+        FunctionOperation operation2 = FunctionOperation.getByMode(op);
         
         String expectedString = "sync";
         assertEquals(operation1, operation2);
@@ -46,7 +46,7 @@ public class FunctionOperationTest {
         
         String op = operation1.toString();
         
-        FunctionOperation operation2 = FunctionOperation.getByString(op);
+        FunctionOperation operation2 = FunctionOperation.getByMode(op);
         
         String expectedString = "async";
         assertEquals(operation1, operation2);

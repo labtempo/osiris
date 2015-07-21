@@ -19,8 +19,13 @@ package br.uff.labtempo.omcp.service;
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public interface OmcpService extends AutoCloseable{
+public interface OmcpService extends AutoCloseable {
+
     void addReference(String url);
+
     void setHandler(EventHandler handler);
+
     void start();
+
+    boolean isStarted();
 }

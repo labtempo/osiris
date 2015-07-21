@@ -5,6 +5,7 @@
 
 # Package Files #
 *.jar
+*.bak
 *.war
 *.ear
 nb-configuration.xml

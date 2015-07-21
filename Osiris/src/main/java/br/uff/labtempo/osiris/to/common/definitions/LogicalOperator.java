@@ -39,7 +39,7 @@ public enum LogicalOperator {
         return operator;
     }
     
-    public static LogicalOperator getByString(String operator) {
+    public static LogicalOperator getByOperatorSymbol(String operator) {
         for (LogicalOperator logicalOperator : values()) {
             if (logicalOperator.operator.equalsIgnoreCase(operator)) {
                 return logicalOperator;

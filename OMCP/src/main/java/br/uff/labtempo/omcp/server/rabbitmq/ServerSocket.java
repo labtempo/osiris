@@ -26,6 +26,8 @@ public interface ServerSocket extends AutoCloseable{
     void addReference(String url);
 
     void run();
+    
+    boolean isStarted();
 
     @Override
     void close();

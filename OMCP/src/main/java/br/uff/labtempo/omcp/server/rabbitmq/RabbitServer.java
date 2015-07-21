@@ -46,13 +46,17 @@ public class RabbitServer implements OmcpServer, RabbitListener {
     private boolean running;
     private RequestHandler handler;
 
-    public RabbitServer(String moduleName, String host, String user, String password) {
+    public RabbitServer(String moduleName, String host, String user, String password, boolean silent) {
         this.MODULE_NAME = moduleName;
         this.MODULE_DESCRIPTION = moduleName + "-java/0.1";
         this.HOST = "omcp://" + moduleName + "/";
-        this.socket = new RabbitServerSocket(DOMAIN + reverseDottedName(moduleName), host, user, password);
+        this.socket = new RabbitServerSocket(DOMAIN + reverseDottedName(moduleName), host, user, password, silent);
         this.socket.setListener(this);
         this.running = true;
+    }
+    
+    public RabbitServer(String moduleName, String host, String user, String password){
+        this(moduleName, host, user, password, false);
     }
     
     private String reverseDottedName(String name){

@@ -42,7 +42,7 @@ public enum FunctionOperation {
         return mode;
     }
 
-    public static FunctionOperation getByString(String mode) {
+    public static FunctionOperation getByMode(String mode) {
         for (FunctionOperation functionOperation : values()) {
             if (functionOperation.mode.equalsIgnoreCase(mode)) {
                 return functionOperation;
