@@ -28,22 +28,22 @@ public class RevisionFieldVsnTo implements IRevisionFieldVsnTo {
     private String name;
     private String unit;
     private String value;
-    private long fieldId;
+    private String symbol;
 
-    private final transient String FIELD_ID = "fieldId";
+    private final transient String SYMBOL = "symbol";
     private final transient String NAME = "name";
     private final transient String UNIT = "unit";
     private final transient String VALUE = "value";
 
-    public RevisionFieldVsnTo(String name, String unit, String value, long fieldId) {
+    public RevisionFieldVsnTo(String name, String unit, String value, String symbol) {
         this.name = name;
         this.unit = unit;
         this.value = value;
-        this.fieldId = fieldId;
+        this.symbol = symbol;
     }
 
     public RevisionFieldVsnTo(Map<String, String> map) {
-        this.fieldId = Long.valueOf(map.get(FIELD_ID));
+        this.symbol = map.get(SYMBOL);
         this.name = map.get(NAME);
         this.unit = map.get(UNIT);
         this.value = map.get(VALUE);
@@ -65,13 +65,13 @@ public class RevisionFieldVsnTo implements IRevisionFieldVsnTo {
     }
 
     @Override
-    public long getFieldId() {
-        return fieldId;
+    public String getSymbol() {
+        return symbol;
     }
 
     protected Map<String, String> toMap() {
         Map<String, String> map = new LinkedHashMap<>();
-        map.put(FIELD_ID, String.valueOf(fieldId));
+        map.put(SYMBOL, symbol);
         map.put(NAME, name);
         map.put(UNIT, unit);
         map.put(VALUE, value);

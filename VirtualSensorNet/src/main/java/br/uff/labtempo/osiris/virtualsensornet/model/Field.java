@@ -21,7 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.persistence.Cacheable;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -36,6 +38,7 @@ import javax.script.ScriptException;
  * @author Felipe Santos <fralph at ic.uff.br>
  */
 @Entity
+@Cacheable
 public class Field implements Serializable {
 
     @Id

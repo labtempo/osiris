@@ -20,6 +20,7 @@ import br.uff.labtempo.osiris.to.virtualsensornet.ConverterVsnTo;
 import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.persistence.Cacheable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -28,14 +29,13 @@ import javax.persistence.ManyToOne;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import org.hibernate.annotations.Where;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
 @Entity
-@Where(clause = "isDeleted = 'false'")
+@Cacheable
 public class DataConverter implements Serializable {
 
     @Id

@@ -17,6 +17,7 @@ package br.uff.labtempo.osiris.virtualsensornet.persistence.jpa;
 
 import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistence;
 import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistenceAutoCommitted;
+import br.uff.labtempo.osiris.utils.persistence.jpa.batch.BatchPersistenceCommitBySecond;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.BlendingDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.CompositeDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.ConverterDao;
@@ -40,12 +41,14 @@ public class JpaDaoFactory implements DaoFactory, AutoCloseable {
     private static JpaDaoFactory instance;
     private EntityManagerFactory emf;
     private BatchPersistence batchPersistence;
+    private BatchPersistence ultraPersistence;
     private ThreadLocal<EntityManager> threadLocal = new ThreadLocal();
 
     private JpaDaoFactory(EntityManagerFactory emf) throws Exception {
         try {
             this.emf = emf;
             this.batchPersistence = new BatchPersistenceAutoCommitted(emf.createEntityManager());
+            this.ultraPersistence = new BatchPersistenceCommitBySecond(emf.createEntityManager());
         } catch (Exception ex) {
             close();
             throw ex;
@@ -73,6 +76,10 @@ public class JpaDaoFactory implements DaoFactory, AutoCloseable {
         } catch (Exception e) {
         }
         try {
+            ultraPersistence.close();
+        } catch (Exception e) {
+        }
+        try {
             emf.close();
         } catch (Exception e) {
         }
@@ -86,6 +93,11 @@ public class JpaDaoFactory implements DaoFactory, AutoCloseable {
     @Override
     public RevisionDao getRevisionDao() {
         return new RevisionJpa(getDataManager());
+    }
+
+    @Override
+    public RevisionDao getUltraRevisionDao() {
+        return new RevisionJpaPersistent(ultraPersistence);
     }
 
     @Override

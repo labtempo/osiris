@@ -52,14 +52,16 @@ public class RabbitServerSocket implements ServerSocket {
 
     protected boolean running;
 
-    private final ArrayList<String> references;
+    private final ArrayList<String> exchanges;
+    private final ArrayList<String> newExchanges;
     private boolean isStarted;
     protected boolean silent;
 
     public RabbitServerSocket(String queueName, String host, String user, String password, boolean silent) {
         QUEUE_NAME = queueName;
         this.comm = new RabbitComm(host, user, password);
-        this.references = new ArrayList<>();
+        this.exchanges = new ArrayList<>();
+        this.newExchanges = new ArrayList<>();
         this.silent = silent;
     }
 
@@ -73,8 +75,13 @@ public class RabbitServerSocket implements ServerSocket {
     }
 
     @Override
-    public void addReference(String url) {
-        references.add(url);
+    public void bindToExchange(String url) {
+        exchanges.add(url);
+    }
+
+    @Override
+    public void createExchange(String url) {
+        newExchanges.add(url);
     }
 
     @Override
@@ -83,7 +90,8 @@ public class RabbitServerSocket implements ServerSocket {
             running = true;
             connect();
             declareQueue();
-            bindings();
+            bindToExchanges();
+            createExchanges();
             QueueingConsumer consumer = createConsumer();
             isStarted = true;
             startListener(consumer);
@@ -193,13 +201,45 @@ public class RabbitServerSocket implements ServerSocket {
         }
     }
 
-    private void bindings() {
-        for (String reference : references) {
+    private void bindToExchanges() {
+        for (String reference : exchanges) {
             try {
-                System.out.print("[x] Binding queue to " + reference + ": ");
                 String[] ref = extractReference(reference);
-                channel.queueBind(QUEUE_NAME, ref[0], ref[1]);
+                String exchange = ref[0];
+                String rountingKey = ref[1];
+                String msg = "[x] Binding queue to " + exchange + " with rounting key '" + rountingKey + "' : ";
+                System.out.print(msg);
+                try {
+                    comm.checkExchangeOrDie(exchange);
+                } catch (Exception e) {
+                    System.out.println(FAIL);
+                    System.out.print("[x] Declaring exchange " + exchange + ": ");
+                    RabbitUtil.declareExchange(channel, exchange);
+                    System.out.println(OK);
+                    System.out.print(msg);
+                }
+                channel.queueBind(QUEUE_NAME, exchange, rountingKey);
                 System.out.println(OK);
+            } catch (URISyntaxException ex) {
+                System.out.println(FAIL);
+            } catch (IOException ex) {
+                System.out.println(FAIL);
+            }
+        }
+    }
+
+    private void createExchanges() {
+        for (String reference : newExchanges) {
+            try {
+                String[] ref = extractReference(reference);
+                String exchange = ref[0];
+                try {
+                    comm.checkExchangeOrDie(exchange);
+                } catch (Exception e) {
+                    System.out.print("[x] Declaring new exchange " + exchange + ": ");
+                    RabbitUtil.declareExchange(channel, exchange);
+                    System.out.println(OK);
+                }                
             } catch (URISyntaxException ex) {
                 System.out.println(FAIL);
             } catch (IOException ex) {
@@ -256,6 +296,17 @@ public class RabbitServerSocket implements ServerSocket {
     }
 
     private void checkNotHasConsumerOrDie() {
+        try {
+            System.out.print("[x] Checking if not has consumers: ");
+            this.comm.checkNotHasConsumersOrDie(QUEUE_NAME);
+            System.out.println(OK);
+        } catch (Exception e) {
+            System.out.println(ERROR);
+            throw e;
+        }
+    }
+
+    private void checkHasExchangeOrDie() {
         try {
             System.out.print("[x] Checking if not has consumers: ");
             this.comm.checkNotHasConsumersOrDie(QUEUE_NAME);

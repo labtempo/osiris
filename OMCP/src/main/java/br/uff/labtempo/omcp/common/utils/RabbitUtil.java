@@ -72,7 +72,7 @@ public class RabbitUtil {
     public static String getRoutingKey(URI uri) {
         String url = uri.toString();
         String path = uri.getPath();
-        if(url.contains("#")){
+        if (url.contains("#")) {
             path = url.split(uri.getHost())[1];
         }
         return getRoutingKey(path);
@@ -98,10 +98,9 @@ public class RabbitUtil {
 
         List<String> items = new ArrayList<>();
         items.addAll(Arrays.<String>asList(routingKey.split("/")));
-        
+
         //reverse routing keys
         //Collections.reverse(items);
-        
         StringBuilder sb = new StringBuilder();
         sb.append(items.remove(0));
 
@@ -110,6 +109,10 @@ public class RabbitUtil {
             sb.append(item);
         }
         return sb.toString();
+    }
+
+    public static AMQP.Exchange.DeclareOk declareExchange(Channel channel, String exchangeName) throws IOException {
+        return channel.exchangeDeclare(exchangeName, "topic", true);
     }
 
     public static AMQP.Queue.DeclareOk declareDurableQueue(Channel channel, String queueName) throws IOException {

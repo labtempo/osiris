@@ -23,6 +23,7 @@ import client.vsn.deletion.VsnConverter;
 import client.vsn.deletion.VsnDatatype;
 import client.vsn.deletion.VsnFunction;
 import client.vsn.deletion.VsnLink;
+import config.OmcpFactory;
 
 /**
  *
@@ -31,7 +32,7 @@ import client.vsn.deletion.VsnLink;
 public class VsnDeleteAllClient {
 
     public static void main(String[] args) throws Exception {
-        try (OmcpClient client = new OmcpClientBuilder().host("192.168.0.7").user("admin", "admin").source("generico").build()) {
+        try (OmcpClient client = OmcpFactory.getClient()) {
             VsnComposite.deleteAll(client);
             VsnBlending.deleteAll(client);
             VsnLink.deleteAll(client);

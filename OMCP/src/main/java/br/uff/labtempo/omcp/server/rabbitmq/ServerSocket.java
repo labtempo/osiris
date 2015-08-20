@@ -19,16 +19,19 @@ package br.uff.labtempo.omcp.server.rabbitmq;
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public interface ServerSocket extends AutoCloseable{
+public interface ServerSocket extends AutoCloseable {
 
     void setListener(RabbitListener listener);
 
-    void addReference(String url);
+    void bindToExchange(String url);
+
+    void createExchange(String url);
 
     void run();
-    
+
     boolean isStarted();
 
     @Override
     void close();
+
 }

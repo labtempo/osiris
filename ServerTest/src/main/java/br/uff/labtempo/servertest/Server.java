@@ -43,8 +43,8 @@ public class Server implements AutoCloseable {
         root.setNext(sensor);
         server.setHandler(root);
 
-        server.addReference("omcp://collector.messagegroup/#");
-        server.addReference("omcp://update.messagegroup/sensornet/#");
+        server.linkToMessageGroup("omcp://collector.messagegroup/#");
+        server.linkToMessageGroup("omcp://update.messagegroup/sensornet/#");
 
     }
 

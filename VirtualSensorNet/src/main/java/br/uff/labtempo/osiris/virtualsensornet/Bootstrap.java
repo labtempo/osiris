@@ -44,31 +44,31 @@ import javax.persistence.Persistence;
  * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class Bootstrap implements AutoCloseable {
-    
+
     private JpaDaoFactory factory;
     private OmcpServer omcpServer;
     private final OmcpClient omcpClientAnnouncer;
     private final OmcpClient omcpClientBlending;
-    private final SchedulerBootstrap schedulerBootstrap;
+    private  SchedulerBootstrap schedulerBootstrap;
     private final AnnouncementBootstrap announcementBootstrap;
     private final AggregatesCheckerController checkerController;
     private RequestPool requestPool;
-    
+
     public Bootstrap(Properties properties) throws Exception {
         this(properties, false);
     }
 
     public Bootstrap(Properties properties, boolean silent) throws Exception {
-        
+
         String ip = properties.getProperty("rabbitmq.server.ip");
         String user = properties.getProperty("rabbitmq.user.name");
         String pass = properties.getProperty("rabbitmq.user.pass");
 
         //virtualsensornet
         String moduleName = Path.NAMING_MODULE_VIRTUALSENSORNET.toString();
-        
+
         String persistenceUnitName = "postgres";
-        
+
         try {
             Properties persistenceProperties = overrideProperties(properties);
             EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnitName, persistenceProperties);
@@ -78,15 +78,15 @@ public class Bootstrap implements AutoCloseable {
 
             //external controllers
             NotifyController nc = new NotifyController(factory, requestPool, checkerController);
-            
+
             VirtualSensorController vsc = new VirtualSensorController(factory);
             VirtualSensorLinkController vslc = new VirtualSensorLinkController(factory);
             VirtualSensorCompositeController vscc = new VirtualSensorCompositeController(factory);
             VirtualSensorBlendingController vsbc = new VirtualSensorBlendingController(factory, checkerController);
-            
+
             DataTypeController dtc = new DataTypeController(factory);
             ConverterController cc = new ConverterController(factory);
-            FunctionController fc = new FunctionController(factory);            
+            FunctionController fc = new FunctionController(factory);
             RevisionController rc = new RevisionController(factory);
 
             //scheduling
@@ -115,21 +115,24 @@ public class Bootstrap implements AutoCloseable {
             dtc.setNext(cc);
             cc.setNext(fc);
             fc.setNext(rc);
-            
+
             omcpServer = new RabbitServer(moduleName, ip, user, pass, silent);
             omcpServer.setHandler(nc);
 
             // omcp://collector.messagegroup/#
-            omcpServer.addReference(Path.MESSAGEGROUP_COLLECTOR_ALL.toString());
+            omcpServer.linkToMessageGroup(Path.MESSAGEGROUP_COLLECTOR_ALL.toString());
             // omcp://update.messagegroup/sensornet/#
-            omcpServer.addReference(Path.MESSAGEGROUP_UPDATE + "sensornet/#");
-            
+            omcpServer.linkToMessageGroup(Path.MESSAGEGROUP_UPDATE + "sensornet/#");
+
+            omcpServer.createMessageGroup(Path.MESSAGEGROUP_UPDATE.toString());
+            omcpServer.createMessageGroup(Path.MESSAGEGROUP_NOTIFICATION.toString());
+
         } catch (Exception ex) {
             close();
             throw ex;
         }
     }
-    
+
     public void start() {
         try {
             requestPool.start();
@@ -141,7 +144,7 @@ public class Bootstrap implements AutoCloseable {
             throw ex;
         }
     }
-    
+
     @Override
     public void close() {
         try {
@@ -173,20 +176,20 @@ public class Bootstrap implements AutoCloseable {
         } catch (Exception e) {
         }
     }
-    
+
     private Properties overrideProperties(Properties properties) {
         Properties persistenceProperties = new Properties();
-        
+
         String ip = properties.getProperty("postgres.server.ip");
         String port = properties.getProperty("postgres.server.port");
         String user = properties.getProperty("postgres.user.name");
         String pass = properties.getProperty("postgres.user.pass");
         String db = properties.getProperty("postgres.server.db");
-        
+
         persistenceProperties.setProperty("javax.persistence.jdbc.url", "jdbc:postgresql://" + ip + ":" + port + "/" + db);
         persistenceProperties.setProperty("javax.persistence.jdbc.user", user);
         persistenceProperties.setProperty("javax.persistence.jdbc.password", pass);
-        
+
         return persistenceProperties;
     }
 }

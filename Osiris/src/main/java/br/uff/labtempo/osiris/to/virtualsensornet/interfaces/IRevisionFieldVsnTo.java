@@ -21,7 +21,7 @@ package br.uff.labtempo.osiris.to.virtualsensornet.interfaces;
  */
 public interface IRevisionFieldVsnTo {
 
-    long getFieldId();
+    String getSymbol();
 
     String getName();
 

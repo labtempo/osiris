@@ -21,6 +21,7 @@ import br.uff.labtempo.omcp.common.Response;
 import br.uff.labtempo.omcp.common.utils.ResponsePacket;
 import br.uff.labtempo.osiris.to.virtualsensornet.BlendingVsnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.LinkVsnTo;
+import config.OmcpFactory;
 
 /**
  *
@@ -29,7 +30,7 @@ import br.uff.labtempo.osiris.to.virtualsensornet.LinkVsnTo;
 public class VsnGetLink {
 
     public static void main(String[] args) throws Exception {
-        try (OmcpClient connection = new OmcpClientBuilder().host("192.168.0.7").user("admin", "admin").source("generico").build()) {
+        try (OmcpClient connection = OmcpFactory.getClient()) {
             Response r = connection.doGet("omcp://virtualsensornet/link/1");
             LinkVsnTo to = r.getContent(LinkVsnTo.class);
             System.out.println("GOT(link): " + to.getId());

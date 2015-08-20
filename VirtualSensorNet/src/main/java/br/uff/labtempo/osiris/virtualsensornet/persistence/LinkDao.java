@@ -31,4 +31,6 @@ public interface LinkDao extends Dao<VirtualSensorLink> {
     public List<VirtualSensorLink> getAll();
 
     public List<VirtualSensorLink> getAllByReferences(String networkId, String collectorId, String sensorId);
+    
+    public void commit();
 }

@@ -24,6 +24,7 @@ import br.uff.labtempo.osiris.virtualsensornet.model.util.field.FieldValuesWrapp
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -38,6 +39,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 /**
  *
@@ -45,6 +47,7 @@ import javax.persistence.OneToMany;
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
+@Cacheable
 public abstract class VirtualSensor<T> extends Model implements IVirtualSensor<T> {
 
     @Id
@@ -72,9 +75,7 @@ public abstract class VirtualSensor<T> extends Model implements IVirtualSensor<T
     @Enumerated(EnumType.STRING)
     private TimeUnit creationIntervalTimeUnit;
 
-    @OneToMany(mappedBy = "virtualSensor", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    //@OrderBy("timestamp DESC")
-    private List<Revision> revisions;
+    private transient Revision lastRevision;
 
     protected VirtualSensor() {
     }
@@ -179,12 +180,8 @@ public abstract class VirtualSensor<T> extends Model implements IVirtualSensor<T
     public abstract T getUniqueTransferObject();
 
     private long getStorageTimestamp() {
-        if (revisions == null) {
-            revisions = new ArrayList<>();
-        }
-        Revision revision = new Revision(this);
-        revisions.add(revision);
-        return revision.getStorageTimestampInMillis();
+        lastRevision = new Revision(this);
+        return lastRevision.getStorageTimestampInMillis();
     }
 
     private Field getField(Field field) {
@@ -221,6 +218,11 @@ public abstract class VirtualSensor<T> extends Model implements IVirtualSensor<T
             return false;
         }
         return true;
+    }
+
+    @Override
+    public Revision getLastRevision() {
+        return lastRevision;
     }
 
 }

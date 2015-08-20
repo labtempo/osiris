@@ -29,7 +29,7 @@ public class ServiceUpdate {
     static OmcpService service;
 
     public static void main(String[] args) throws Exception {
-        service = new RabbitService("192.168.0.7", "admin", "admin");
+        service = new RabbitService("192.168.1.1", "admin", "admin");
         service.addReference("omcp://update.messagegroup/#");
         //service.addReference("omcp://update.messagegroup/sensornet/#");
         //shutdown();

@@ -77,11 +77,11 @@ public class RevisionController extends Controller {
     }
 
     private List<RevisionVsnTo> get(long id, Map<String, String> params) throws InternalServerErrorException, NotFoundException, BadRequestException {
-        String from = params.get(Path.NAMING_URLPARAM_REVISIONS_FROM_DATE.toString());
-        String to = params.get(Path.NAMING_URLPARAM_REVISIONS_TO_DATE.toString());
-        String limit = params.get(Path.NAMING_URLPARAM_REVISIONS_LIMIT.toString());
+        String from = params.get(Path.NAMING_QUERY_STRING_FROM_DATE.toString());
+        String to = params.get(Path.NAMING_QUERY_STRING_TO_DATE.toString());
+        String limit = params.get(Path.NAMING_QUERY_STRING_LIMIT.toString());
 
-        List<Revision> revisions = getAll(id, from, to, stringToLimit(limit));
+        List<Revision> revisions = getAll(id, from, to, stringToInt(limit));
 
         List<RevisionVsnTo> tos = new ArrayList<>();
         for (Revision revision : revisions) {
@@ -146,7 +146,7 @@ public class RevisionController extends Controller {
         }
     }
 
-    private int stringToLimit(String limit) {
+    private int stringToInt(String limit) {
         try {
             return Integer.valueOf(limit);
         } catch (Exception e) {

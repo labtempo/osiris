@@ -16,7 +16,10 @@
 package br.uff.labtempo.osiris.utils.persistence.jpa.batch;
 
 import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 
 /**
@@ -36,8 +39,14 @@ public interface BatchPersistence extends AutoCloseable {
     void update(Object o);
 
     CriteriaBuilder getCriteriaBuilder();
+    
+    <T> int getQuery(CriteriaDelete<T> query);        
 
     <T> List<T> getQuery(CriteriaQuery<T> query);
 
+    <T> List<T> getQuery(CriteriaQuery<T> query, int limit);
+
     <T> T getQuerySingle(CriteriaQuery<T> query);
+    
+    void forceCommit();
 }

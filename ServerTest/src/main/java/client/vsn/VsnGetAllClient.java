@@ -31,6 +31,7 @@ import br.uff.labtempo.osiris.to.virtualsensornet.DataTypeVsnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.FunctionVsnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.LinkVsnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorVsnTo;
+import config.OmcpFactory;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +42,7 @@ import java.util.List;
 public class VsnGetAllClient {
 
     public static void main(String[] args) throws Exception {
-        try (OmcpClient client = new OmcpClientBuilder().host("192.168.0.7").user("admin", "admin").source("generico").build()) {
+        try (OmcpClient client = OmcpFactory.getClient()) {
             Response r = client.doGet("omcp://virtualsensornet/datatype/");
             if (r.getStatusCode() == StatusCode.OK) {
                 DataTypeVsnTo[] dtvts = r.getContent(DataTypeVsnTo[].class);

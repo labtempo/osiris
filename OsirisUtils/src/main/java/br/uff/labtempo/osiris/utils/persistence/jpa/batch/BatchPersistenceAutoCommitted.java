@@ -50,4 +50,8 @@ public class BatchPersistenceAutoCommitted extends AbstractBatchPersistence {
         em.remove(em.contains(o) ? o : em.merge(o));
         em.getTransaction().commit();
     }
+
+    @Override
+    public void forceCommit() {
+    }
 }

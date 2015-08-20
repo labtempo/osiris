@@ -29,6 +29,8 @@ import br.uff.labtempo.osiris.to.virtualsensornet.ConverterVsnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.DataTypeVsnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.FunctionVsnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.LinkVsnTo;
+import static config.Config.*;
+import config.OmcpFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +43,7 @@ import java.util.Map;
 public class VsnCreationClient {
 
     public static void main(String[] args) throws Exception {
-        try (OmcpClient connection = new OmcpClientBuilder().host("192.168.0.7").user("admin", "admin").source("generico").build()) {
+        try (OmcpClient connection = OmcpFactory.getClient() ) {
             populate(connection);
         }
     }

@@ -42,6 +42,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -105,7 +106,7 @@ public class VirtualSensorTest {
     public void TestGetAllVirtualSensor_Valid_ShouldPass() throws NotFoundException, BadRequestException, InternalServerErrorException {
         List<VirtualSensorVsnTo> vsnTos = controller.getAll();
 
-        LinkVsnTo to = new LinkVsnTo("sensor", "collector", "network");
+        LinkVsnTo to = new LinkVsnTo("sensor", "collectorTestGetAllVirtualSensor", "networkTestGetAllVirtualSensor");
         to.createField("temperature", dt2, cc1);
         to.createField("temperature", dt1);
         linkcontroller.create(to);
@@ -117,7 +118,7 @@ public class VirtualSensorTest {
 
     @Test
     public void TestGetVirtualSensor_Valid_ShouldPass() throws NotFoundException, BadRequestException, InternalServerErrorException {
-        LinkVsnTo to = new LinkVsnTo("sensor", "collector", "network");
+        LinkVsnTo to = new LinkVsnTo("sensor", "collectorTestGetVirtualSensor", "networkTestGetVirtualSensor");
         to.createField("temperature", dt2, cc1);
         to.createField("temperature", dt1);
 
@@ -129,12 +130,12 @@ public class VirtualSensorTest {
 
     @Test
     public void TestUpdateVirtualSensor_WithValues_Valid_ShouldPass() throws NotFoundException, MethodNotAllowedException, InternalServerErrorException, BadRequestException {
-        LinkVsnTo to = new LinkVsnTo("1", "collector", "network");
+        LinkVsnTo to = new LinkVsnTo("1", "collector123456", "network123");
         to.createField("temperature", dt2, cc1);
         to.createField("temperature", dt1);
         long id = linkcontroller.create(to);
 
-        CollectorDataBuilder builder = new CollectorDataBuilder("network", "collector");
+        CollectorDataBuilder builder = new CollectorDataBuilder("network123", "collector123456");
         SampleCoTo sampleCoTo = builder.generateSample();
         notifycontroller.updateValues(sampleCoTo);
 
@@ -160,7 +161,7 @@ public class VirtualSensorTest {
 
     @Test(expected = MethodNotAllowedException.class)
     public void TestUpdateVirtualSensor_Invalid_ShouldThrowException() throws NotFoundException, MethodNotAllowedException, BadRequestException, InternalServerErrorException {
-        LinkVsnTo to = new LinkVsnTo("sensor", "collector", "network");
+        LinkVsnTo to = new LinkVsnTo("sensor", "collectorTestUpdateVirtualSensor_Invalid", "networkTestUpdateVirtualSensor_Invalid");
         to.createField("temperature", dt2, cc1);
         to.createField("temperature", dt1);
 
@@ -173,7 +174,7 @@ public class VirtualSensorTest {
 
     @Test(expected = MethodNotAllowedException.class)
     public void TestDeleteVirtualSensor_Valid_ShouldPass() throws NotFoundException, MethodNotAllowedException, InternalServerErrorException, BadRequestException {
-        LinkVsnTo to = new LinkVsnTo("sensor", "collector", "network");
+        LinkVsnTo to = new LinkVsnTo("sensor", "collectorTestDeleteVirtualSensor", "networkTestDeleteVirtualSensor");
         to.createField("temperature", dt2, cc1);
         to.createField("temperature", dt1);
 

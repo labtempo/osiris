@@ -21,6 +21,7 @@ import br.uff.labtempo.omcp.client.OmcpClientBuilder;
 import br.uff.labtempo.omcp.common.Response;
 import br.uff.labtempo.omcp.common.StatusCode;
 import br.uff.labtempo.osiris.to.sensornet.RevisionSnTo;
+import config.OmcpFactory;
 import java.net.URLEncoder;
 
 /**
@@ -30,7 +31,7 @@ import java.net.URLEncoder;
 public class VsnGetRevisions {
 
     public static void main(String[] args) throws Exception {
-        try (OmcpClient connection = new OmcpClientBuilder().host("192.168.0.7").user("admin", "admin").source("generico").build()) {
+        try (OmcpClient connection =OmcpFactory.getClient()) {
             String from = "05-09-2015 16:48:52 -03:00";
             String too = "05-09-2015 15:48:52 -03:00";
             from = URLEncoder.encode(from, "UTF-8");

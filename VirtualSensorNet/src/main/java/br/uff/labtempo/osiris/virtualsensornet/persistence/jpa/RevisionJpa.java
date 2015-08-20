@@ -19,16 +19,15 @@ import br.uff.labtempo.osiris.virtualsensornet.model.DataConverter;
 import br.uff.labtempo.osiris.virtualsensornet.model.Field;
 import br.uff.labtempo.osiris.virtualsensornet.model.Field_;
 import br.uff.labtempo.osiris.virtualsensornet.model.Revision;
+import br.uff.labtempo.osiris.virtualsensornet.model.RevisionItem;
 import br.uff.labtempo.osiris.virtualsensornet.model.Revision_;
 import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor;
-import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensorLink;
-import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensorLink_;
-import br.uff.labtempo.osiris.virtualsensornet.model.VirtualSensor_;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.RevisionDao;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
@@ -54,11 +53,8 @@ public class RevisionJpa implements RevisionDao {
         CriteriaBuilder cb = data.getCriteriaBuilder();
         CriteriaQuery<Revision> criteriaQuery = cb.createQuery(Revision.class);
         Root<Revision> root = criteriaQuery.from(Revision.class);
-
-        Join<Revision, VirtualSensor> subRoot = root.join(Revision_.virtualSensor, JoinType.LEFT);
-
         List<Predicate> predicates = new ArrayList<>();
-        predicates.add(cb.equal(subRoot.<Long>get(VirtualSensor_.id), sensorId));
+        predicates.add(cb.equal(root.<Long>get(Revision_.virtualSensorId), sensorId));
         predicates.add(cb.lessThanOrEqualTo(root.<Long>get(Revision_.storageTimestampInMillis), fromTime));
         predicates.add(cb.greaterThanOrEqualTo(root.<Long>get(Revision_.storageTimestampInMillis), toTime));
         criteriaQuery.where(predicates.toArray(new Predicate[]{}));
@@ -83,10 +79,8 @@ public class RevisionJpa implements RevisionDao {
         CriteriaQuery<Revision> criteriaQuery = cb.createQuery(Revision.class);
         Root<Revision> root = criteriaQuery.from(Revision.class);
 
-        Join<Revision, VirtualSensor> subRoot = root.join(Revision_.virtualSensor, JoinType.LEFT);
-
         List<Predicate> predicates = new ArrayList<>();
-        predicates.add(cb.equal(subRoot.<Long>get(VirtualSensor_.id), sensorId));
+        predicates.add(cb.equal(root.<Long>get(Revision_.virtualSensorId), sensorId));
         predicates.add(cb.greaterThanOrEqualTo(root.<Long>get(Revision_.storageTimestampInMillis), toTime));
         criteriaQuery.where(predicates.toArray(new Predicate[]{}));
 
@@ -110,10 +104,8 @@ public class RevisionJpa implements RevisionDao {
         CriteriaQuery<Revision> criteriaQuery = cb.createQuery(Revision.class);
         Root<Revision> root = criteriaQuery.from(Revision.class);
 
-        Join<Revision, VirtualSensor> subRoot = root.join(Revision_.virtualSensor, JoinType.LEFT);
-
         List<Predicate> predicates = new ArrayList<>();
-        predicates.add(cb.equal(subRoot.<Long>get(VirtualSensor_.id), sensorId));
+        predicates.add(cb.equal(root.<Long>get(Revision_.virtualSensorId), sensorId));
         predicates.add(cb.lessThanOrEqualTo(root.<Long>get(Revision_.storageTimestampInMillis), fromTime));
         criteriaQuery.where(predicates.toArray(new Predicate[]{}));
 
@@ -136,10 +128,8 @@ public class RevisionJpa implements RevisionDao {
         CriteriaQuery<Revision> criteriaQuery = cb.createQuery(Revision.class);
         Root<Revision> root = criteriaQuery.from(Revision.class);
 
-        Join<Revision, VirtualSensor> subRoot = root.join(Revision_.virtualSensor, JoinType.LEFT);
-
         List<Predicate> predicates = new ArrayList<>();
-        predicates.add(cb.equal(subRoot.<Long>get(VirtualSensor_.id), sensorId));
+        predicates.add(cb.equal(root.<Long>get(Revision_.virtualSensorId), sensorId));
         criteriaQuery.where(predicates.toArray(new Predicate[]{}));
 
         criteriaQuery.select(root);
@@ -156,11 +146,35 @@ public class RevisionJpa implements RevisionDao {
     }
 
     @Override
+    public int deleteAllByVirtualSensor(long sensorId) {
+        List<Revision> revisions = getToday(sensorId,0);
+        for (Revision revision : revisions) {
+            delete(revision);
+        }
+        return revisions.size();
+    }
+
+    @Override
     public boolean hasVirtualSensor(long sensorId) {
         VirtualSensor vs = data.get(VirtualSensor.class, sensorId);
         if (vs == null) {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void save(Revision o) {
+        data.save(o);
+    }
+
+    @Override
+    public void update(Revision o) {
+        data.update(o);
+    }
+
+    @Override
+    public void delete(Revision o) {
+        data.delete(o);
     }
 }

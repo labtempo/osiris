@@ -92,4 +92,10 @@ public class LinkJpaPersistent implements LinkDao {
         persistence.delete((VirtualSensor) o);
     }
 
+    @Override
+    public void commit() {
+        persistence.forceCommit();
+    }
+
+    
 }

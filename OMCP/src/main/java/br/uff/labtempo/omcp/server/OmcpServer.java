@@ -21,6 +21,7 @@ package br.uff.labtempo.omcp.server;
  */
 public interface OmcpServer extends AutoCloseable {
     void start();
-    void addReference(String url);
+    void linkToMessageGroup(String url);
+    void createMessageGroup(String url);
     void setHandler(RequestHandler handler);
 }

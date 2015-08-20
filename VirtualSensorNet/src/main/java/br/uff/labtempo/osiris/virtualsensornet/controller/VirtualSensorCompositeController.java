@@ -36,6 +36,7 @@ import br.uff.labtempo.osiris.virtualsensornet.model.util.FieldListManager;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.CompositeDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.FieldDao;
+import br.uff.labtempo.osiris.virtualsensornet.persistence.RevisionDao;
 import br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer.AnnouncerAgent;
 import java.util.ArrayList;
 import java.util.List;
@@ -208,7 +209,9 @@ public class VirtualSensorCompositeController extends Controller {
     public boolean delete(long id) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException {
         FieldController fsc = new FieldController(factory);
         CompositeDao cd;
+        RevisionDao rDao;
         try {
+            rDao = factory.getRevisionDao();
             cd = factory.getPersistentCompositeDao();
         } catch (Exception e) {
             throw new InternalServerErrorException("Data query error!");
@@ -221,6 +224,7 @@ public class VirtualSensorCompositeController extends Controller {
         try {
             List<Field> fields = composite.getFields();
             composite.removeFields();
+            //rDao.deleteAllByVirtualSensor(composite.getId());
             cd.delete(composite);
 
             for (Field field : fields) {

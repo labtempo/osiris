@@ -62,9 +62,14 @@ import br.uff.labtempo.osiris.virtualsensornet.persistence.ConverterDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DataTypeDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.FunctionDao;
+import br.uff.labtempo.osiris.virtualsensornet.persistence.RevisionDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.SchedulerDao;
 import br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer.AnnouncerAgent;
 import br.uff.labtempo.osiris.virtualsensornet.thirdparty.scheduler.ModelSchedulerItem;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -168,7 +173,9 @@ public class VirtualSensorBlendingController extends Controller implements Sched
 
     public void insertValue(long id, ResponseFnTo responseFnTo) throws InternalServerErrorException, NotFoundException {
         BlendingDao blendingDao;
+        RevisionDao rDao;
         try {
+            rDao = factory.getUltraRevisionDao();
             blendingDao = factory.getPersistentBlendingDao();
         } catch (Exception e) {
             throw new InternalServerErrorException("Data query error!");
@@ -191,6 +198,7 @@ public class VirtualSensorBlendingController extends Controller implements Sched
         blending.setFieldsValues(wrapper);
 
         blendingDao.update(blending);
+        rDao.save(blending.getLastRevision());
 
         //broadcast        
         announcer.broadcastIt(blending.getTransferObject());
@@ -435,8 +443,6 @@ public class VirtualSensorBlendingController extends Controller implements Sched
             if (hasFunction) {
                 //TODO: create update scheduler item
                 insertToScheduler(blending);
-            } else {
-                removeFromScheduler(blending);
             }
         }
         return isUpdated;
@@ -444,7 +450,9 @@ public class VirtualSensorBlendingController extends Controller implements Sched
 
     public boolean delete(long id) throws NotFoundException, InternalServerErrorException, BadRequestException {
         BlendingDao blendingDao;
+        RevisionDao rDao;
         try {
+            rDao = factory.getRevisionDao();
             blendingDao = factory.getPersistentBlendingDao();
         } catch (Exception e) {
             throw new InternalServerErrorException("Data query error!");
@@ -482,6 +490,13 @@ public class VirtualSensorBlendingController extends Controller implements Sched
             for (Field removedField : removedFields) {
                 fieldSubController.delete(removedField);
             }
+
+            try {
+                rDao.deleteAllByVirtualSensor(blending.getId());
+            } catch (Exception ex) {
+                Logger.getLogger(VirtualSensorBlendingController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
             blendingDao.delete(blending);
             return true;
         } catch (Exception e) {
@@ -621,6 +636,12 @@ public class VirtualSensorBlendingController extends Controller implements Sched
                 ModelSchedulerItem msi = (ModelSchedulerItem) item;
                 long sensorId = item.getObjectId();
                 VirtualSensorBlending blending = blendingDao.getById(sensorId);
+                //remove from scheduler
+                if (blending == null) {
+                    msi.setRemoved();
+                    return;
+                }
+
                 msi.setTime(blending);
 
                 ModelState oldModelState = blending.getModelState();
@@ -663,9 +684,8 @@ public class VirtualSensorBlendingController extends Controller implements Sched
         scheduler.schedule(item);
     }
 
-    private void removeFromScheduler(VirtualSensorBlending blending) {
+    private void removeFromScheduler(SchedulerItem item) {
         SchedulerDao schedulerDao = factory.getSchedulerDao();
-        SchedulerItem item = schedulerDao.getItemByObjectId(blending.getId());
         if (item != null) {
             schedulerDao.delete(item);
         }

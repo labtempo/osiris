@@ -12,6 +12,7 @@ nb-configuration.xml
 
 
 target/
+results/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.next

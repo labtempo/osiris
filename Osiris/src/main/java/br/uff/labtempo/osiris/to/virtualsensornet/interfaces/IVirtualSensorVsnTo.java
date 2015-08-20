@@ -38,6 +38,12 @@ public interface IVirtualSensorVsnTo {
     long getAcquisitionTimestampInMillis();
 
     long getStorageTimestampInMillis();
+    
+    long getPackingTimestampInMillis();
+    
+    long getFetchingTimestampInMillis();
+    
+    void setFetchingTimeInMillis(long fetchingTimestampInMillis);
 
     BigInteger getCreationTimestampInNano();
 

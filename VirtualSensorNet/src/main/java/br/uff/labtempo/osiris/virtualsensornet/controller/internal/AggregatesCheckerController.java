@@ -24,6 +24,7 @@ import br.uff.labtempo.osiris.virtualsensornet.controller.util.AnnouncerWrapper;
 import br.uff.labtempo.osiris.virtualsensornet.model.state.ModelState;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.CompositeDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
+import br.uff.labtempo.osiris.virtualsensornet.persistence.RevisionDao;
 import br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer.AnnouncerAgent;
 import java.util.HashSet;
 import java.util.List;
@@ -66,6 +67,7 @@ public class AggregatesCheckerController implements AggregatesChecker {
 
         //get dao
         final CompositeDao compositeDao = factory.getPersistentCompositeDao();
+        final RevisionDao revisionDao = factory.getUltraRevisionDao();
 
         //get fields
         final List<Field> fields = virtualSensor.getFields();
@@ -88,7 +90,11 @@ public class AggregatesCheckerController implements AggregatesChecker {
                         if (virtualSensor.getVirtualSensorType() == VirtualSensorType.COMPOSITE) {
                             VirtualSensorComposite composite = (VirtualSensorComposite) virtualSensor;
                             composite.setFieldsValues(null);
-                            compositeDao.save(composite);
+                            try {
+                                compositeDao.update(composite);
+                            } catch (Exception e) {
+                            }
+                            revisionDao.save(composite.getLastRevision());
                             //notify sensor if its state is equals "reactivated", "malfunction" or "inactive"
                             if (ModelState.REACTIVATED.equals(composite.getModelState())) {
                                 announcer.notifyReactivation(composite.getTransferObject());

@@ -21,16 +21,20 @@ package br.uff.labtempo.osiris.to.common.definitions;
  */
 public enum Path {
 
+    /*OMCP URI SCHEME*/
     PROTOCOL("omcp://"),
     SEPARATOR("/"),
-    //reference info 
-    ID1(":k1"),
-    ID2(":k2"),
-    ID3(":k3"),
-    ID4(":k4"),
-    ID5(":k5"),
+    
+    /*NAMING*/
+    /*OMCP MODULE DOMAINS*/
+    NAMING_MODULE_COLLECTOR("collector"),  
     NAMING_MODULE_SENSORNET("sensornet"),    
     NAMING_MODULE_VIRTUALSENSORNET("virtualsensornet"),
+    NAMING_MODULE_SERVICE("service"),    
+    NAMING_MODULE_FUNCTION("function"),
+    NAMING_MODULE_EXTERNAL("external"),
+    
+    /*MODULE RESOURCES*/
     NAMING_RESOURCE_NETWORK(""),
     NAMING_RESOURCE_COLLECTOR("collector"),
     NAMING_RESOURCE_SENSOR("sensor"),
@@ -44,17 +48,28 @@ public enum Path {
     NAMING_RESOURCE_FUNCTION("function"),
     NAMING_RESOURCE_SPOOL("spool"),
     NAMING_RESOURCE_INTERFACE("interface"),
+    
+    /*OMCP MESSAGE GROUP DOMAIN*/
+    NAMING_MESSAGEGROUP("messagegroup"),
+    
+    /*NATIVE MESSAGE GROUP DOMAINS*/ 
     NAMING_MESSAGEGROUP_COLLECTOR("collector.messagegroup"),    
     NAMING_MESSAGEGROUP_UPDATE("update.messagegroup"),    
     NAMING_MESSAGEGROUP_NOTIFICATION("notification.messagegroup"),
-    NAMING_EXTRAMODULE_MESSAGEGROUP("messagegroup"), 
-    NAMING_EXTRAMODULE_SERVICE("service"),    
-    NAMING_EXTRAMODULE_APPLICATION_FUNCTION("function"),
-    NAMING_EXTRAMODULE_APPLICATION_MODULE("external"),
-    NAMING_URLPARAM_REVISIONS_LIMIT("limit"),
-    NAMING_URLPARAM_REVISIONS_FROM_DATE("from"),
-    NAMING_URLPARAM_REVISIONS_TO_DATE("to"),
-    //to dyamic use(filter)
+    
+    /*URI QUERY-STRING PARAMS*/
+    NAMING_QUERY_STRING_LIMIT("limit"),
+    NAMING_QUERY_STRING_FROM_DATE("from"),
+    NAMING_QUERY_STRING_TO_DATE("to"),
+    
+    /*CONTROLLER URI FILTERS*/
+    /*KEYS*/
+    ID1(":k1"),
+    ID2(":k2"),
+    ID3(":k3"),
+    ID4(":k4"),
+    ID5(":k5"),
+    /*URI RESOURCE WITH WILDCARD*/
     RESOURCE_SENSORNET_NETWORK_All("/"),
     RESOURCE_SENSORNET_NETWORK_BY_ID("/:k1"),
     RESOURCE_SENSORNET_NETWORK_SENSOR_All("/:k1/sensor/"),
@@ -83,7 +98,8 @@ public enum Path {
     RESOURCE_FUNCTION_INTERFACE("/interface/"),
     RESOURCE_FUNCTION_SPOOL("/spool/"),
     RESOURCE_FUNCTION_SPOOL_ITEM("/spool/:k1"),
-    //to static use(request)
+    
+    /*OMCP NATIVE ADDRESSES*/
     MODULE_SENSORNET("omcp://sensornet/"),
     MODULE_VIRTUALSENSORNET("omcp://virtualsensornet/"),
     MESSAGEGROUP_COLLECTOR("omcp://collector.messagegroup/"),    

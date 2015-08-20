@@ -39,6 +39,8 @@ public class ModelSchedulerItem implements Serializable, SchedulerItem {
     private long timeToNextUpdate;
     private long intervalInMillis;
 
+    private boolean isRemovable;
+
     public ModelSchedulerItem() {
     }
 
@@ -72,8 +74,16 @@ public class ModelSchedulerItem implements Serializable, SchedulerItem {
     }
 
     public void setTime(VirtualSensor virtualSensor) {
+        if (virtualSensor == null) {
+            isRemovable = true;
+            return;
+        }
         this.intervalInMillis = TimeUnit.MILLISECONDS.convert(virtualSensor.getCreationInterval(), virtualSensor.getCreationIntervalTimeUnit());
         this.timeToNextUpdate = virtualSensor.getCreationTimestampInMillis() + intervalInMillis;
+    }
+
+    public void setRemoved() {
+        setTime(null);
     }
 
     @Override
@@ -83,6 +93,6 @@ public class ModelSchedulerItem implements Serializable, SchedulerItem {
 
     @Override
     public boolean isRemovable() {
-        return false;
+        return isRemovable;
     }
 }

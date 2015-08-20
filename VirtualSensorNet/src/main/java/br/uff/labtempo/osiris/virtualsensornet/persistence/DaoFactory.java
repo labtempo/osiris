@@ -26,6 +26,8 @@ public interface DaoFactory {
     VirtualSensorDao getVirtualSensorDao();
 
     RevisionDao getRevisionDao();
+    
+    RevisionDao getUltraRevisionDao();
 
     LinkDao getLinkDao();
 

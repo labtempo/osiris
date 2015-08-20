@@ -20,6 +20,7 @@ import br.uff.labtempo.osiris.to.virtualsensornet.RevisionVsnTo;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -28,20 +29,21 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
 @Entity
+@Cacheable(false)
 public class Revision implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @ManyToOne
-    private VirtualSensor virtualSensor;
+    private long virtualSensorId;
 
     @OneToMany(mappedBy = "revision", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<RevisionItem> items;
@@ -55,7 +57,7 @@ public class Revision implements Serializable {
     }
 
     public Revision(VirtualSensor virtualSensor) {
-        this.virtualSensor = virtualSensor;
+        this.virtualSensorId = virtualSensor.getId();
         this.creationTimestampInMillis = virtualSensor.getCreationTimestampInMillis();
         this.creationPrecisionInNano = virtualSensor.getCreationPrecisionInNano();
         this.acquisitionTimestampInMillis = virtualSensor.getAcquisitionTimestampInMillis();

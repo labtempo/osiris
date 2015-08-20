@@ -20,6 +20,7 @@ import br.uff.labtempo.omcp.client.OmcpClientBuilder;
 import br.uff.labtempo.omcp.common.Response;
 import br.uff.labtempo.omcp.common.utils.ResponsePacket;
 import br.uff.labtempo.osiris.to.virtualsensornet.BlendingVsnTo;
+import config.OmcpFactory;
 
 /**
  *
@@ -28,7 +29,7 @@ import br.uff.labtempo.osiris.to.virtualsensornet.BlendingVsnTo;
 public class VsnGetBlending {
 
     public static void main(String[] args) throws Exception {
-        try (OmcpClient connection = new OmcpClientBuilder().host("192.168.0.7").user("admin", "admin").source("generico").build()) {
+        try (OmcpClient connection = OmcpFactory.getClient()) {
             Response r = connection.doGet("omcp://virtualsensornet/blending/4");
             BlendingVsnTo blendingVsnTo = r.getContent(BlendingVsnTo.class);
             System.out.println("GOT(blending): " + blendingVsnTo.getId());

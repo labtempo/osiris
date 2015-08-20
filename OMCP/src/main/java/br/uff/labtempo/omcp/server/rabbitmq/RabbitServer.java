@@ -54,17 +54,17 @@ public class RabbitServer implements OmcpServer, RabbitListener {
         this.socket.setListener(this);
         this.running = true;
     }
-    
-    public RabbitServer(String moduleName, String host, String user, String password){
+
+    public RabbitServer(String moduleName, String host, String user, String password) {
         this(moduleName, host, user, password, false);
     }
-    
-    private String reverseDottedName(String name){
-        if(name.contains(".")){
+
+    private String reverseDottedName(String name) {
+        if (name.contains(".")) {
             String names[] = name.split("\\.");
             StringBuilder sb = new StringBuilder();
-            for (int i = names.length-1; i >= 0; i--) {
-                if(sb.length() > 0){
+            for (int i = names.length - 1; i >= 0; i--) {
+                if (sb.length() > 0) {
                     sb.append(".");
                 }
                 sb.append(names[i]);
@@ -136,7 +136,12 @@ public class RabbitServer implements OmcpServer, RabbitListener {
     }
 
     @Override
-    public void addReference(String url) {
-        socket.addReference(url);
+    public void linkToMessageGroup(String url) {
+        socket.bindToExchange(url);
+    }
+
+    @Override
+    public void createMessageGroup(String url) {
+        socket.createExchange(url);
     }
 }

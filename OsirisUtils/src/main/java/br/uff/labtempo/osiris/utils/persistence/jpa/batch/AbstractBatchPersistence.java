@@ -17,8 +17,11 @@ package br.uff.labtempo.osiris.utils.persistence.jpa.batch;
 
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 
 /**
@@ -52,9 +55,28 @@ public abstract class AbstractBatchPersistence implements BatchPersistence {
     }
 
     @Override
+    public synchronized <T> int getQuery(CriteriaDelete<T> query) {
+        EntityManager EM = getEntityManager();
+        EntityTransaction et = EM.getTransaction();
+
+        et.begin();
+        Query deleteQuery = EM.createQuery(query);
+        int result = deleteQuery.executeUpdate();
+        et.commit();
+
+        return result;
+    }
+
+    @Override
     public synchronized <T> List<T> getQuery(CriteriaQuery<T> query) {
         TypedQuery<T> tquery = em.createQuery(query);
         List<T> result = tquery.getResultList();
+        return result;
+    }
+
+    public synchronized <T> List<T> getQuery(CriteriaQuery<T> query, int limit) {
+        TypedQuery<T> tquery = em.createQuery(query);
+        List<T> result = tquery.setMaxResults(limit).getResultList();
         return result;
     }
 

@@ -36,6 +36,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -394,12 +395,12 @@ public class VirtualSensorLinkTest {
 
     @Test
     public void TestUpdateLink_UpdateFields_WithValues_Valid_ShouldPass() throws NotFoundException, MethodNotAllowedException, InternalServerErrorException, BadRequestException {
-        LinkVsnTo to = new LinkVsnTo("1", "collector", "network");
+        LinkVsnTo to = new LinkVsnTo("1", "collectorTestUpdateLink_UpdateFields", "networkTestUpdateLink_UpdateFields");
         to.createField("temperature", dt2, cc1);
         to.createField("temperature", dt1);
         long id = controller.create(to);
 
-        CollectorDataBuilder builder = new CollectorDataBuilder("network", "collector");
+        CollectorDataBuilder builder = new CollectorDataBuilder("networkTestUpdateLink_UpdateFields", "collectorTestUpdateLink_UpdateFields");
         SampleCoTo sampleCoTo = builder.generateSample();
         notifycontroller.updateValues(sampleCoTo);
 
@@ -409,7 +410,7 @@ public class VirtualSensorLinkTest {
 
         LinkVsnTo lvt = controller.get(id);
 
-        LinkVsnTo to1 = new LinkVsnTo("1", "collector", "network");
+        LinkVsnTo to1 = new LinkVsnTo("1", "collectorTestUpdateLink_UpdateFields", "networkTestUpdateLink_UpdateFields");
 
         FieldTo ft1 = lvt.getFields().get(0);
         FieldTo ft2 = lvt.getFields().get(1);
@@ -423,12 +424,12 @@ public class VirtualSensorLinkTest {
 
     @Test(expected = BadRequestException.class)
     public void TestUpdateLink_ChangeDataTypeFields_WithValues_Invalid_ShouldThrowException() throws NotFoundException, MethodNotAllowedException, InternalServerErrorException, BadRequestException {
-        LinkVsnTo to = new LinkVsnTo("1", "collector", "network");
+        LinkVsnTo to = new LinkVsnTo("1", "collectorTestUpdateLink_ChangeDataTypeFields", "networkTestUpdateLink_ChangeDataTypeFields");
         to.createField("temperature", dt2, cc1);
         to.createField("temperature", dt1);
         long id = controller.create(to);
 
-        CollectorDataBuilder builder = new CollectorDataBuilder("network", "collector");
+        CollectorDataBuilder builder = new CollectorDataBuilder("networkTestUpdateLink_ChangeDataTypeFields", "collectorTestUpdateLink_ChangeDataTypeFields");
         SampleCoTo sampleCoTo = builder.generateSample();
         notifycontroller.updateValues(sampleCoTo);
 
@@ -438,7 +439,7 @@ public class VirtualSensorLinkTest {
 
         LinkVsnTo lvt = controller.get(id);
 
-        LinkVsnTo to1 = new LinkVsnTo("1", "collector", "network");
+        LinkVsnTo to1 = new LinkVsnTo("1", "collectorTestUpdateLink_ChangeDataTypeFields", "networkTestUpdateLink_ChangeDataTypeFields");
 
         FieldTo ft1 = lvt.getFields().get(0);
         FieldTo ft2 = lvt.getFields().get(1);
@@ -451,18 +452,18 @@ public class VirtualSensorLinkTest {
 
     @Test(expected = BadRequestException.class)
     public void TestUpdateLink_RemoveFields_WithValues_Invalid_ShouldThrowException() throws NotFoundException, MethodNotAllowedException, InternalServerErrorException, BadRequestException {
-        LinkVsnTo to = new LinkVsnTo("1", "collector", "network");
+        LinkVsnTo to = new LinkVsnTo("1", "collectorTestUpdateLink_RemoveFields", "networkTestUpdateLink_RemoveFields");
         to.createField("temperature", dt2, cc1);
         to.createField("temperature", dt1);
         long id = controller.create(to);
 
-        CollectorDataBuilder builder = new CollectorDataBuilder("network", "collector");
+        CollectorDataBuilder builder = new CollectorDataBuilder("networkTestUpdateLink_RemoveFields", "collectorTestUpdateLink_RemoveFields");
         SampleCoTo sampleCoTo = builder.generateSample();
         notifycontroller.updateValues(sampleCoTo);
 
         LinkVsnTo lvt = controller.get(id);
 
-        LinkVsnTo to1 = new LinkVsnTo("1", "collector", "network");
+        LinkVsnTo to1 = new LinkVsnTo("1", "collectorTestUpdateLink_RemoveFields", "networkTestUpdateLink_RemoveFields");
 
         FieldTo ft1 = lvt.getFields().get(0);
         FieldTo ft2 = lvt.getFields().get(1);
@@ -483,18 +484,18 @@ public class VirtualSensorLinkTest {
 
     @Test
     public void TestUpdateLink_AddConverterInFields_WithValues_Valid_ShouldPass() throws NotFoundException, MethodNotAllowedException, InternalServerErrorException, BadRequestException {
-        LinkVsnTo to = new LinkVsnTo("1", "collector", "network");
+        LinkVsnTo to = new LinkVsnTo("1", "collectorTestUpdateLink_AddConverterInFields", "networkTestUpdateLink_AddConverterInFields");
         to.createField("temperature", dt2);
         to.createField("temperature", dt1);
         long id = controller.create(to);
 
-        CollectorDataBuilder builder = new CollectorDataBuilder("network", "collector");
+        CollectorDataBuilder builder = new CollectorDataBuilder("networkTestUpdateLink_AddConverterInFields", "collectorTestUpdateLink_AddConverterInFields");
         SampleCoTo sampleCoTo = builder.generateSample();
         notifycontroller.updateValues(sampleCoTo);
 
         LinkVsnTo lvt = controller.get(id);
 
-        LinkVsnTo to1 = new LinkVsnTo("1", "collector", "network");
+        LinkVsnTo to1 = new LinkVsnTo("1", "collectorTestUpdateLink_AddConverterInFields", "networkTestUpdateLink_AddConverterInFields");
 
         FieldTo ft1 = lvt.getFields().get(0);
         FieldTo ft2 = lvt.getFields().get(1);
@@ -513,18 +514,18 @@ public class VirtualSensorLinkTest {
 
     @Test
     public void TestUpdateLink_CheckValues_CheckFieldIsInitialized_Valid_ShouldPass() throws NotFoundException, MethodNotAllowedException, InternalServerErrorException, BadRequestException {
-        LinkVsnTo to = new LinkVsnTo("2", "collector", "network");
+        LinkVsnTo to = new LinkVsnTo("2", "collectorTestUpdateLink_CheckValues", "networkTestUpdateLink_CheckValues");
         to.createField("temperature", dt2);
         to.createField("temperature", dt1);
         long id = controller.create(to);
 
-        CollectorDataBuilder builder = new CollectorDataBuilder("network", "collector", "2");
+        CollectorDataBuilder builder = new CollectorDataBuilder("networkTestUpdateLink_CheckValues", "collectorTestUpdateLink_CheckValues", "2");
         SampleCoTo sampleCoTo = builder.generateSample();
         notifycontroller.updateValues(sampleCoTo);
 
         LinkVsnTo lvt = controller.get(id);
 
-        LinkVsnTo to1 = new LinkVsnTo("2", "collector", "network");
+        LinkVsnTo to1 = new LinkVsnTo("2", "collectorTestUpdateLink_CheckValues", "networkTestUpdateLink_CheckValues");
 
         FieldTo ft1 = lvt.getFields().get(0);
         FieldTo ft2 = lvt.getFields().get(1);
@@ -555,18 +556,18 @@ public class VirtualSensorLinkTest {
 
     @Test(expected = BadRequestException.class)
     public void TestUpdateLink_RemoveLogicallyField_WithValue_Invalid_ShouldThrowException() throws NotFoundException, MethodNotAllowedException, InternalServerErrorException, BadRequestException {
-        LinkVsnTo to = new LinkVsnTo("1", "collector", "network");
+        LinkVsnTo to = new LinkVsnTo("1", "collectorTestUpdateLink_RemoveLogicallyField", "networkTestUpdateLink_RemoveLogicallyField");
         to.createField("temperature", dt2, cc1);
         to.createField("temperature", dt1);
         long id = controller.create(to);
 
-        CollectorDataBuilder builder = new CollectorDataBuilder("network", "collector");
+        CollectorDataBuilder builder = new CollectorDataBuilder("networkTestUpdateLink_RemoveLogicallyField", "collectorTestUpdateLink_RemoveLogicallyField");
         SampleCoTo sampleCoTo = builder.generateSample();
         notifycontroller.updateValues(sampleCoTo);
 
         LinkVsnTo lvt = controller.get(id);
 
-        LinkVsnTo to1 = new LinkVsnTo("1", "collector", "network");
+        LinkVsnTo to1 = new LinkVsnTo("1", "collectorTestUpdateLink_RemoveLogicallyField", "networkTestUpdateLink_RemoveLogicallyField");
 
         FieldTo ft1 = lvt.getFields().get(0);
         FieldTo ft2 = lvt.getFields().get(1);
@@ -587,7 +588,7 @@ public class VirtualSensorLinkTest {
 
     @Test
     public void TestDeleteLink_Valid_ShouldPass() throws NotFoundException, MethodNotAllowedException, InternalServerErrorException, BadRequestException {
-        LinkVsnTo to = new LinkVsnTo("sensor", "collector", "network");
+        LinkVsnTo to = new LinkVsnTo("sensor", "collectorTestDeleteLink", "networkTestDeleteLink");
         to.createField("temperature", dt2, cc1);
         to.createField("temperature", dt1);
 

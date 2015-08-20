@@ -15,7 +15,6 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.persistence;
 
-import br.uff.labtempo.osiris.to.virtualsensornet.RevisionVsnTo;
 import br.uff.labtempo.osiris.virtualsensornet.model.Revision;
 import java.util.Calendar;
 import java.util.List;
@@ -24,7 +23,7 @@ import java.util.List;
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public interface RevisionDao {
+public interface RevisionDao  extends Dao<Revision>{
 
     List<Revision> getFromTo(long sensorId, Calendar from, Calendar to, int limit);
 
@@ -35,4 +34,6 @@ public interface RevisionDao {
     List<Revision> getToday(long sensorId, int limit);
 
     boolean hasVirtualSensor(long sensorId);
+    
+    int deleteAllByVirtualSensor(long sensorId);
 }

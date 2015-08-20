@@ -20,6 +20,7 @@ import br.uff.labtempo.omcp.client.OmcpClientBuilder;
 import br.uff.labtempo.omcp.common.Response;
 import br.uff.labtempo.omcp.common.StatusCode;
 import br.uff.labtempo.osiris.to.virtualsensornet.DataTypeVsnTo;
+import config.OmcpFactory;
 
 /**
  *
@@ -28,7 +29,7 @@ import br.uff.labtempo.osiris.to.virtualsensornet.DataTypeVsnTo;
 public class VsnDatatype {
 
     public static void main(String[] args) throws Exception{
-       try (OmcpClient client = new OmcpClientBuilder().host("192.168.0.7").user("admin", "admin").source("generico").build()) {
+       try (OmcpClient client = OmcpFactory.getClient()) {
            deleteAll(client);
        };
     }

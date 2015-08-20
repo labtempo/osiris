@@ -38,10 +38,13 @@ import br.uff.labtempo.osiris.virtualsensornet.persistence.ConverterDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.DataTypeDao;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.LinkDao;
+import br.uff.labtempo.osiris.virtualsensornet.persistence.RevisionDao;
 import br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer.AnnouncerAgent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -230,7 +233,9 @@ public class VirtualSensorLinkController extends Controller {
 
     public boolean delete(long id) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, BadRequestException {
         LinkDao lDao;
+        RevisionDao rDao;
         try {
+            rDao =  factory.getRevisionDao();
             lDao = factory.getPersistentLinkDao();
         } catch (Exception e) {
             throw new InternalServerErrorException("Data query error!");
@@ -266,7 +271,14 @@ public class VirtualSensorLinkController extends Controller {
             for (Field removedField : removedFields) {
                 fieldSubController.delete(removedField);
             }
-            lDao.delete(sensorLink);
+            
+            try {
+                rDao.deleteAllByVirtualSensor(sensorLink.getId());
+            } catch (Exception ex) {
+                Logger.getLogger(VirtualSensorBlendingController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            lDao.delete(sensorLink);            
             return true;
         } catch (Exception e) {
             throw new InternalServerErrorException("VirtuaSensorLink couldn't removed!");

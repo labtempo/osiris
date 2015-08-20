@@ -93,7 +93,9 @@ public class Bootstrap implements AutoCloseable {
             omcpServer = new RabbitServer(moduleName, ip, user, pass, silent);
             omcpServer.setHandler(notifyController);
 
-            omcpServer.addReference(Path.MESSAGEGROUP_COLLECTOR_ALL.toString());
+            omcpServer.linkToMessageGroup(Path.MESSAGEGROUP_COLLECTOR_ALL.toString());
+            omcpServer.createMessageGroup(Path.MESSAGEGROUP_UPDATE.toString());
+            omcpServer.createMessageGroup(Path.MESSAGEGROUP_NOTIFICATION.toString());
         } catch (Exception ex) {
             close();
             throw ex;

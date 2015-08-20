@@ -25,7 +25,7 @@ import br.uff.labtempo.omcp.client.OmcpClientBuilder;
 public class Collector implements AutoCloseable{
 
     public void execute() throws Exception{
-        try (OmcpClient connection = new OmcpClientBuilder().host("192.168.0.7").user("admin", "admin").source("virtual-lab").build()) {
+        try (OmcpClient connection = new OmcpClientBuilder().host("192.168.1.1").user("admin", "admin").source("virtual-lab").build()) {
             populate(connection);
         }
     }

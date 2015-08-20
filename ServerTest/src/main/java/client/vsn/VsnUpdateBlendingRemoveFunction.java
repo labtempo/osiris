@@ -16,13 +16,10 @@
 package client.vsn;
 
 import br.uff.labtempo.omcp.client.OmcpClient;
-import br.uff.labtempo.omcp.client.OmcpClientBuilder;
 import br.uff.labtempo.omcp.common.Response;
 import br.uff.labtempo.omcp.common.StatusCode;
-import br.uff.labtempo.osiris.to.common.definitions.FunctionOperation;
 import br.uff.labtempo.osiris.to.virtualsensornet.BlendingVsnTo;
-import br.uff.labtempo.osiris.to.virtualsensornet.ConverterVsnTo;
-import br.uff.labtempo.osiris.to.virtualsensornet.LinkVsnTo;
+import config.OmcpFactory;
 
 /**
  *
@@ -31,7 +28,7 @@ import br.uff.labtempo.osiris.to.virtualsensornet.LinkVsnTo;
 public class VsnUpdateBlendingRemoveFunction {
 
     public static void main(String[] args) throws Exception {
-        try (OmcpClient connection = new OmcpClientBuilder().host("192.168.0.7").user("admin", "admin").source("generico").build()) {
+        try (OmcpClient connection = OmcpFactory.getClient()) {
             String address = "omcp://virtualsensornet/blending/4";
             Response r = connection.doGet(address);
             BlendingVsnTo to = r.getContent(BlendingVsnTo.class);

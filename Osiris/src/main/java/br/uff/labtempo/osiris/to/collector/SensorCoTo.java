@@ -47,6 +47,10 @@ public class SensorCoTo extends SensorToBase implements ISensorCoTo {
     public SensorCoTo(String id, State state, long captureTimestampInMillis, int capturePrecisionInNano) {
         this(String.valueOf(id), state, captureTimestampInMillis, capturePrecisionInNano, System.currentTimeMillis());
     }
+    
+    public SensorCoTo(String id, long captureTimestampInMillis) {
+        this(id, captureTimestampInMillis, 0);
+    }
 
     public SensorCoTo(long id, long captureTimestampInMillis) {
         this(String.valueOf(id), captureTimestampInMillis, 0);

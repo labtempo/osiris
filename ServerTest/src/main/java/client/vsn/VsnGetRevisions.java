@@ -20,6 +20,7 @@ import br.uff.labtempo.omcp.client.OmcpClientBuilder;
 import br.uff.labtempo.omcp.common.Response;
 import br.uff.labtempo.omcp.common.StatusCode;
 import br.uff.labtempo.osiris.to.virtualsensornet.RevisionVsnTo;
+import config.OmcpFactory;
 import java.net.URLEncoder;
 
 /**
@@ -29,10 +30,10 @@ import java.net.URLEncoder;
 public class VsnGetRevisions {
 
     public static void main(String[] args) throws Exception {
-        try (OmcpClient connection = new OmcpClientBuilder().host("192.168.0.7").user("admin", "admin").source("generico").build()) {
+        try (OmcpClient connection = OmcpFactory.getClient()) {
             String from = "05-07-2015 21:33:52 -03:00";
             from = URLEncoder.encode(from, "UTF-8");
-            Response r = connection.doGet("omcp://virtualsensornet/vsensor/1/revisions/?from="+from+"&limit=5");
+            Response r = connection.doGet("omcp://virtualsensornet/vsensor/1/revisions/?to="+from+"&limit=5");
             if (r.getStatusCode() == StatusCode.OK) {
                 RevisionVsnTo[] to = r.getContent(RevisionVsnTo[].class);
                 System.out.println("GOT(revisions): " + to.length);

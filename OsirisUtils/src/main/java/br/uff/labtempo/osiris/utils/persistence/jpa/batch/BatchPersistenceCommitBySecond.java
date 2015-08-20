@@ -67,6 +67,10 @@ public class BatchPersistenceCommitBySecond extends AbstractBatchPersistence {
         } catch (Exception ex) {
             Logger.getLogger(BatchPersistenceCommitBySecond.class.getName()).log(Level.SEVERE, null, ex);
         }
+        try {
+            super.getEntityManager().clear();
+        } catch (Exception ex) {
+        }
         et.begin();
     }
 
@@ -111,5 +115,14 @@ public class BatchPersistenceCommitBySecond extends AbstractBatchPersistence {
         };
         long millis = TimeUnit.SECONDS.toMillis(second);
         timer.scheduleAtFixedRate(task, millis, millis);
+    }
+
+    @Override
+    public synchronized void forceCommit() {
+        try {
+            et.commit();
+        } catch (Exception ex) {
+        }
+        et.begin();
     }
 }

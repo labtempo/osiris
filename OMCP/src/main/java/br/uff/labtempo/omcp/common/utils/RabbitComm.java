@@ -56,6 +56,7 @@ public class RabbitComm {
 
             try {
                 connection = factory.newConnection();
+                
             } catch (Exception ex) {//IOException
                 close();
                 this.checkHostOrDie(host);

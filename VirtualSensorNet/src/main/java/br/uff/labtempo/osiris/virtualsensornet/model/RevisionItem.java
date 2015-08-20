@@ -15,31 +15,35 @@
  */
 package br.uff.labtempo.osiris.virtualsensornet.model;
 
+import br.uff.labtempo.osiris.to.common.definitions.ValueType;
 import br.uff.labtempo.osiris.to.virtualsensornet.RevisionFieldVsnTo;
 import java.io.Serializable;
+import javax.persistence.Cacheable;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import org.hibernate.annotations.Cascade;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
 @Entity
+@Cacheable(false)
 public class RevisionItem implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @ManyToOne
-    @Cascade({org.hibernate.annotations.CascadeType.ALL, org.hibernate.annotations.CascadeType.DELETE})
-    private Field field;
-    private String fieldValue;
-
+    private String value;
+    private String referenceName;
+    private String unit;
+    private String symbol;
+    private ValueType type;
+    
     @ManyToOne
     private Revision revision;
 
@@ -47,23 +51,24 @@ public class RevisionItem implements Serializable {
     }
 
     public RevisionItem(Field field, Revision revision) {
-        this.field = field;
-        this.fieldValue = field.getValue();
+        this.value = field.getValue();
+        this.referenceName = field.getReferenceName();
+        this.unit = field.getUnit();
+        this.symbol = field.getSymbol();
+        this.type = field.getValueType();
+
         this.revision = revision;
 
         field.setStored();
     }
 
-    public Field getField() {
-        return field;
-    }
-
     public String getValue() {
-        return fieldValue;
+        return value;
     }
 
     public RevisionFieldVsnTo getTransferObject() {
-        RevisionFieldVsnTo revisionFieldVsnTo = new RevisionFieldVsnTo(field.getReferenceName(), field.getUnit(),fieldValue, field.getId());
+        //TODO: alterar RevisionFieldVsnTo
+        RevisionFieldVsnTo revisionFieldVsnTo = new RevisionFieldVsnTo(referenceName, unit, value, symbol);
         return revisionFieldVsnTo;
     }
 }

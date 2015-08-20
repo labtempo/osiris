@@ -1,20 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
     <persistence-unit name="postgres" transaction-type="RESOURCE_LOCAL">
-        <provider>org.hibernate.ejb.HibernatePersistence</provider>
-        <shared-cache-mode>ALL</shared-cache-mode>
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
         <properties>
+            <!-- DADOS CONEXAO -->  
             <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver" />
             <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://192.168.0.7:5432/OsirisVSN" />
             <property name="javax.persistence.jdbc.user" value="postgres" />
             <property name="javax.persistence.jdbc.password" value="postgres" />
+            
+            <!-- CONFIGURACAO -->  
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />
             <property name="hibernate.show_sql" value="false" />
             <property name="hibernate.format_sql" value="true" />
             <!--property ${hibernate.hbm2ddl.auto} controlled by maven profile(development or production)-->
             <property name="hibernate.hbm2ddl.auto" value="${hibernate.hbm2ddl.auto}"/>
-            <property name="hibernate.connection.pool_size" value="100" />            
-            <property name="hibernate.generate_statistics" value="true" />
+            <property name="hibernate.generate_statistics" value="false"/>
+            
+            <!-- CACHE -->
+            <property name="hibernate.cache.provider_class" value="net.sf.ehcache.hibernate.EhCacheProvider"/>  
+            <!--<property name="net.sf.ehcache.configurationResourceName" value="ehcache.xml"/>-->  
+            <property name="hibernate.cache.region.factory_class" value="org.hibernate.cache.ehcache.EhCacheRegionFactory"/> 
+            <property name="hibernate.cache.use_structured_entries" value="true"/> 
+            <property name="hibernate.cache.use_query_cache" value="true" />
+            <property name="hibernate.cache.use_second_level_cache" value="true" />
+            
+            <!-- POOL -->
+            <property name="hibernate.connection.provider_class" value="org.hibernate.connection.C3P0ConnectionProvider"/>            
+            <property name="hibernate.c3p0.min_size" value="5"/>  
+            <property name="hibernate.c3p0.max_size" value="20"/>  
+            <property name="hibernate.c3p0.timeout" value="300"/>  
+            <property name="hibernate.c3p0.max_statements" value="50"/>  
+            <property name="hibernate.c3p0.idle_test_period" value="1800"/>
+            <property name="hibernate.c3p0.acquireRetryAttempts" value="3"/>
+            <property name="hibernate.c3p0.breakAfterAcquireFailure" value="true"/>
         </properties>
     </persistence-unit>    
 </persistence>

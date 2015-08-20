@@ -186,15 +186,15 @@ public class PathTest {
     
     @Test
     public void testNamingMessageGroupCollector_Contains_ShouldPass() {
-        assertTrue(NAMING_MESSAGEGROUP_COLLECTOR.toString().contains(NAMING_EXTRAMODULE_MESSAGEGROUP.toString()));
+        assertTrue(NAMING_MESSAGEGROUP_COLLECTOR.toString().contains(NAMING_MESSAGEGROUP.toString()));
     }
     @Test
     public void testNamingMessageGroupNotification_Contains_ShouldPass() {
-        assertTrue(NAMING_MESSAGEGROUP_NOTIFICATION.toString().contains(NAMING_EXTRAMODULE_MESSAGEGROUP.toString()));
+        assertTrue(NAMING_MESSAGEGROUP_NOTIFICATION.toString().contains(NAMING_MESSAGEGROUP.toString()));
     }
     @Test
     public void testNamingMessageGroupUpdate_Contains_ShouldPass() {
-        assertTrue(NAMING_MESSAGEGROUP_UPDATE.toString().contains(NAMING_EXTRAMODULE_MESSAGEGROUP.toString()));
+        assertTrue(NAMING_MESSAGEGROUP_UPDATE.toString().contains(NAMING_MESSAGEGROUP.toString()));
     }
 
 }

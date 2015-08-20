@@ -52,6 +52,8 @@ public class VirtualSensorVsnTo implements IVirtualSensorVsnTo {
     private transient TimeUnit helperCreationIntervalTimeUnit;
     private transient VirtualSensorType helperVirtualSensorType;
     private transient List<ValueVsnTo> helperValueToList;
+    private final long packingTimestampInMillis;
+    private long fetchingTimeInMillis;
 
     public VirtualSensorVsnTo(long id, String label, State state, long creationTimestampInMillis, int creationPrecisionInNano, long creationInterval, TimeUnit creationIntervalTimeUnit, long acquisitionTimestampInMillis, long storageTimestampInMillis, Calendar lastModified, VirtualSensorType sensorType) {
         this.id = id;
@@ -63,6 +65,7 @@ public class VirtualSensorVsnTo implements IVirtualSensorVsnTo {
         this.creationIntervalTimeUnit = creationIntervalTimeUnit.toString();
         this.acquisitionTimestampInMillis = acquisitionTimestampInMillis;
         this.storageTimestampInMillis = storageTimestampInMillis;
+        this.packingTimestampInMillis = System.currentTimeMillis();
         this.lastModified = lastModified.getTimeInMillis();
         this.sensorType = sensorType.toString();
         this.values = new ArrayList<>();
@@ -168,4 +171,20 @@ public class VirtualSensorVsnTo implements IVirtualSensorVsnTo {
         helperValueToList = valuesTo;
         return valuesTo;
     }
+
+    @Override
+    public long getPackingTimestampInMillis() {
+        return packingTimestampInMillis;
+    }
+
+    @Override
+    public long getFetchingTimestampInMillis() {
+        return fetchingTimeInMillis;
+    }
+
+    @Override
+    public void setFetchingTimeInMillis(long fetchingTimeInMillis) {
+        this.fetchingTimeInMillis = fetchingTimeInMillis;
+    }
+
 }

@@ -18,6 +18,7 @@ package br.uff.labtempo.osiris.virtualsensornet.model.interfaces;
 import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorType;
 import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorVsnTo;
 import br.uff.labtempo.osiris.virtualsensornet.model.Field;
+import br.uff.labtempo.osiris.virtualsensornet.model.Revision;
 import br.uff.labtempo.osiris.virtualsensornet.model.util.FieldListManager;
 import br.uff.labtempo.osiris.virtualsensornet.model.util.field.FieldValuesWrapper;
 import java.util.List;
@@ -60,4 +61,6 @@ public interface IVirtualSensor<T> extends IModel {
     VirtualSensorVsnTo getTransferObject();
 
     T getUniqueTransferObject();
+    
+    Revision getLastRevision();
 }

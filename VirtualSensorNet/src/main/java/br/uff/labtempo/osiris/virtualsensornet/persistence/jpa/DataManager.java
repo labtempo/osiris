@@ -21,6 +21,7 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 
 /**
@@ -73,6 +74,16 @@ public class DataManager {
     public synchronized CriteriaBuilder getCriteriaBuilder() {
         EntityManager EM = getEntityManager();
         return EM.getCriteriaBuilder();
+    }
+    
+    public synchronized <T> int getQuery(CriteriaDelete<T> query) {
+        EntityManager EM = getEntityManager();
+        EntityTransaction et = EM.getTransaction();  
+        Query deleteQuery = EM.createQuery(query);
+        et.begin();
+        int result = deleteQuery.executeUpdate();
+        et.commit();        
+        return result;
     }
 
     public synchronized <T> List<T> getQuery(CriteriaQuery<T> query) {

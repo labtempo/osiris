@@ -38,12 +38,14 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
+
 public class VirtualSensorBlendingTest {
 
     private static Bootstrap bootstrap;

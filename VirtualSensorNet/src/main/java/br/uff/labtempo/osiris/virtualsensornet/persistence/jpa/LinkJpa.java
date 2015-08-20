@@ -91,4 +91,8 @@ public class LinkJpa implements LinkDao {
         data.delete((VirtualSensor) o);
     }
 
+    @Override
+    public void commit() {
+    }
+
 }

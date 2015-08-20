@@ -85,7 +85,7 @@ public class RabbitService implements OmcpService, RabbitListener {
 
     @Override
     public void addReference(String url) {
-        socket.addReference(url);
+        socket.bindToExchange(url);
     }
 
     @Override

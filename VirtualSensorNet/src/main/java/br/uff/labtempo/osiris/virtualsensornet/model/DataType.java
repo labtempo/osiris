@@ -19,6 +19,7 @@ import br.uff.labtempo.osiris.to.common.definitions.ValueType;
 import br.uff.labtempo.osiris.to.virtualsensornet.DataTypeVsnTo;
 import java.io.Serializable;
 import java.util.Objects;
+import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -26,14 +27,13 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import org.hibernate.annotations.Where;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
 @Entity
-@Where(clause = "isDeleted = 'false'")
+@Cacheable
 public class DataType implements Serializable {
 
     @Id

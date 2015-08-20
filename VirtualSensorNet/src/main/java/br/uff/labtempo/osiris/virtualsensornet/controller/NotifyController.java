@@ -25,10 +25,10 @@ import br.uff.labtempo.omcp.common.exceptions.NotFoundException;
 import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
 import br.uff.labtempo.omcp.common.utils.ResponseBuilder;
 import br.uff.labtempo.osiris.omcp.Controller;
-import br.uff.labtempo.osiris.utils.scheduling.Scheduler;
 import br.uff.labtempo.osiris.to.collector.SampleCoTo;
 import br.uff.labtempo.osiris.to.common.definitions.Path;
 import br.uff.labtempo.osiris.to.sensornet.SensorSnTo;
+import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorVsnTo;
 import br.uff.labtempo.osiris.utils.requestpool.RequestHandler;
 import br.uff.labtempo.osiris.utils.requestpool.RequestPool;
 import br.uff.labtempo.osiris.virtualsensornet.controller.util.AggregatesChecker;
@@ -41,6 +41,7 @@ import br.uff.labtempo.osiris.virtualsensornet.persistence.DaoFactory;
 import br.uff.labtempo.osiris.virtualsensornet.model.util.LinkValuesWrapper;
 import br.uff.labtempo.osiris.virtualsensornet.thirdparty.announcer.AnnouncerAgent;
 import br.uff.labtempo.osiris.virtualsensornet.persistence.LinkDao;
+import br.uff.labtempo.osiris.virtualsensornet.persistence.RevisionDao;
 import java.util.List;
 
 /**
@@ -152,24 +153,36 @@ public class NotifyController extends Controller implements RequestHandler {
 
     private void updateLink(LinkValuesWrapper wrapper) {
         LinkDao lDao = factory.getPersistentLinkDao();
+        RevisionDao rDao = factory.getUltraRevisionDao();
 
         String sensorId = wrapper.getSensorId();
         String networkId = wrapper.getNetworkId();
         String collectorId = wrapper.getCollectorId();
 
+        long t1 = System.currentTimeMillis();
+
         List<VirtualSensorLink> links = lDao.getAllByReferences(networkId, collectorId, sensorId);
+
+        long t2 = System.currentTimeMillis();
+        long fetchingTimeInMillis = t2 - t1;
 
         for (VirtualSensorLink link : links) {
             if (link != null) {
-                link.setFieldsValues(wrapper);
-                lDao.save(link);
-                if (ModelState.REACTIVATED.equals(link.getModelState())) {
-                    announcer.notifyReactivation(link.getTransferObject());
-                }
-                announcer.broadcastIt(link.getTransferObject());
+                if (link.setFieldsValues(wrapper)) {
+                    lDao.update(link);
+                    rDao.save(link.getLastRevision());
 
-                //check aggregates
-                checker.check(link);
+                    VirtualSensorVsnTo to = link.getTransferObject();
+                    to.setFetchingTimeInMillis(fetchingTimeInMillis);
+
+                    if (ModelState.REACTIVATED.equals(link.getModelState())) {
+                        announcer.notifyReactivation(to);
+                    }
+                    announcer.broadcastIt(to);
+
+                    //check aggregates
+                    checker.check(link);
+                }
             }
         }
     }
