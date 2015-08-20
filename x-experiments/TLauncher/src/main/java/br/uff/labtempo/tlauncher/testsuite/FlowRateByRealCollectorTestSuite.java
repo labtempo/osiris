@@ -58,9 +58,6 @@ import java.util.logging.Logger;
 public class FlowRateByRealCollectorTestSuite implements UpdateListener<VirtualSensorVsnTo>, TestSuite {
 
     private String testName;
-    private String sensorId;
-    private final Object monitor = new Object();
-    private boolean waiting;
     private FilePrinter printer;
     private int totalMessagesToSend;
     private final int multiplier;
@@ -70,19 +67,20 @@ public class FlowRateByRealCollectorTestSuite implements UpdateListener<VirtualS
     private boolean silent;
     private boolean verbose;
     private final int delayBetweenTestsInSeconds;
+    private final List<String> linkIds;
 
     private ResponseAccumulator accumulator;
 
     public FlowRateByRealCollectorTestSuite(boolean silent, boolean verbose) {
         this.testName = "flow-rate-by-real-collector";
-        this.sensorId = "1";
         this.totalMessagesToSend = 10;
         this.multiplier = 10;
-        this.delayLimitInSeconds = 1;
-        this.testLoop = 100;
-        this.delayBetweenTestsInSeconds = 2;
+        this.delayLimitInSeconds = 60;
+        this.testLoop = 100;//100
+        this.delayBetweenTestsInSeconds = 0;
         this.silent = silent;
         this.verbose = verbose;
+        this.linkIds = new ArrayList<>();
     }
 
     public FlowRateByRealCollectorTestSuite() {
@@ -107,7 +105,6 @@ public class FlowRateByRealCollectorTestSuite implements UpdateListener<VirtualS
         }
 
         ConnectionFactory factory = manager.getConfig();
-        OmcpClient client = factory.getClient();
         OmcpService service;
 
         if (silent) {
@@ -116,7 +113,6 @@ public class FlowRateByRealCollectorTestSuite implements UpdateListener<VirtualS
             service = factory.getService();
         }
 
-        VirtualSensorNetDataBuilder vsnDataBuilder = new VirtualSensorNetDataBuilder(client);
         CommandString dataBuilder = new CommandString(manager.getProperties(), "..\\ThinCollector\\target\\ThinCollector-1.0-SNAPSHOT-jar-with-dependencies.jar");
         VirtualSensorNetUpdateService updateService = new VirtualSensorNetUpdateService(service, this);
         UpdateServiceWrapper wrapper = new UpdateServiceWrapper(updateService);
@@ -130,8 +126,7 @@ public class FlowRateByRealCollectorTestSuite implements UpdateListener<VirtualS
             //commands
             //command.execute();
             manager.start();
-            System.out.println("Criando link");
-            vsnDataBuilder.createLink(testName, sensorId);
+            
             System.out.println("Iniciando service");
             wrapper.start();
             System.out.println("Enviando dados");
@@ -139,8 +134,7 @@ public class FlowRateByRealCollectorTestSuite implements UpdateListener<VirtualS
             while (lastDelayInSeconds < delayLimitInSeconds) {
                 String name = String.valueOf(totalMessagesToSend);
                 File folder = fileManager.createFolder(testFolder, name);
-                List<Process> processes = new ArrayList<>();
-
+                addNewLinks(factory);
                 for (int i = 1; i <= testLoop; i++) {
                     printer = fileManager.getFilePrinter(totalMessagesToSend + "_" + String.format("%03d", i) + ".txt", folder, true);
                     printer.println(VirtualSensorPrintFormat.getHeaders());
@@ -148,26 +142,29 @@ public class FlowRateByRealCollectorTestSuite implements UpdateListener<VirtualS
                         System.out.print(totalMessagesToSend + "(x" + i + "): ");
                     }
 
-                    ExecutorService es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+                    //ExecutorService es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
 
                     accumulator = new ResponseAccumulator(totalMessagesToSend);
                     //quantidade de mensagens enviadas
 
-                    List<Callable<Integer>> callables = new ArrayList<>();
+                    //List<Callable<Integer>> callables = new ArrayList<>();
+                    List<Process> list = new ArrayList<>();
                     for (int j = 1; j <= totalMessagesToSend; j++) {
-                        ProcessBuilder builder = dataBuilder.getCommand(j);
-                        Proc proc = new Proc(builder);
-                        callables.add(proc);
+                        //Proc proc = new Proc(dataBuilder, linkIds.get(j - 1), j);
+                        ProcessBuilder builder = dataBuilder.getCommand(linkIds.get(j - 1), j);
+                        Process p = builder.start();
+                        list.add(p);
+                    }
+                    for (Process process : list) {
+                        process.waitFor();
                     }
 
-                    List<Future<Integer>> futures = es.invokeAll(callables);
-                    for (Future<Integer> future : futures) {
-                        future.get();
-                    }
-
+//                    List<Future<Integer>> futures = es.invokeAll(callables);
+//                    for (Future<Integer> future : futures) {
+//                        future.get();
+//                    }                    
                     while (!accumulator.isComplete()) {
                         Thread.sleep(200);
-                        System.out.println(accumulator);
                     }
                     accumulator.print(printer);
 
@@ -175,22 +172,11 @@ public class FlowRateByRealCollectorTestSuite implements UpdateListener<VirtualS
                         System.out.println("ok");
                     }
 
-                }
-                if (totalMessagesToSend == 100) {
-                    totalMessagesToSend = 300;
-                    continue;
-                }
+                    Thread.sleep(delayBetweenTestsInSeconds * 1000);
 
-                if (totalMessagesToSend == 300) {
-                    totalMessagesToSend = 400;
-                    continue;
-                }
+                }                
 
-                if (totalMessagesToSend == 400) {
-                    totalMessagesToSend = 100;
-                }
-
-                totalMessagesToSend *= multiplier;
+                totalMessagesToSend += multiplier;
 
             }
         } catch (Exception ex) {
@@ -216,26 +202,40 @@ public class FlowRateByRealCollectorTestSuite implements UpdateListener<VirtualS
     public void updateReceived(VirtualSensorVsnTo object, long unpackingTimestamp) {
         try {
             VirtualSensorPrintFormat format = new VirtualSensorPrintFormat(object, unpackingTimestamp);
-            System.out.println("received:" +format.getId());
-            accumulator.add(format);
-            long delay = format.getEndToEndInSeconds();
-            if (delay > lastDelayInSeconds) {
-                lastDelayInSeconds = delay;
+            String id = format.getId();
+            if (id != null) {
+                accumulator.add(format);
+                long delay = format.getEndToEndInSeconds();
+                if (delay > lastDelayInSeconds) {
+                    lastDelayInSeconds = delay;
+                }
             }
         } catch (Exception e) {
         }
     }
 
-    private boolean isAlive(Process process) {
-        if (process == null) {
-            return false;
+    private void addNewLinks(ConnectionFactory factory) throws Exception {
+        OmcpClient client = factory.getClient();
+        VirtualSensorNetDataBuilder vsnDataBuilder = new VirtualSensorNetDataBuilder(client);
+        int total = totalMessagesToSend - linkIds.size();
+        System.out.println("Adicionando novos links(" + totalMessagesToSend + " - " + linkIds.size() + " = " + total + ")");
+        List<String> newIds = createLinkIds(linkIds.size(), totalMessagesToSend);
+        vsnDataBuilder.createLink(testName, newIds);
+        linkIds.addAll(newIds);
+        client.close();
+        Thread.sleep(delayBetweenTestsInSeconds * 1000);
+    }
+
+    private List<String> createLinkIds(int total) {
+        return createLinkIds(1, total);
+    }
+
+    private List<String> createLinkIds(int from, int to) {
+        List<String> list = new ArrayList<>();
+        for (int i = from + 1; i <= to; i++) {
+            list.add(String.valueOf(i));
         }
-        try {
-            process.exitValue();
-            return false;
-        } catch (Exception e) {
-            return true;
-        }
+        return list;
     }
 
     private class CommandString {
@@ -243,18 +243,17 @@ public class FlowRateByRealCollectorTestSuite implements UpdateListener<VirtualS
         private final String delimiter = ":";
 
         private final String credentials;
-        private final String identifiers;
+        private final String preIdentifiers;
         private final String path;
 
         public CommandString(Properties config, String path) {
             this.credentials = generateCredentials(config);
-            this.identifiers = generateIdenrifiers(DataBase.NETWORK_ID, testName, sensorId);
+            this.preIdentifiers = generateIdenrifiers(DataBase.NETWORK_ID, testName);
             this.path = path;
         }
 
-        public ProcessBuilder getCommand(int messageId) {
-
-            return generateCommand(String.valueOf(messageId));
+        public ProcessBuilder getCommand(String sensorId, int messageId) {
+            return generateCommand(sensorId, String.valueOf(messageId));
         }
 
         private String generateCredentials(Properties config) {
@@ -265,16 +264,17 @@ public class FlowRateByRealCollectorTestSuite implements UpdateListener<VirtualS
 
         }
 
-        private ProcessBuilder generateCommand(String messageId) {
+        private ProcessBuilder generateCommand(String sensorId, String messageId) {
             String command = "java";
             String jar = "-jar";
+            String identifiers = implode(delimiter, preIdentifiers, sensorId);
             String tuple = implode(delimiter, DataBase.DATA_NAME, messageId, DataBase.DATA_UNIT, DataBase.DATA_SYMBOL);
             ProcessBuilder builder = new ProcessBuilder(command, jar, path, credentials, identifiers, tuple);
             return builder;
         }
 
-        private String generateIdenrifiers(String networkId, String collectorId, String sensorId) {
-            return implode(delimiter, networkId, collectorId, sensorId);
+        private String generateIdenrifiers(String networkId, String collectorId) {
+            return implode(delimiter, networkId, collectorId);
         }
 
         public String implode(String separator, String... data) {
@@ -336,18 +336,22 @@ public class FlowRateByRealCollectorTestSuite implements UpdateListener<VirtualS
 
     private class Proc implements Callable<Integer> {
 
-        private ProcessBuilder builder;
+        private CommandString command;
+        private final String sensorId;
+        private final int messageId;
 
-        public Proc(ProcessBuilder builder) {
-            this.builder = builder;
+        public Proc(CommandString command, String sensorId, int messageId) {
+            this.command = command;
+            this.sensorId = sensorId;
+            this.messageId = messageId;
         }
 
         @Override
         public Integer call() throws Exception {
             Process p;
             try {
+                ProcessBuilder builder = command.getCommand(sensorId, messageId);
                 p = builder.start();
-                setInputStream(p.getInputStream());
                 p.waitFor();
             } catch (Exception ex) {
 
@@ -355,12 +359,11 @@ public class FlowRateByRealCollectorTestSuite implements UpdateListener<VirtualS
             return 1;
         }
 
-        
         public void setInputStream(InputStream is) throws IOException {
             BufferedReader reader = new BufferedReader(new InputStreamReader(is, "CP857"));
             String line;
             while ((line = reader.readLine()) != null) {
-                System.out.println(line);                
+                System.out.println(line);
             }
         }
 

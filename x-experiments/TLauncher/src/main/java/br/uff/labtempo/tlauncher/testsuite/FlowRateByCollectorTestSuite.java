@@ -114,7 +114,7 @@ public class FlowRateByCollectorTestSuite implements UpdateListener<VirtualSenso
 
             //commands
             //command.execute();
-            //manager.start();
+            manager.start();
             System.out.println("Criando link");
             vsnDataBuilder.createLink(testName, sensorId);
             System.out.println("Iniciando service");

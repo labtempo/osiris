@@ -57,7 +57,7 @@ public class App {
                 sct.addValue(name, Integer.valueOf(value), unit, symbol);
                 SampleCoTo sampleCoTo = new SampleCoTo(nct, cct, sct);
                 client.doNofity(url, sampleCoTo);
-                System.out.println(value);
+                client.close();
             }
         } catch (Exception e) {
             System.out.println("Require args separete by :");
