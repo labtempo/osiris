@@ -49,6 +49,7 @@ public class LatencyTestSuite implements UpdateListener<VirtualSensorVsnTo>, Tes
     private final int testLoop;
     private final boolean silent;
     private final boolean verbose;
+    private int delayBetweenTestsInSeconds;
 
     public LatencyTestSuite(boolean silent, boolean verbose) {
         this.testName = "latency";
@@ -58,6 +59,7 @@ public class LatencyTestSuite implements UpdateListener<VirtualSensorVsnTo>, Tes
         //omcp config
         this.silent = silent;
         this.verbose = verbose;
+        this.delayBetweenTestsInSeconds = 2;
     }
 
     public LatencyTestSuite() {
@@ -118,6 +120,7 @@ public class LatencyTestSuite implements UpdateListener<VirtualSensorVsnTo>, Tes
                     if (verbose) {
                         System.out.println("ok");
                     }
+                    Thread.sleep(delayBetweenTestsInSeconds * 1000);
                 }
             }
             printer.close();

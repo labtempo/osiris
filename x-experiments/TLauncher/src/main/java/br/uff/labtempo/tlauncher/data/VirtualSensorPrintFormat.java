@@ -66,7 +66,7 @@ public class VirtualSensorPrintFormat {
     }
 
     public static String getHeaders() {
-        String header = "ID\tSent(ms)\tStored(ms)\tReceived(ms)\tStoringLatency(ms)\tStoring(ms)\tFetching(ms)\tEndToEndLatency(ms)\tStoringToEndLatency(ms)";
+        String header = "ID\tSent(ms)\tStored(ms)\tReceived(ms)\tSendToStoringLatency(ms)\tStoringLatency(ms)\tFetchingLatency(ms)\tEndToEndLatency(ms)\tStoringToReceiptLatency(ms)";
         return header;
     }
 
