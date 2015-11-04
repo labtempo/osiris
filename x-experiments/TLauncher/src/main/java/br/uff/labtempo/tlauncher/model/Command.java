@@ -17,7 +17,7 @@ package br.uff.labtempo.tlauncher.model;
 
 /**
  *
- * @author Felipe Santos <live.proto at hotmail.com>
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public interface Command {
 

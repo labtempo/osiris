@@ -85,7 +85,7 @@ public class NotifyController extends Controller implements RequestHandler {
                 if (requestPool != null) {
                     requestPool.add(request);
                 } else {
-                    handle(request);
+                    handleRequest(request);
                 }
             }
             return new ResponseBuilder().buildNull();
@@ -94,7 +94,7 @@ public class NotifyController extends Controller implements RequestHandler {
     }
 
     @Override
-    public void handle(Request request) throws BadRequestException {
+    public void handleRequest(Request request) throws BadRequestException {
         SampleCoTo sample = request.getContent(SampleCoTo.class);
         analyzeSample(sample);
     }

@@ -22,7 +22,7 @@ import java.io.InputStreamReader;
 
 /**
  *
- * @author Felipe Santos <live.proto at hotmail.com>
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class ConsolePrinter implements Printer {
 

@@ -23,7 +23,7 @@ import java.util.Properties;
 
 /**
  *
- * @author Felipe Santos <live.proto at hotmail.com>
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class ConnectionFactory {
 

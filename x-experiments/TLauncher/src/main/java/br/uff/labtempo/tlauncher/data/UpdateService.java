@@ -50,7 +50,7 @@ public abstract class UpdateService<T> implements AutoCloseable, EventHandler {
     }
 
     @Override
-    public void process(Request request) {
+    public void handle(Request request) {
         try {
             T object = request.getContent(klass);
             long unpackingTimestamp = System.currentTimeMillis();

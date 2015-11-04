@@ -19,7 +19,7 @@ import junit.framework.TestCase;
 
 /**
  *
- * @author Felipe Santos <live.proto at hotmail.com>
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class ConsoleCommandTest extends TestCase {
     

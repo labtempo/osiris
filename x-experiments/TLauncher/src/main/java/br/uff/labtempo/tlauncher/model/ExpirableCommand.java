@@ -18,6 +18,10 @@ package br.uff.labtempo.tlauncher.model;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/**
+ *
+ * @author Felipe Santos <fralph at ic.uff.br>
+ */
 public class ExpirableCommand implements Command {
 
     private final ConsoleCommand command;

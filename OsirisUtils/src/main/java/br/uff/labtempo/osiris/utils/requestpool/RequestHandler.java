@@ -22,5 +22,5 @@ import br.uff.labtempo.omcp.common.Request;
  * @author Felipe
  */
 public interface RequestHandler {
-    void handle(Request request) throws Exception;
+    void handleRequest(Request request) throws Exception;
 }

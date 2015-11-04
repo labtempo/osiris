@@ -21,7 +21,7 @@ import java.io.IOException;
 
 /**
  *
- * @author Felipe Santos <live.proto at hotmail.com>
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class PrintToFile {
     private String folderName;

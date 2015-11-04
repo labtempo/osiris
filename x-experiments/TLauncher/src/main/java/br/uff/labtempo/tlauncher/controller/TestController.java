@@ -17,7 +17,7 @@ package br.uff.labtempo.tlauncher.controller;
 
 /**
  *
- * @author Felipe Santos <live.proto at hotmail.com>
+ * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class TestController {
 

@@ -64,7 +64,7 @@ public class RabbitPersistentService implements OmcpService, RabbitListener {
 
         try {
             Request request = new RequestPacket().parse(message);
-            handler.process(request);
+            handler.handle(request);
             process = true;
         } catch (Exception ex) {
 

@@ -31,6 +31,13 @@ public class FunctionVsnTo extends InterfaceFnTo {
     public FunctionVsnTo(long id, String name, String description, String address, List<FunctionOperation> operations, List<ParamFnTo> requestParams, List<ParamFnTo> responseParams) {
         super(name, description, address, operations, requestParams, responseParams);
         this.id = id;
+    
+        
+    }
+    
+    public FunctionVsnTo(InterfaceFnTo interfaceFnTo) {
+        super(interfaceFnTo.getName(), interfaceFnTo.getDescription(), interfaceFnTo.getAddress(), interfaceFnTo.getOperations(), interfaceFnTo.getRequestParams(), interfaceFnTo.getResponseParams());
+        this.id = 0;
     }
 
     public long getId() {

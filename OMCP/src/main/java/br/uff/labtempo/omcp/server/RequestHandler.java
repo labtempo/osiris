@@ -31,5 +31,5 @@ public interface RequestHandler {
 
     void setContext(Context context);
 
-    Response handler(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException;
+    Response handle(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException;
 }

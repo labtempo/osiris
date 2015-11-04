@@ -57,7 +57,7 @@ public class RequestPool implements AutoCloseable {
     private void deliver(Request request) {
         if (handler != null) {
             try {
-                handler.handle(request);
+                handler.handleRequest(request);
             } catch (Exception ex) {
                 Logger.getLogger(RequestPool.class.getName()).log(Level.SEVERE, null, ex);
             }

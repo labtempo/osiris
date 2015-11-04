@@ -61,7 +61,7 @@ public abstract class Controller implements RequestHandler {
     public abstract Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException;
 
     @Override
-    public Response handler(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException {
+    public Response handle(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException {
         Response response = process(request);
         if (response == null) {
             return goToNext(request);
@@ -71,99 +71,20 @@ public abstract class Controller implements RequestHandler {
 
     protected Response goToNext(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException {
         if (nextController != null) {
-            return nextController.handler(request);
+            return nextController.handle(request);
         }
         throw new NotFoundException(request.getResource() + " not found!");
     }
 
-    /**
+    /*
      * transformar para regex acima method params
      */
-    private String createRegex(String value) {
-        String[] resources = value.split("/");
-        StringBuilder sb = new StringBuilder();
-        sb.append("^");
-        for (String resource : resources) {
-            if (resource.length() == 0) {
-                continue;
-            }
-            sb.append("/");
-            if (resource.contains(":")) {
-                sb.append("(.[^/\\?]*)");
-            } else {
-                sb.append(resource);
-            }
-        }
-        sb.append("/?$?[\\?.]*?");
-        return sb.toString();
-    }
-
     protected boolean match(String resource, String customRegex) {
-        if (resource != null) {
-            if(resource.contains("?")){
-                resource = resource.split("\\?")[0];
-            }
-            return resource.matches(createRegex(customRegex));
-        }
-        return false;
+        return HandlerTools.match(resource, customRegex);
     }
 
     protected Map<String, String> extractParams(String path, String customRegex) {
-        Pattern datePatt = Pattern.compile(createRegex(customRegex));
-        Matcher m = datePatt.matcher(path);
-
-        List<String> args = new ArrayList<>();
-
-        while (m.find()) {
-            for (int i = 1; i <= m.groupCount(); i++) {
-                args.add(m.group(i));
-            }
-        }
-
-        List<String> cusromKeys = getCustomKeys(customRegex);
-        Map<String, String> map = new HashMap<>();
-        if (cusromKeys.size() == args.size()) {
-            for (int i = 0; i < cusromKeys.size(); i++) {
-                map.put(cusromKeys.get(i), args.get(i));
-            }
-        }
-
-        Map<String, String> params = getParams(path);
-
-        if (params != null) {
-            map.putAll(params);
-        }
-
-        return map;
-    }
-
-    private List<String> getCustomKeys(String customRegex) {
-        String regex = ":[\\w]+[^/]?";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(customRegex);
-
-        List<String> customKeys = new ArrayList<>();
-
-        while (matcher.find()) {
-            customKeys.add(matcher.group(0));
-        }
-        return customKeys;
-    }
-
-    private Map<String, String> getParams(String path) {
-        if (path != null && path.contains("?")) {
-            Map<String, String> map = new HashMap<>();
-
-            String query = (path.split("\\?"))[1];
-            String[] params = query.split("&");
-
-            for (String param : params) {
-                String[] keyValue = param.split("=");
-                map.put(keyValue[0], keyValue[1]);
-            }
-            return map;
-        }
-        return null;
+        return HandlerTools.extractParams(path, customRegex);
     }
 
     protected Response builderOk(Object obj, String contentType) {

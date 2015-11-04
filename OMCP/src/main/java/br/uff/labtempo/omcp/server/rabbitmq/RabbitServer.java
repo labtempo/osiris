@@ -96,7 +96,7 @@ public class RabbitServer implements OmcpServer, RabbitListener {
 
         try {
             Request request = new RequestPacket().parse(message);
-            response = handler.handler(request);
+            response = handler.handle(request);
             isDone = true;
         } catch (BadRequestException ex) {
             response = new ResponseBuilder().error(ex).build();
