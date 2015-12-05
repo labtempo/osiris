@@ -25,12 +25,7 @@ import br.uff.labtempo.omcp.common.exceptions.NotImplementedException;
 import br.uff.labtempo.omcp.common.utils.ResponseBuilder;
 import br.uff.labtempo.omcp.server.Context;
 import br.uff.labtempo.omcp.server.RequestHandler;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  *
