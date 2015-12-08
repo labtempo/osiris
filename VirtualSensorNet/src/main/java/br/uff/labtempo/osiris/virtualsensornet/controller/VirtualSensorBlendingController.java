@@ -71,8 +71,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -424,6 +426,7 @@ public class VirtualSensorBlendingController extends Controller implements Sched
 
         //commit changes
         if (isUpdated) {
+            removeFromScheduler(blending);
             //commit sensor changes
             blendingDao.update(blending);
             //remove unusable fields
@@ -538,6 +541,7 @@ public class VirtualSensorBlendingController extends Controller implements Sched
     }
 
     private List<BlendingBond> createResponseBlendingBonds(List<BlendingBondVsnTo> bondVsnTos, List<FunctionParam> functionParams, VirtualSensorBlending blending) throws InternalServerErrorException, BadRequestException {
+        Set<Field> fields = new HashSet<>();//repeated fields not allowed
         List<BlendingBond> blendingBonds = new ArrayList<>();
         for (BlendingBondVsnTo bondVsnTo : bondVsnTos) {
             List<Field> tempFields = blending.getFields();
@@ -548,19 +552,26 @@ public class VirtualSensorBlendingController extends Controller implements Sched
                     field = tempField;
                 }
             }
-            BlendingBond bb = createBlendingBonds(functionParams, bondVsnTo, field, true);
-            blendingBonds.add(bb);
+            if (!fields.contains(field)) {
+                BlendingBond bb = createBlendingBonds(functionParams, bondVsnTo, field, true);
+                blendingBonds.add(bb);
+                fields.add(field);
+            }
         }
         return blendingBonds;
     }
 
     private List<BlendingBond> createRequestBlendingBonds(List<BlendingBondVsnTo> bondVsnTos, List<FunctionParam> functionParams) throws InternalServerErrorException, BadRequestException {
+        Set<Field> fields = new HashSet<>();//repeated fields are not allowed
         FieldController fieldController = new FieldController(factory);
         List<BlendingBond> blendingBonds = new ArrayList<>();
         for (BlendingBondVsnTo bondVsnTo : bondVsnTos) {
             Field field = fieldController.getById(bondVsnTo.getFieldId());
-            BlendingBond bb = createBlendingBonds(functionParams, bondVsnTo, field, false);
-            blendingBonds.add(bb);
+            if (!fields.contains(field)) {
+                BlendingBond bb = createBlendingBonds(functionParams, bondVsnTo, field, false);
+                blendingBonds.add(bb);
+                fields.add(field);
+            }
         }
         return blendingBonds;
     }
@@ -684,10 +695,13 @@ public class VirtualSensorBlendingController extends Controller implements Sched
         scheduler.schedule(item);
     }
 
-    private void removeFromScheduler(SchedulerItem item) {
+    private void removeFromScheduler(VirtualSensorBlending blending) {
         SchedulerDao schedulerDao = factory.getSchedulerDao();
-        if (item != null) {
-            schedulerDao.delete(item);
+        if (blending != null) {
+            SchedulerItem item = schedulerDao.getItemByObjectId(blending.getId());
+            if (item != null) {
+                schedulerDao.delete(item);
+            }
         }
     }
 

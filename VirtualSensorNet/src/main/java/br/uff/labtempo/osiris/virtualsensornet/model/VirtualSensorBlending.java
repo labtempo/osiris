@@ -295,7 +295,7 @@ public class VirtualSensorBlending extends VirtualSensor<BlendingVsnTo> implemen
                 Field field = responseField.getField();
                 String paramName = responseField.getName();
                 long paramFieldId = field.getId();
-                blendingVsnTo.addRequestParam(paramFieldId, paramName);
+                blendingVsnTo.addResponseParam(paramFieldId, paramName);
             }
         }
 

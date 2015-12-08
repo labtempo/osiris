@@ -20,7 +20,7 @@ package config;
  * @author Felipe Santos <fralph at ic.uff.br>
  */
 public class Config {
-    public static final String HOST = "192.168.1.1";
+    public static final String HOST = "192.168.0.7";
     public static final String USER = "admin";
     public static final String PASS = "admin";
 }

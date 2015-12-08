@@ -61,6 +61,9 @@ public enum Path {
     NAMING_QUERY_STRING_LIMIT("limit"),
     NAMING_QUERY_STRING_FROM_DATE("from"),
     NAMING_QUERY_STRING_TO_DATE("to"),
+    NAMING_QUERY_STRING_SENSOR("sensor"),
+    NAMING_QUERY_STRING_COLLECTOR("collector"),
+    NAMING_QUERY_STRING_NETWORK("network"),
     
     /*CONTROLLER URI FILTERS*/
     /*KEYS*/

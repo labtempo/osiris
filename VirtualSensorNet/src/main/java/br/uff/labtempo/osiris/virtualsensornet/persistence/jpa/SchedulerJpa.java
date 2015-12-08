@@ -41,7 +41,22 @@ public class SchedulerJpa implements SchedulerDao {
 
     @Override
     public SchedulerItem getItemByObjectId(long objectId) {
-        return persistence.get(ModelSchedulerItem.class, objectId);
+        CriteriaBuilder cb = persistence.getCriteriaBuilder();
+        CriteriaQuery<ModelSchedulerItem> criteriaQuery = cb.createQuery(ModelSchedulerItem.class);
+        Root<ModelSchedulerItem> root = criteriaQuery.from(ModelSchedulerItem.class);
+
+        //condition where
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(cb.lessThanOrEqualTo(root.<Long>get(ModelSchedulerItem_.virtualSensorId), objectId));
+        criteriaQuery.where(predicates.toArray(new Predicate[]{}));
+
+        criteriaQuery.select(root);
+        List<ModelSchedulerItem> items = persistence.getQuery(criteriaQuery);
+        if (items.isEmpty()) {
+            return null;
+        } else {
+            return items.get(0);
+        }
     }
 
     @Override

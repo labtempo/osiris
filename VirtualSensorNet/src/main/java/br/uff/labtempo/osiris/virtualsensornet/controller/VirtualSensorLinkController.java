@@ -82,7 +82,14 @@ public class VirtualSensorLinkController extends Controller {
         if (match(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_LINK_ALL.toString())) {
             switch (request.getMethod()) {
                 case GET:
-                    List<LinkVsnTo> all = getAll();
+                    Map<String, String> params = extractParams(request.getResource(), Path.RESOURCE_VIRTUALSENSORNET_LINK_ALL.toString());
+                    List<LinkVsnTo> all;
+
+                    if (params.isEmpty()) {
+                        all = getAll();
+                    } else {
+                        all = getAll(params);
+                    }
                     Response response = new ResponseBuilder().ok(all, contentType).build();
                     return response;
                 case POST:
@@ -147,6 +154,35 @@ public class VirtualSensorLinkController extends Controller {
         }
 
         List<VirtualSensorLink> virtualSensors = lDao.getAll();
+        List<LinkVsnTo> linkVsnTos = new ArrayList<>();
+        for (VirtualSensorLink vs : virtualSensors) {
+            linkVsnTos.add(vs.getUniqueTransferObject());
+        }
+        return linkVsnTos;
+    }
+
+    public List<LinkVsnTo> getAll(Map<String, String> params) throws NotFoundException, InternalServerErrorException {
+
+        String sensor = params.get(Path.NAMING_QUERY_STRING_SENSOR.toString());
+        String collector = params.get(Path.NAMING_QUERY_STRING_COLLECTOR.toString());
+        String network = params.get(Path.NAMING_QUERY_STRING_NETWORK.toString());
+
+        LinkDao lDao;
+        try {
+            lDao = factory.getPersistentLinkDao();
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Data query error!");
+        }
+        
+        try{//checks if params is not empty or null
+            if(sensor.isEmpty() || collector.isEmpty() || network.isEmpty()){
+                throw new RuntimeException();
+            }
+        }catch(Exception e){
+            return getAll();
+        }
+
+        List<VirtualSensorLink> virtualSensors = lDao.getAllByReferences(network, collector, sensor);
         List<LinkVsnTo> linkVsnTos = new ArrayList<>();
         for (VirtualSensorLink vs : virtualSensors) {
             linkVsnTos.add(vs.getUniqueTransferObject());
@@ -235,7 +271,7 @@ public class VirtualSensorLinkController extends Controller {
         LinkDao lDao;
         RevisionDao rDao;
         try {
-            rDao =  factory.getRevisionDao();
+            rDao = factory.getRevisionDao();
             lDao = factory.getPersistentLinkDao();
         } catch (Exception e) {
             throw new InternalServerErrorException("Data query error!");
@@ -271,14 +307,14 @@ public class VirtualSensorLinkController extends Controller {
             for (Field removedField : removedFields) {
                 fieldSubController.delete(removedField);
             }
-            
+
             try {
                 rDao.deleteAllByVirtualSensor(sensorLink.getId());
             } catch (Exception ex) {
                 Logger.getLogger(VirtualSensorBlendingController.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
-            lDao.delete(sensorLink);            
+
+            lDao.delete(sensorLink);
             return true;
         } catch (Exception e) {
             throw new InternalServerErrorException("VirtuaSensorLink couldn't removed!");

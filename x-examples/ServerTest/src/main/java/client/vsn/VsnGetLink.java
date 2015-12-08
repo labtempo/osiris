@@ -16,10 +16,7 @@
 package client.vsn;
 
 import br.uff.labtempo.omcp.client.OmcpClient;
-import br.uff.labtempo.omcp.client.OmcpClientBuilder;
 import br.uff.labtempo.omcp.common.Response;
-import br.uff.labtempo.omcp.common.utils.ResponsePacket;
-import br.uff.labtempo.osiris.to.virtualsensornet.BlendingVsnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.LinkVsnTo;
 import config.OmcpFactory;
 
@@ -34,6 +31,14 @@ public class VsnGetLink {
             Response r = connection.doGet("omcp://virtualsensornet/link/1");
             LinkVsnTo to = r.getContent(LinkVsnTo.class);
             System.out.println("GOT(link): " + to.getId());
+        }
+        
+        try (OmcpClient connection = OmcpFactory.getClient()) {
+            Response r = connection.doGet("omcp://virtualsensornet/link/?sensor=1&collector=labpos&network=labtempo");
+            LinkVsnTo[] tos = r.getContent(LinkVsnTo[].class);
+            for (LinkVsnTo to : tos) {
+                System.out.println("GOT(link): " + to.getId());
+            }            
         }
     }
 }

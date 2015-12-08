@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  *
@@ -130,7 +131,9 @@ public class BlendingVsnTo implements IBlendingVsnTo {
 
     @Override
     public void setFunction(FunctionVsnTo function) {
-        this.functionId = function.getId();
+        if (function != null) {
+            this.functionId = function.getId();
+        }
     }
 
     @Override
@@ -140,7 +143,9 @@ public class BlendingVsnTo implements IBlendingVsnTo {
 
     @Override
     public void setCallMode(FunctionOperation operation) {
-        this.callMode = operation.toString();
+        if (operation != null) {
+            this.callMode = operation.toString();
+        }
     }
 
     @Override
@@ -235,4 +240,5 @@ public class BlendingVsnTo implements IBlendingVsnTo {
             return super.toMap(); //To change body of generated methods, choose Tools | Templates.
         }
     }
+
 }
