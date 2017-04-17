@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Main-Class: br.uff.labtempo.osiris.function.min.App
+Created-By: Felipe Ralph (improved by andre.ghigo)
+Application-Name: osiris-min-function
+Application-Description: Function module of the OSIRIS Framework that calculates the minimum value of a given list of virtual sensor values
+
+
+
