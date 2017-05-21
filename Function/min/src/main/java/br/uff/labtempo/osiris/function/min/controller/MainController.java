@@ -50,12 +50,10 @@ public class MainController extends Controller {
 
     @Override
     public Response process(Request request) throws MethodNotAllowedException, NotFoundException, InternalServerErrorException, NotImplementedException, BadRequestException {
-        Response response = null;
         try {
             return routing(request);
         } catch (Exception e) {
             System.out.println("Error in process: " + e.getMessage());
-        } finally {
             return new Response(AppConfig.PROTOCOL_VERSION, StatusCode.INTERNAL_SERVER_ERROR, Calendar.getInstance(), AppConfig.MODULE_NAME, null, 0, RESPONSE_ERROR_MEDIATYPE, null, "Failed to process the request");
         }
     }
