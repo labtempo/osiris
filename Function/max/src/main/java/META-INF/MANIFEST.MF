@@ -1,3 +1,0 @@
-Manifest-Version: 1.0
-Main-Class: br.uff.labtempo.osiris.function.max.App
-

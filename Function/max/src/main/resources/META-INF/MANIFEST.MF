@@ -1,0 +1,1 @@
+Main-Class: br.uff.labtempo.osiris.function.max.App
