@@ -18,14 +18,11 @@ Sens<b>o</b>r-ba<b>s</b>ed Mon<b>i</b>to<b>ri</b>ng <b>S</b>ystems Framework
 * x-examples -	A code collection that includes source code to create modules Collector and Function, source code to make SensorNet and VirtualSensorNet requests and a prototype GUI to monitor the OSIRIS
 * x-experiments - Experiment suite used to extract efficiency data of the OSIRIS's performance
 
-## About
-This fork is part of an Undergraduate Thesis for the [Bachelor of Computer Information Systems](http://www.ic.uff.br/index.php/en-GB/undergraduate-programs/information-systems) course at [Universidade Federal Fluminense](www.uff.br/) (UFF).
-The main goal consists in create a user-friendly web interface to manage the [OSIRIS framework](https://github.com/labtempo/osiris/wiki) modules [SensorNet](https://github.com/labtempo/osiris/wiki/2.1-M%C3%B3dulo-SensorNet) and [VirtualSensorNet](https://github.com/labtempo/osiris/wiki/2.2-M%C3%B3dulo-VirtualSensorNet).
-
 ## Authors
-* [Andre Ghigo](https://github.com/ghigo)
-* [Felippe Mauricio](https://github.com/felippemauricio)
+* [Felipe Ralph](https://github.com/println), creator of the [OSIRIS framework](https://github.com/labtempo/osiris/wiki)
 
 ## Credits
+* [Andre Ghigo](https://github.com/ghigo), back-end developer (contributed by developing the web-interface back-end API)
+* [Felippe Mauricio](https://github.com/felippemauricio), front-end developer (contributed by developing the web-interface front-end app)
 * [Raphael Guerra](http://www2.ic.uff.br/~rguerra/), professor
-* [Felipe Ralph](https://github.com/println), creator of the [OSIRIS framework](https://github.com/labtempo/osiris/wiki)
+
