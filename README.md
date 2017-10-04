@@ -22,7 +22,7 @@ Sens<b>o</b>r-ba<b>s</b>ed Mon<b>i</b>to<b>ri</b>ng <b>S</b>ystems Framework
 * [Felipe Ralph](https://github.com/println), creator of the [OSIRIS framework](https://github.com/labtempo/osiris/wiki)
 
 ## Credits
-* [Andre Ghigo](https://github.com/ghigo), back-end developer (contributed by developing the web-interface back-end API)
+* [Andre Ghigo](https://github.com/aghigo), back-end developer (contributed by developing the web-interface back-end API)
 * [Felippe Mauricio](https://github.com/felippemauricio), front-end developer (contributed by developing the web-interface front-end app)
 * [Raphael Guerra](http://www2.ic.uff.br/~rguerra/), professor
 
