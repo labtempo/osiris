@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Main-Class: br.uff.labtempo.osiris.function.average.App
+Created-By: Felipe Ralph (improved by andre.ghigo)
+Application-Description: Function module of the OSIRIS framework that calculates the average of a given list of virtual sensor values
+Application-Name: osiris-average-function

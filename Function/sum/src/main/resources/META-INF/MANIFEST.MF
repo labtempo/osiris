@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Main-Class: br.uff.labtempo.osiris.function.sum.App
+Application-Name: osiris-sum-function
+Created-By: Felipe Ralph (improved by andre.ghigo)
+Application-Description: Function module of the OSIRIS framework that calculates the sum of a given list virtual sensors values
+
